@@ -1,0 +1,70 @@
+\documentclass[12pt,a4paper]{report}
+
+\input{preambule.tex}
+
+\title{\Huge Kriptografija --- napredne teme}
+\author{Aleksandra Labović (mi241025)\\
+Ana Knežević (mi241052)\\
+Marijana Čupović (mi251018)\\
+Marko Lazarević (mi251005)\\
+Matija Stanković (mi21207)\\
+Nikola Milošević (/)\\
+Staša Đorđević (mi251007)\\
+Tanja Gavrić (mr251065)\\
+Tijana Jakšić (mr241087)\\
+Vukašin Marković (mi241051)}
+\date{\today}
+
+\begin{document}
+\maketitle
+\pagenumbering{gobble}
+\pagestyle{empty}
+\tableofcontents
+\thispagestyle{empty}
+\clearpage
+\pagenumbering{arabic}
+\pagestyle{fancy}
+
+\chapter{Uvod}
+\input{chapters/uvod/uvod.tex}
+
+\chapter{Multi-party calculation}
+\section{Test}
+
+\input{chapters/multi_party_calculation/multi_party_calculation.tex}
+
+\chapter{Certificates}
+\input{chapters/certificates/certificates.tex}
+
+\chapter{Commitments}
+\input{chapters/commitments/commitments.tex}
+
+\chapter{ZK Uvod}
+\input{chapters/zk_uvod/zk_uvod.tex}
+
+\chapter{ZK-snark}
+\input{chapters/zk_snark/zk_snark.tex}
+
+\chapter{ZK-stark}
+\input{chapters/zk_stark/zk_stark.tex}
+
+\chapter{Fully homomorphic encryption}
+\input{chapters/fully_homomorphic_encryption/fully_homomorphic_encryption.tex}
+
+\chapter{Lattices}
+\input{chapters/lattices/lattices.tex}
+
+\chapter{LWE}
+\input{chapters/lwe/lwe.tex}
+
+\chapter{Secret sharing}
+\input{chapters/secret_sharing/secret_sharing.tex}
+
+\chapter{Zakljucak}
+\input{chapters/zakljucak/zakljucak.tex}
+
+\clearpage
+\bibliographystyle{plain}
+\bibliography{references.bib}
+
+\end{document}

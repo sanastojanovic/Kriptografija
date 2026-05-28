@@ -1,0 +1,70 @@
+% Preambula zajednicka za glavni dokument i poglavlja.
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[serbian]{babel}
+\usepackage{lmodern}
+
+\usepackage[a4paper,margin=3cm]{geometry}
+\usepackage[patch=none]{microtype}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+
+\hypersetup{
+	colorlinks=true,
+	linkcolor=black,
+	citecolor=black,
+	urlcolor=blue
+}
+
+\setlength{\parindent}{1.2em}
+\setlength{\parskip}{0.4em}
+\onehalfspacing{}
+\setlength{\headheight}{14.5pt}
+\addtolength{\topmargin}{-0.5pt}
+
+% Fancy headers/footers with chapter titles (oneside).
+\pagestyle{fancy}
+\fancyhf{}
+\makeatletter
+\@ifundefined{chapter}{
+	\renewcommand{\sectionmark}[1]{\markboth{Glava #1}{}}
+}{
+	\renewcommand{\chaptermark}[1]{\markboth{Glava \thechapter. #1}{}}
+	\renewcommand{\sectionmark}[1]{\markright{#1}}
+}
+\makeatother
+\fancyhead[L]{\MakeUppercase{\leftmark}}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Use the same header style on chapter-opening pages.
+\fancypagestyle{plain}{
+	\fancyhf{}
+	\fancyhead[L]{\MakeUppercase{\leftmark}}
+	\fancyhead[R]{\thepage}
+	\renewcommand{\headrulewidth}{0.4pt}
+	\renewcommand{\footrulewidth}{0pt}
+}
+
+\graphicspath{{images/}}
+
+% Okruzenja za teoreme, definicije i primere.
+\theoremstyle{plain}
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{proposition}[theorem]{Propozicija}
+\newtheorem{corollary}[theorem]{Posledica}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definicija}
+\newtheorem{example}[theorem]{Primer}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Napomena}
