@@ -62,7 +62,6 @@ jobs:
       # Publish the renamed PDF as a GitHub Release asset.
       # Releases are created or updated per branch using a branch-specific tag.
       - name: Publish release asset
-        if: github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: pdf-${{ github.ref_name }}
