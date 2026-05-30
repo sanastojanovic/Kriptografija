@@ -1,0 +1,42 @@
+\section{Motivacija}
+Kriptografija obezbedjuje poverljivost, integritet i autenticnost podataka.
+U ovom radu koristimo standardni zapis i okruzenja za matematicke izraze.
+
+\subsection{Osnovni pojmovi}
+\begin{definition}
+Kriptosistem je uredjeni skup $(P, C, K, E, D)$ gde su $P$ skup otvorenih
+tekstova, $C$ skup sifrovanih tekstova, $K$ skup kljuceva, a $E$ i $D$
+funkcije enkripcije i dekripcije. 
+\end{definition}
+
+\begin{theorem}
+Za svako $m \in P$ i $k \in K$ vazi $D_k(E_k(m)) = m$.
+\end{theorem}
+
+\begin{proof}
+Sledi direktno iz definicije korektnosti kriptosistema.
+\end{proof}
+
+\begin{example}
+Za Cezarovu sifru sa pomerajem $k=3$, slovo $A$ prelazi u slovo $D$.
+\end{example}
+
+\section{Ilustracija}
+Slika \ref{fig:primer} prikazuje mesto za ilustraciju. Ako fajl ne postoji,
+slika se preskace bez prekida kompilacije.
+
+\begin{figure}[H]
+	\centering
+	\IfFileExists{images/primer.pdf}{%
+		\includegraphics[width=0.7\linewidth]{primer.pdf}%
+	}{%
+		\IfFileExists{images/primer.png}{%
+			\includegraphics[width=0.7\linewidth]{primer.png}%
+		}{}
+	}
+	\caption{Primer slike}
+	\label{fig:primer}
+\end{figure}
+
+
+Knjiga \cite{smart2016cryptography} je dobar uvod u kriptografiju.
