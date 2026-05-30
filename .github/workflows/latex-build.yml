@@ -1,0 +1,59 @@
+name: LaTeX build
+
+on:
+  push:
+    paths:
+      - "2026_seminarski/**"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "2026_seminarski/**"
+
+jobs:
+  build-latex:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the repository so the workflow can access the LaTeX sources.
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Build the LaTeX project from 2026_seminarski/main.tex and fail on any
+      # compilation error.
+      - name: Build LaTeX project
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          working_directory: 2026_seminarski
+          args: -pdf -file-line-error -halt-on-error -interaction=nonstopmode
+
+      # Rename the generated PDF to include the current branch name.
+      - name: Rename generated PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          branch_name="${GITHUB_REF_NAME}"
+          # Replace slashes and spaces with hyphens so the branch name can be
+          # safely used in filenames and artifact names.
+          safe_branch_name="$(printf '%s' "$branch_name" | tr '/ ' '--')"
+          source_pdf="2026_seminarski/main.pdf"
+          target_pdf="kriptografija_napredne_teme_${safe_branch_name}.pdf"
+
+          # Expose the sanitized branch name to later workflow steps.
+          echo "SAFE_BRANCH_NAME=${safe_branch_name}" >> "$GITHUB_ENV"
+
+          if [[ ! -f "$source_pdf" ]]; then
+            echo "Expected PDF not found: $source_pdf" >&2
+            exit 1
+          fi
+
+          mv "$source_pdf" "$target_pdf"
+
+      # Upload the renamed PDF so it is available as an Actions artifact.
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kriptografija-napredne-teme-${{ env.SAFE_BRANCH_NAME }}
+          path: kriptografija_napredne_teme_${{ env.SAFE_BRANCH_NAME }}.pdf
+          if-no-files-found: error
