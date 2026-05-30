@@ -40,15 +40,20 @@ jobs:
           # Replace slashes and spaces with hyphens so the branch name can be
           # safely used in filenames and artifact names.
           safe_branch_name="$(printf '%s' "$branch_name" | tr '/ ' '--')"
-          source_pdf="2026_seminarski/main.pdf"
           target_pdf="kriptografija_napredne_teme_${safe_branch_name}.pdf"
 
           # Expose the sanitized branch name to later workflow steps.
           echo "SAFE_BRANCH_NAME=${safe_branch_name}" >> "$GITHUB_ENV"
           echo "OUTPUT_PDF=${target_pdf}" >> "$GITHUB_ENV"
 
-          if [[ ! -f "$source_pdf" ]]; then
-            echo "Expected PDF not found: $source_pdf" >&2
+          # Locate the generated PDF in whichever path latexmk/xu-cheng/latex-action
+          # used for this run, then fail if no PDF is found.
+          if [[ -f "2026_seminarski/main.pdf" ]]; then
+            source_pdf="2026_seminarski/main.pdf"
+          elif [[ -f "main.pdf" ]]; then
+            source_pdf="main.pdf"
+          else
+            echo "Expected PDF not found in either 2026_seminarski/main.pdf or main.pdf" >&2
             exit 1
           fi
 
