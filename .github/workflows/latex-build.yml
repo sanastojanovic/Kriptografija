@@ -1,5 +1,8 @@
 name: LaTeX build
 
+permissions:
+  contents: write
+
 on:
   push:
     paths:
@@ -42,6 +45,7 @@ jobs:
 
           # Expose the sanitized branch name to later workflow steps.
           echo "SAFE_BRANCH_NAME=${safe_branch_name}" >> "$GITHUB_ENV"
+          echo "OUTPUT_PDF=${target_pdf}" >> "$GITHUB_ENV"
 
           if [[ ! -f "$source_pdf" ]]; then
             echo "Expected PDF not found: $source_pdf" >&2
@@ -50,10 +54,14 @@ jobs:
 
           mv "$source_pdf" "$target_pdf"
 
-      # Upload the renamed PDF so it is available as an Actions artifact.
-      - name: Upload PDF artifact
-        uses: actions/upload-artifact@v4
+      # Publish the renamed PDF as a GitHub Release asset.
+      # Releases are created or updated per branch using a branch-specific tag.
+      - name: Publish release asset
+        if: github.event_name != 'pull_request'
+        uses: softprops/action-gh-release@v2
         with:
-          name: kriptografija-napredne-teme-${{ env.SAFE_BRANCH_NAME }}
-          path: kriptografija_napredne_teme_${{ env.SAFE_BRANCH_NAME }}.pdf
-          if-no-files-found: error
+          tag_name: pdf-${{ github.ref_name }}
+          name: PDF release for ${{ env.SAFE_BRANCH_NAME }}
+          files: ${{ env.OUTPUT_PDF }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fail_on_unmatched_files: true
