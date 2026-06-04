@@ -8,7 +8,7 @@ Potrebno je da imate instaliran `pdflatex` i `make`.
 
 ```bash
 sudo apt update
-sudo apt install -y make texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
+sudo apt install -y make texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-lang-cyrillic
 ```
 
 ## Build
