@@ -1,3 +1,492 @@
-% Poglavlje: ZK Uvod (matematicka osnova, Zero Knowledge, ideje, upotreba,
-% interaktivni i neiteraktivni ZK protokoli)
+% Poglavlje: Uvod u dokaze nultog znanja (matematicka osnova, ideje, upotreba,
+% interaktivni i neinteraktivni ZK protokoli)
 % Autor: Aleksandra Labović (mi241025)
+
+Dokazi nultog znanja predstavljaju jednu od ključnih kriptografskih primitiva,
+koja omogućava jednoj strani da dokaže istinitost neke tvrdnje drugoj strani, a
+da pri tome ne otkrije ništa osim same istinitosti. Ovaj pojam uveli su Shafi
+Goldwasser i Silvio Micali sa Massachusetts Institute of Technology zajedno sa
+Charlesom Rackoffom sa University of Toronto u radu \emph{The Knowledge
+Complexity of Interactive Proof-Systems}\cite{goldwasser1985knowledge}, predstavljenom na konferenciji STOC\footnote{STOC 
+(engl.\ \textit{Symposium on Theory of Computing}) jedna je od 
+najuglednijih godišnjih konferencija iz oblasti teorije računarstva.}
+1985.\ godine. U tom 
+radu autori su pokazali da se istinitost tvrdnje može dokazati, 
+a da verifikator pri tome ne sazna ništa osim same činjenice 
+da je tvrdnja tačna.
+
+Značaj dokaza nultog znanja proizilazi upravo iz ove prividno paradoksalne mogućnosti: 
+jedna strana može dokazati da poseduje određeno znanje, a da pri tome drugoj strani ne 
+otkrije njegov sadržaj. Zbog toga se dokazi nultog znanja
+koriste kao teorijska osnova i praktičan alat u autentifikaciji, zaštiti
+privatnosti, digitalnim potpisima, neinteraktivnim dokazima i verifikabilnim
+sistemima elektronskog glasanja. U ovom poglavlju predstavljamo osnovne ideje i formalne koncepte 
+dokaza nultog znanja, od klasičnih primera do veze sa teorijom 
+složenosti.
+
+\section{Motivacija i osnovna terminologija}
+
+Pretpostavimo da Alisa poseduje lozinku i želi da se autentifikuje na veb-sajtu koji administrira Bob, 
+ali ne želi da Bobu, odnosno serveru, otkrije samu lozinku.
+Direktno slanje lozinke omogućava proveru identiteta, ali istovremeno izlaže
+lozinku riziku kompromitacije. Jedan od praktičnih pristupa ovom problemu jeste metod 
+delimičnog otkrivanja lozinke, gde sistem u različitim sesijama traži
+samo pojedine karaktere, na primer prvi, četvrti i deseti karakter. Takav
+pristup smanjuje količinu informacije koja curi u jednoj sesiji, ali ne rešava
+osnovni problem: verifikator i dalje uči delove tajne.
+
+Idealni cilj je da verifikator bude uveren da dokazivač zaista poznaje 
+tajnu, ali da iz samog protokola ne sazna ništa o njoj. Dokazi nultog 
+znanja formalizuju upravo tu mogućnost. U standardnoj terminologiji\cite{smart2016cryptography}, 
+strana koja dokazuje tvrdnju naziva se dokazivač (engl. \textit{prover}), 
+dok se strana koja proverava dokaz naziva verifikator (engl. \textit{verifier}). 
+U opštem kontekstu kriptografskih protokola učesnici se tradicionalno označavaju 
+imenima Alisa i Bob. Međutim, u literaturi o dokazima znanja i dokazima nultog 
+znanja često se koriste imena Pegi (engl. \textit{Peggy}) i Viktor (engl. \textit{Victor}), 
+izvedena iz naziva njihovih uloga - dokazivača i verifikatora. Ova konvencija biće korišćena i u nastavku rada.
+
+\section{Protokol za izomorfizam grafova}
+
+Kao klasičan primer dokaza nultog znanja razmatra se 
+protokol zasnovan na problemu izomorfizma grafova.
+
+\begin{definition}
+Za dva grafa kažemo da su izomorfni ukoliko postoji bijektivno 
+preslikavanje između skupova njihovih čvorova pri kojem se čuva 
+incidentnost sa granama. Takvo preslikavanje naziva se
+izomorfizam grafova. Ako je $\varphi$ izomorfizam između grafova
+$G_1$ i $G_2$, tada pišemo
+\[
+G_2=\varphi(G_1)
+\]
+\end{definition}
+
+
+Primer takvog preslikavanja prikazan je na slici \ref{fig:graf-izomorfizam}. 
+Grafovi $G_1$ i $G_2$ imaju identičnu strukturu povezanosti, ali se razlikuju u označavanju čvorova. 
+Izomorfizam između njih dat je permutacijom $\varphi=(1,2,4,3)$, čijom se primenom na graf $G_1$ dobija graf $G_2$.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{zk_uvod/graf_izomorfizam.png}
+  \caption{Primer izomorfizma grafova i konstrukcije posvećenog grafa}
+  \label{fig:graf-izomorfizam}
+\end{figure}
+
+Pretpostavimo sada da Pegi poznaje izomorfizam $\varphi$ između javnih 
+grafova $G_1$ i $G_2$, dok Viktor zna samo grafove. Cilj protokola jeste 
+da Pegi ubedi Viktora u to poznavanje, a da pri tome ne otkrije samu 
+permutaciju. U tu svrhu koristi se dodatni graf $H$, prikazan na slici
+\ref{fig:graf-izomorfizam}, čija će uloga biti objašnjena kroz korake
+protokola.
+
+\begin{enumerate}
+  \item \textbf{Posveta}
+  Pegi bira slučajnu permutaciju $\psi$ i konstruiše graf
+  \[
+    H \leftarrow \psi(G_2).
+  \]
+
+  Graf $H$ šalje Viktoru kao posvetu. Pri tome važi
+  \[
+    H=\psi(G_2)=\psi(\varphi(G_1)),
+  \]
+
+  \item \textbf{Izazov}
+  Viktor bira slučajnu vrednost $b\in\{1,2\}$ i zahteva od Pegi izomorfizam između grafova $G_b$ i $H$.
+
+  \item \textbf{Odgovor}
+  Ukoliko je $b=2$, Pegi šalje permutaciju $\chi=\psi$. U suprotnom, za $b=1$, šalje permutaciju
+  \[
+    \chi=\psi\circ\varphi.
+  \]
+  Viktor prihvata dokaz ukoliko proverom utvrdi da važi
+  \[
+    \chi(G_b)=H.
+  \]
+\end{enumerate}
+
+Primetimo da je graf $H$ konstruisan tako da bude izomorfan i grafu $G_2$ i
+grafu $G_1$. Zaista, po konstrukciji važi
+\[
+H=\psi(G_2),
+\]
+pa je permutacija $\psi$ izomorfizam između grafova $G_2$ i $H$. Takođe,
+\[
+H=\psi(\varphi(G_1))=(\psi\circ\varphi)(G_1),
+\]
+odakle sledi da je kompozicija $\psi\circ\varphi$ izomorfizam između grafova
+$G_1$ i $H$. Zbog toga Pegi može da odgovori na oba moguća Viktorova izazova:
+ukoliko se zahteva izomorfizam između $G_2$ i $H$, dovoljno je da otkrije
+permutaciju $\psi$, dok u slučaju da se zahteva izomorfizam između $G_1$ i $H$,
+otkriva kompoziciju $\psi\circ\varphi$.
+
+Transkript jedne runde protokola ima oblik
+\[
+  P \to V : H,\qquad
+  V \to P : b,\qquad
+  P \to V : \chi.
+\]
+Na primer, ako su $\varphi=(1,2,4,3)$ i $\psi=(1,2)$, tada za izazov $b=1$
+Pegi šalje
+\[
+  \chi=\psi\circ\varphi=(1,2)\circ(1,2,4,3)=(2,4,3).
+\]
+
+Ako Pegi ne zna izomorfizam $\varphi$, mora unapred da pogodi koji će 
+izazov Viktor postaviti. Verovatnoća ispravnog pogađanja u jednoj rundi 
+iznosi $1/2$, a ponavljanjem protokola $n$ puta verovatnoća da nepošteni 
+dokazivač prođe sve runde opada na $(1/2)^n$ — vrednost koja 
+eksponencijalno brzo postaje zanemarljiva.
+
+Važan uslov bezbednosti jeste da Pegi u svakoj rundi koristi novu slučajnu
+permutaciju i novi graf $H$. Ako bi isti $H$ bio upotrebljen više puta, Viktor
+bi u jednoj rundi mogao zatražiti odgovor za $b=2$ i dobiti $\psi$, a u drugoj
+odgovor za $b=1$ i dobiti $\psi\circ\varphi$. Tada bi mogao izračunati
+\[
+  \varphi = (\psi\circ\varphi)\circ\psi^{-1},
+\]
+čime bi tajni izomorfizam bio otkriven.
+
+Postavlja se pitanje da li Viktor uopšte uči nešto iz izvođenja protokola. 
+Odgovor je negativan, što se vidi iz sledećeg argumenta. Viktor može sam, 
+bez ikakve interakcije sa Pegi, da konstruiše transkript $(H,b,\chi)$ koji 
+prolazi svaku proveru: dovoljno je da nasumično izabere $b$ i $\chi$, a 
+zatim izračuna $H=\chi(G_b)$. Pošto takav transkript ne može da se razlikuje 
+od transkripta nastalog u stvarnom razgovoru, Viktor njime ne može ubediti 
+treću stranu niti da on poznaje $\varphi$, niti da je Pegi uopšte učestvovala 
+u protokolu. Ovo svojstvo, da se transkript protokola može simulirati bez poznavanja 
+tajne, formalna je osnova pojma nultog znanja.
+
+Protokol koji smo opisali primer je interaktivnog dokaznog sistema — 
+konstrukcije u kojoj dokazivač i verifikator razmenjuju poruke kako bi 
+verifikator stekao uverenje u istinitost neke tvrdnje. Od takvog sistema 
+očekujemo da zadovolji tri osnovna svojstva.
+
+\begin{itemize}
+  \item \textbf{Potpunost} (engl.\ \textit{completeness}): ako Pegi 
+  zaista poznaje tajnu i pošteno prati protokol, Viktor će prihvatiti 
+  dokaz sa verovatnoćom jedan.
+  
+  \item \textbf{Tačnost} (engl.\ \textit{soundness}): ako Pegi ne poznaje 
+  tajnu, verovatnoća da Viktor prihvati lažni dokaz je zanemarljivo mala, 
+  bez obzira na strategiju kojom se Pegi služi.
+
+  \item \textbf{Nulto znanje} (engl.\ \textit{zero-knowledge}): transkript 
+  protokola ne otkriva verifikatoru nikakvu informaciju osim same 
+  istinitosti tvrdnje, što se formalizuje zahtevom da se transkript može 
+  simulirati bez poznavanja tajne.
+\end{itemize}
+
+U protokolu za izomorfizam grafova sva tri svojstva su zadovoljena. 
+Potpunost je očigledna: poštena Pegi uvek može da odgovori na oba 
+moguća izazova. Tačnost sledi iz ranije analize: verovatnoća da 
+nepošteni dokazivač prođe $n$ rundi iznosi $(1/2)^n$. 
+Svojstvo nultog znanja sledi iz simulacionog argumenta: Viktor može 
+sam da konstruiše transkript koji je nerazlučiv od stvarnog, pa 
+protokol ne otkriva nikakvu informaciju o tajnom izomorfizmu.
+
+\section{Nulto znanje i klase složenosti}
+
+Pre nego što razmotrimo koje se tvrdnje mogu dokazati uz nulto znanje, 
+potrebno je objasniti kako se formalizuje zahtev da transkript 
+protokola ne otkriva nikakvu dodatnu informaciju. 
+Osnovna ideja zasniva se na poređenju stvarnih transkripata protokola 
+sa transkriptima koje je moguće generisati simulacijom bez poznavanja 
+tajne. U analizi se uobičajeno pretpostavlja da je Viktor računski 
+ograničen, dok se Pegi tretira kao računski neograničena strana, ako 
+protokol ostaje bezbedan čak i protiv neograničeno moćnog dokazivača, 
+utoliko pre je bezbedan u praksi. U zavisnosti od toga koliko su 
+raspodele stvarnih i simuliranih transkripata bliske, razlikuju se tri 
+nivoa nultog znanja. Neka je $V$ skup stvarnih transkripata, a $S$ 
+skup simuliranih.
+
+\begin{itemize}
+  \item \textbf{Savršeno nulto znanje} ($V=S$): raspodele su identične, 
+  pa ni računski neograničen protivnik ne može razlikovati simulirani 
+  transkript od stvarnog. Protokol za izomorfizam grafova iz prethodne 
+  sekcije primer je ovog nivoa.
+  
+  \item \textbf{Statističko nulto znanje} ($V\approx_s S$): raspodele se 
+  razlikuju za statistički zanemarljivu vrednost, što ih čini nerazlučivim 
+  čak i za neograničenog protivnika.
+  
+  \item \textbf{Računsko nulto znanje} ($V\approx_c S$): raspodele su 
+  nerazlučive za računski ograničenog protivnika. Većina praktičnih 
+  protokola spada u ovu kategoriju, jer je takav nivo bezbednosti 
+  dovoljan u odnosu na realne pretnje.
+\end{itemize}
+
+Nakon što smo definisali svojstvo nultog znanja, prirodno se nameće 
+pitanje koje se tvrdnje uopšte mogu dokazivati na ovaj način. Već smo 
+pokazali da problem izomorfizma grafova leži u ovoj klasi, ali taj 
+problem zauzima posebno mesto u teoriji složenosti: veruje se da leži 
+između klase $\mathbf{P}$ i $\mathbf{NP}$-kompletnih problema, dakle nije rešiv 
+u polinomskom vremenu, ali verovatno nije ni $\mathbf{NP}$-kompletan. Zbog toga 
+on sam po sebi ne govori mnogo o tome koliko su dokazi nultog znanja 
+moćni, moglo bi se pomisliti da su ograničeni upravo na ovakve 
+probleme koji ne spadaju ni u jednu dobro poznatu klasu.
+
+Ispostavlja se, međutim, da je doseg dokaza nultog znanja daleko širi. 
+Ključna klasa u ovom kontekstu jeste $\mathbf{NP}$, koja obuhvata 
+probleme za koje postoji kratak svedok čiju ispravnost računski 
+ograničen verifikator može proveriti u polinomskom vremenu. U 
+klasičnom, neinteraktivnom modelu dokazivač jednostavno dostavlja 
+svedoka, a verifikator proverava njegovu ispravnost bez ikakve 
+razmene poruka.
+
+Ako se dozvoli interakcija između računski neograničenog dokazivača i 
+računski ograničenog verifikatora, dobija se klasa interaktivnih dokaza 
+$\mathbf{IP}$. Za razliku od klase $\mathbf{NP}$, gde dokazivač 
+jednostavno dostavlja svedoka bez ikakve razmene poruka, ovde 
+dokazivač i verifikator aktivno komuniciraju u više rundi. Pokazano 
+je da važi
+\[
+  \mathbf{IP} = \mathbf{PSPACE},
+\]
+gde je $\mathbf{PSPACE}$ klasa problema rešivih uz polinomsku količinu 
+memorije. Pošto se široko veruje da je $\mathbf{NP} \subsetneq 
+\mathbf{PSPACE}$, ovaj rezultat pokazuje da interakcija značajno 
+proširuje klasu problema koja se mogu dokazivati.
+
+Šta se dešava kada interaktivnim dokazima dodamo i zahtev nultog 
+znanja? Definišemo klasu $\mathbf{CZK}$ (engl.\ \textit{computational 
+zero-knowledge}) kao skup svih problema čija se rešenja mogu 
+verifikovati putem računskog dokaza nultog znanja. Već smo pokazali 
+da problem izomorfizma grafova leži u $\mathbf{CZK}$, ali postavlja 
+se pitanje da li tu leže i svi $\mathbf{NP}$ problemi. Odgovor daje 
+sledeća teorema.
+
+\begin{theorem}
+\label{thm:3col}
+Problem $3$-obojivosti grafa leži u $\mathbf{CZK}$, pod pretpostavkom 
+da postoji računski sakrivajuća šema posvete.
+\end{theorem}
+
+Problem $3$-obojivosti pita, može li se svaki čvor grafa obojiti 
+jednom od tri boje tako da nijedna grana ne spaja dva čvora iste boje? 
+U protokolu koji dokazuje ovu teoremu, Pegi zna ispravno bojenje i želi 
+da to dokaže bez otkrivanja samih boja. U fazi posvete, Pegi bira 
+slučajnu permutaciju boja i za svaki čvor objavljuje posvetu na 
+(permutovanu) boju tog čvora. Viktor zatim nasumično bira jednu granu 
+i traži da se otkriju boje njenih krajeva. Pegi otvara odgovarajuće 
+posvete, a Viktor proverava da su boje različite. Permutacija boja 
+menja se u svakoj rundi, pa Viktor ni nakon mnogo rundi ne dobija 
+informaciju o kompletnom bojenju, saznaje samo da su boje krajeva 
+izabrane grane različite.
+
+Pošto je $3$-obojivost $\mathbf{NP}$-kompletan problem, iz teoreme 
+neposredno sledi $\mathbf{NP} \subseteq \mathbf{CZK}$ — svaka tvrdnja 
+koja ima kratak dokaz može se dokazati i uz nulto znanje. Ovaj rezultat 
+ima snažne posledice po kriptografiju: praktično svaka tvrdnja koja se 
+javlja u kriptografskim protokolima može se dokazati uz nulto znanje, 
+bez obzira na njenu strukturu.
+
+Uz pretpostavku postojanja jednosmernih funkcija\footnote{Jednosmerna 
+funkcija je funkcija koju je lako izračunati, ali je računski 
+neizvodljivo invertovati. Tipičan primer je množenje velikih prostih 
+brojeva: lako je izračunati $n=p\cdot q$, ali je faktorizacija $n$ 
+računski teška.} važi čak i
+\[
+  \mathbf{CZK} = \mathbf{IP} = \mathbf{PSPACE},
+\]
+što znači da se svi problemi koji se uopšte mogu dokazati interaktivno 
+mogu dokazati i uz nulto znanje.
+
+\section{Sigma protokoli}
+
+Protokol izomorfizma grafova ima jasnu teorijsku vrednost, ali u praksi nije
+najefikasniji. Sigma protokoli predstavljaju efikasniju klasu dokaza nultog
+znanja, zasnovanu na istoj trokoračnoj strukturi:
+\[
+  \text{posveta} \longrightarrow \text{izazov} \longrightarrow \text{odgovor}
+\]
+
+Kod Sigma protokola uobičajeno se pretpostavlja pošten verifikator 
+(engl.\ \textit{honest verifier}), odnosno verifikator koji izazov 
+bira u skladu sa specifikacijom protokola, što omogućava jednostavniju 
+analizu svojstava protokola.
+
+Jedan od najpoznatijih predstavnika ove klase jeste Schnorr-ov 
+identifikacioni protokol, koji se zasniva na problemu rešavanja 
+diskretnog logaritma. Neka je $g$ generator grupe $G$ prostog reda $q$ 
+i neka je $y = g^x$ javna vrednost. Pegi želi da ubedi Viktora da zna 
+tajni eksponent $x$, a da ga pri tome ne otkrije. Protokol se odvija 
+u tri koraka:
+\[
+  P \to V : r \leftarrow g^k, \quad k \leftarrow \mathbb{Z}/q\mathbb{Z},
+\]
+\[
+  V \to P : e \leftarrow \mathbb{Z}/q\mathbb{Z},
+\]
+\[
+  P \to V : s \leftarrow k + x \cdot e \pmod{q}.
+\]
+Viktor prihvata dokaz ako važi $r = g^s \cdot y^{-e}$. Ispravnost ove 
+provere sledi direktno iz konstrukcije: ako Pegi zaista zna $x$, tada
+\[
+  g^s \cdot y^{-e} = g^{k + x \cdot e} \cdot g^{-x \cdot e} = g^k = r.
+\]
+
+Ako Pegi ne zna $x$, mora unapred da pogodi vrednost izazova $e$ pre 
+nego što ga Viktor pošalje. Pošto se $e$ bira uniformno iz skupa od 
+$q$ elemenata, verovatnoća ispravnog pogađanja iznosi $1/q$, za 
+razliku od protokola za izomorfizam grafova, gde je izazov bio binaran 
+i ta verovatnoća iznosila $1/2$. Zbog toga Schnorr-ov protokol pruža 
+jaku bezbednost već u jednoj rundi.
+
+Schnorr-ov protokol može se proširiti kako bi dokazao ne samo 
+poznavanje diskretnog logaritma, već i jednakost dva diskretna 
+logaritma. Tu ideju realizuje Chaum-Pedersen protokol, koji je 
+prvobitno razvijen za potrebe sistema elektronskog novca, ali 
+danas ima široku primenu. Pegi želi da dokaže da za javne vrednosti 
+$y_1 = g^{x_1}$ i $y_2 = h^{x_2}$ važi $x_1 = x_2$, pri čemu $g$ 
+i $h$ generišu grupu prostog reda $q$. Zajednički diskretni logaritam 
+označavamo sa $x$.
+
+Protokol se može posmatrati kao dva istovremena izvođenja Schnorr-ovog 
+protokola nad različitim bazama, ali sa jednim zajedničkim izazovom:
+\[
+  P \to V : (r_1, r_2) \leftarrow (g^k,\, h^k),
+\]
+\[
+  V \to P : e \leftarrow \mathbb{Z}/q\mathbb{Z},
+\]
+\[
+  P \to V : s \leftarrow k - e \cdot x \pmod{q}
+\]
+Viktor prihvata dokaz ako važi $r_1 = g^s \cdot y_1^e$ i 
+$r_2 = h^s \cdot y_2^e$.
+
+Potpunost sledi direktno iz konstrukcije: ako Pegi zaista zna $x$, 
+verifikacioni uslov je uvek zadovoljen, jer
+\[
+  g^s \cdot y_1^e = g^{k-ex} \cdot g^{ex} = g^k = r_1,
+\]
+i analogno $h^s \cdot y_2^e = h^k = r_2$.
+Svojstvo nultog znanja sledi iz toga što simulator 
+$S'(e,s) := (g^s \cdot y_1^e,\, h^s \cdot y_2^e)$ 
+proizvodi transkripte nerazlučive od stvarnih. 
+Tačnost se pokazuje argumentom specijalne tačnosti: pretpostavimo da 
+Pegi može da prođe verifikaciju za dva različita izazova $e \neq e'$ 
+sa istom posvetom $(r_1, r_2)$ i odgovorima $s$ i $s'$. Tada važi
+\[
+  r_1 = g^s \cdot y_1^e \quad \text{i} \quad r_1 = g^{s'} \cdot y_1^{e'}.
+\]
+Izjednačavanjem dobijamo $g^s \cdot y_1^e = g^{s'} \cdot y_1^{e'}$, 
+odakle sledi
+\[
+  y_1^{e-e'} = g^{s'-s}.
+\]
+Analogno, iz uslova za $r_2$ dobijamo $y_2^{e-e'} = h^{s'-s}$. 
+Iz ove dve jednačine sledi
+\[
+  (e-e') \cdot \log_g y_1 = s'-s = (e-e') \cdot \log_h y_2,
+\]
+što potvrđuje da su diskretni logaritmi jednaki i da se zajednička 
+vrednost može ekstrahovati kao
+\[
+  x = \frac{s - s'}{e - e'} \pmod{q}.
+\]
+Dakle, Pegi koja ne zna $x$ ne može da konstruiše posvetu koja će 
+proći verifikaciju za više od jednog izazova, što osigurava tačnost 
+protokola. Primetimo da je ekstrovana vrednost zaista traženi 
+diskretni logaritam, jer iz $y_1 = g^x$ direktno sledi 
+$x = \log_g y_1$.
+
+\subsection{Fiat-Shamir heuristika i neinteraktivni dokazi}
+
+Dokazi nultog znanja koje smo do sada razmatrali su interaktivni: 
+dokazivač i verifikator razmenjuju poruke u realnom vremenu, pri čemu 
+je upravo ta interakcija ono što obezbeđuje bezbednost. Međutim, u 
+praksi je interakcija često nepoželjna ili neizvodljiva — na primer, 
+kada jedan entitet želi da dokaže ispravnost podataka svima koji ih 
+budu čitali, bez mogućnosti direktne komunikacije sa svakim 
+verifikatorom posebno. Zbog toga se uvode neinteraktivni dokazi 
+nultog znanja (engl.\ \textit{non-interactive zero-knowledge proofs}, 
+NIZK), u kojima dokazivač samostalno konstruiše dokaz koji bilo ko 
+može naknadno proveriti.
+
+Standardan način pretvaranja interaktivnog Sigma protokola u 
+neinteraktivni dokaz jeste Fiat-Shamir heuristika. Ključna ideja je 
+da se verifikatorov nasumični izazov $e$ zameni heš-vrednošću javnih 
+podataka. Na primeru Schnorr-ovog protokola, gde je $g$ generator 
+grupe i $y = g^x$ javna vrednost čiji se diskretni logaritam dokazuje, 
+izazov se definiše kao
+\[
+  e = H(r \,\|\, g \,\|\, y).
+\]
+Uključivanje $g$ i $y$ u heš je važno: time se osigurava da je dokaz 
+vezan za konkretnu tvrdnju i konkretne javne parametre, a ne samo za 
+posvetu $r$. Bez toga, isti dokaz mogao bi se ponovo upotrebiti u 
+drugom kontekstu.
+
+Ista transformacija može se primeniti i za konstrukciju šeme digitalnog 
+potpisa: umesto javnih parametara, u heš se uključuje poruka $m$ koja 
+se potpisuje. Javni ključ je tvrdnja $X$, tajni ključ je svedok $w$, 
+a potpis poruke $m$ dobija se računanjem
+\[
+  r \leftarrow R(w,k),\qquad
+  e \leftarrow H(r\,\|\,m),\qquad
+  s \leftarrow S(e,w,k).
+\]
+Verifikator koji želi da proveri potpis $(e,s)$ na poruci $m$ 
+rekonstruiše posvetu kao $r' \leftarrow S'(e,s)$ i proverava da li 
+važi $e = H(r'\,\|\,m)$. Ako jednakost važi, potpis je ispravan. 
+Bezbednost ovakve konstrukcije standardno se razmatra uz pretpostavku 
+da se heš funkcija ponaša kao idealna nasumična funkcija.
+
+\section{Primena u elektronskom glasanju}
+
+Dokazi nultog znanja prirodno se kombinuju sa drugim kriptografskim
+primitivama. Kao ilustraciju razmatramo protokol elektronskog glasanja
+u kome $m$ glasača glasaju između dve opcije, a $n$ centara za
+prebrojavanje zajednički utvrđuju rezultat. Cilj je da svako može
+proveriti ispravnost rezultata, a da pri tome nijedan pojedinačni glas
+ne bude otkriven.
+
+Pre glasanja svaki centar objavljuje javni ključ za šifrovanje, 
+fiksira se grupa i biraju se javni parametri takvi da nijedna strana 
+ne zna njihov međusobni diskretni logaritam. Svaki glasač poseduje 
+par ključeva za digitalno potpisivanje, čime se osigurava da glasaju 
+samo ovlašćene osobe.
+
+Kada glasač želi da glasa, bira jednu od dve vrednosti i objavljuje 
+Pedersen-ovu posvetu\footnote{Pedersen-ova šema posvete obrađena je 
+u poglavlju 20, referencirati kasnije na rad} svog glasa. Sama posveta ne otkriva vrednost glasa, 
+ali glasač uz nju objavljuje i neinteraktivni dokaz nultog znanja 
+kojim dokazuje da je glas zaista iz dozvoljenog skupa vrednosti — bez 
+otkrivanja koje od dve opcije je izabrao. Time se sprečava mogućnost 
+upisivanja nevalidne vrednosti, a anonimnost glasa ostaje očuvana.
+
+Da bi se omogućilo prebrojavanje bez otkrivanja pojedinačnih glasova, 
+svaki glasač svoju tajnu deli između centara koristeći Shamir-ovo 
+tajno deljenje\footnote{Shamir-ovo tajno deljenje obrađeno je u 
+poglavlju 19, referencirati kasnije na rad} i svakom centru šalje odgovarajući šifrovani udeo. 
+Javno objavljuje i posvete koeficijentima, što centrima omogućava da 
+provere konzistentnost primljenih udela sa objavljenim glasom.
+
+Na kraju svaki centar javno objavljuje zbir udela koje je primio, a 
+bilo ko može proveriti ispravnost tog izračunavanja. Konačni zbir 
+glasova dobija se interpolacijom iz dovoljnog broja objavljenih 
+vrednosti: ako je zbir negativan, većina je glasala za jednu opciju, 
+a ako je pozitivan, za drugu. Rezultat je tako javno proverljiv, dok 
+individualni glasovi ostaju trajno skriveni.
+
+\section{Zaključak}
+
+Dokazi nultog znanja predstavljaju jedan od najelegantnijih rezultata 
+moderne kriptografije, omogućavaju da se istinitost tvrdnje dokaže 
+bez otkrivanja ikakve informacije osim same istinitosti. Ova naizgled 
+paradoksalna mogućnost ima duboke teorijske korene, svaka tvrdnja 
+koja ima kratak dokaz može se dokazati uz nulto znanje, a uz 
+odgovarajuće pretpostavke taj rezultat se proteže na celu klasu 
+$\mathbf{PSPACE}$.
+
+U praksi, značaj dokaza nultog znanja leži u tome što omogućavaju 
+bezbednu autentifikaciju bez otkrivanja lozinke, digitalne potpise 
+čija se ispravnost može proveriti bez uvida u tajni ključ, i sisteme 
+glasanja u kojima se tačnost rezultata može javno verifikovati a da 
+nijedan pojedinačni glas ne bude otkriven. Sigma protokoli, kao 
+efikasna praktična realizacija ove ideje, danas su sastavni deo 
+brojnih kriptografskih standarda i protokola.
