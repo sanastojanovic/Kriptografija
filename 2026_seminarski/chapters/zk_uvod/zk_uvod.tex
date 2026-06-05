@@ -2,7 +2,7 @@
 % interaktivni i neinteraktivni ZK protokoli)
 % Autor: Aleksandra Labović (mi241025)
 
-Dokazi nultog znanja (engl. \textit{zero-knowledge proofs}) predstavljaju jednu od ključnih kriptografskih primitiva,
+Dokazi nultog znanja (engl. \textit{zero-knowledge proofs}, ZKP) predstavljaju jednu od ključnih kriptografskih primitiva,
 koja omogućava jednoj strani da dokaže istinitost neke tvrdnje drugoj strani, a
 da pri tome ne otkrije ništa osim same istinitosti. Ovaj pojam uveli su Šefi
 Goldvoser (engl.\ \textit{Shafi Goldwasser}) i Silvio Mikali (engl.\
@@ -303,7 +303,7 @@ ima snažne posledice po kriptografiju. Praktično svaka tvrdnja koja se
 javlja u kriptografskim protokolima može se dokazati uz nulto znanje, 
 bez obzira na njenu strukturu.
 
-Uz pretpostavku postojanja jednosmernih funkcija\footnote{Jednosmerna 
+Uz pretpostavku postojanja jednosmernih funkcija\marginpar{Jednosmerna 
 funkcija je funkcija koju je lako izračunati, ali je računski 
 neizvodljivo invertovati. Tipičan primer je množenje velikih prostih 
 brojeva: lako je izračunati $n=p\cdot q$, ali je faktorizacija $n$ 
@@ -482,7 +482,7 @@ par ključeva za digitalno potpisivanje, čime se osigurava da glasaju
 samo ovlašćene osobe.
 
 Kada glasač želi da glasa, bira jednu od dve vrednosti i objavljuje 
-Pedersen-ovu posvetu\footnote{Pedersen-ova šema posvete obrađena je 
+Pedersen-ovu posvetu\marginpar{Pedersen-ova šema posvete obrađena je 
 u poglavlju 20, referencirati kasnije na rad} svog glasa. Sama posveta ne otkriva vrednost glasa, 
 ali glasač uz nju objavljuje i neinteraktivni dokaz nultog znanja 
 kojim dokazuje da je glas zaista iz dozvoljenog skupa vrednosti, bez 
@@ -491,7 +491,7 @@ upisivanja nevalidne vrednosti, a anonimnost glasa ostaje očuvana.
 
 Da bi se omogućilo prebrojavanje bez otkrivanja pojedinačnih glasova, 
 svaki glasač svoju tajnu deli između centara koristeći Shamir-ovo 
-tajno deljenje\footnote{Shamir-ovo tajno deljenje obrađeno je u 
+tajno deljenje\marginpar{Shamir-ovo tajno deljenje obrađeno je u 
 poglavlju 19, referencirati kasnije na rad} i svakom centru šalje odgovarajući šifrovani udeo. 
 Javno objavljuje i posvete koeficijentima, što centrima omogućava da 
 provere konzistentnost primljenih udela sa objavljenim glasom.
