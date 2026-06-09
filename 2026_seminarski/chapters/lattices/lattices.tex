@@ -38,3 +38,34 @@ Kada se izvrši program, kvantno stanje treba prevesti u konkretno stanje reprez
 Ako je krajnje stanje kvantne mašine $v = \sum_{I \in I_n} \alpha_I \ket{I} $, očitavanje zavisi od raspodele verovatnoća za stanje $s$. Verovatnoća očitavanja stanja $v$ je $P_v(I) = \frac{|\alpha_I|^2}{\sum_{J \in I_n} |\alpha_J|^2} $. \cite{postquantumcryptography:2009} Nakon merenja, sistem kolapsira u izmereno stanje i ponovnim merenjem dobija se isti rezultat.
 
 Na ovako definisanom modelu je Šor \cite{Shor_1997} definisao algoritam koji efikasno rešavaju probleme faktorizacije i diskretnog logaritma. Kada se uspe sa kreiranjem kvantnog računara, kriptosistemi zasnovani na ovim funkcijama će postati ranjivi. Zbog toga je neophodno  kreirati sisteme koji su kvantnorezistentni, kao što su sistemi zasnovani na rešetkama.
+
+
+\section{Rešetke}
+
+Ovo poglavlje posvećeno je rešetkama (engl. \textit{lattices}), koje su se u kriptografiji prvobitno koristile za kriptoanalizu postojećih sistema, dok danas predstavljaju osnovu za konstrukciju novih kriptografskih šema. Bezbednost postkvantnih kriptosistema se zasniva na pretpostavljenoj težini problema na rešetkama kao što su problem najkraćeg vektora i problem najbližeg vektora. Za ove probleme se smatra da ne postoje algoritmi koji ih rešavaju u polinomijalnom vremenu ni na klasičnom ni na kvantnom računaru.
+
+\begin{definition}
+    \textbf{Rešetka} $\latt$ je skup celobrojnih linearnih kombinacija linearno nezavisnih vektora $\{b_1, ..., b_m\}, b_i \in \mathbb{R}^n$. Drugim rečima, rešetka $\latt = \{ \sum_{i=1}^m a_ib_i \mid a_i \in \mathbb{Z} \} = \{ B \textbf{a} \mid \textbf{a} \in \mathbb{Z}^n \}$, gde je $B = [b_1, ..., b_m]$ bazna matrica rešetke, a vektori $\{b_1, ..., b_m\}$ čine bazu rešetke.
+\end{definition}
+
+Kako je rešetka $\latt$ diskretan skup, može se definisati minimalna dužina nenula vektora $\lambda_1(\latt) := \min \{||x|| \ | x \in \latt, x \neq 0 \} $. Element za koji važi da  mu je dužina jednaka $\lambda_1$ se naziva \textit{najkraći nenula vektor rešetke} i nalaženje ovog elementa se generalno smatra teškim \cite{smart2016cryptography}. 
+
+Za rešetku $\latt$ i njenu baznu matricu $B$ možemo definisati \textit{diskriminantu} $\Delta(\latt) = |\det(B^TB)|^{1/2} $, to jest $\Delta(\latt) = |\det(B)|$ ako je $B$ kvadratna matrica. Vrednost diskriminante definiše zapreminu fundamentalnog paralelepipeda koji razapinju bazni vektori \cite{smart2016cryptography}. 
+
+Jedna rešetka ima beskonačan broj baza, pa se može definisati šta je dobra, a šta loša baza za jednu rešetku. \textit{Dobra baza} je ona čiji su vektori kratki i međusobno približno ortogonalni. \textit{Loša baza} se sastoji od relativno dugih vektora između kojih je mali ugao. Na slici \ref{fig:osnovna_rešetka_2d} je prikazana rešetka čija je dobra baza $\{(1,0), (0,1)\}$ jer su vektori međusobno ortogonalni i kratki, a loša $\{(3,0), (5,1)\}$ \cite{postquantumcryptography:2009}. 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\linewidth]{chapters/lattices/slike/osnovna_rešetka_2d.png}
+    \caption{Struktura rešetke, sa prikazom dobre (plava) i loše (crvena) baze. }
+    \label{fig:osnovna_rešetka_2d}
+\end{figure}
+
+Za proizvoljnu rešetku $\latt$ čija je baza $B$ se ne može uvek naći potpuno ortogonalna baza, ali postoji \textit{LLL} (Lenstra, Lenstra i Lovász) \textit{algoritam} koji daje redukovanu bazu. On u polinomijalnom vremenu nalazi redukovanu bazu čiji su vektori relativno kratki i približno međusobno ortogonalni, pri čemu je prvi vektor te baze približan najkraćem nenula vektoru rešetke $\latt$, sa faktorom aproksimacije $2^{(n-1)/2}$, gde je $n$ dimenzija kvadratne bazne matrice \cite{smart2016cryptography}.
+
+Poseban tip rešetki su rešetke po modulu $q$ (eng. \textit{q-ary lattice}). Rešetka $\latt$ je po modulu $q$ ako važi $q \mathbb{Z}^n \subset \latt \subset \mathbb{Z}^n$ za neko celobrojno $q$. Za proizvoljnu matricu $A \in \mathbb{Z}_q^{n \times m}$ mogu se definisati dve $m$-dimenzione rešetke po modulu $q$:
+
+\[ \Lambda_q (A) = \{ y \in \mathbb{Z}^m \mid y= A^T z \ \pmod q, z \in \mathbb{Z}^n\}, \]
+\[\Lambda_q^{\bot}(A) = \{y \in \mathbb{Z}^m \mid Ay = 0 \pmod q\} \].
+
+Rešetke po modulu $q$ igraju centralnu ulogu u konstrukciji savremenih kriptosistema zasnovanih na rešetkama i biće korišćene u nastavku rada.
