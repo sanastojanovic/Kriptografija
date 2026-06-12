@@ -1,19 +1,16 @@
-% Poglavlje: Lattices
-% Autor: Marijana Čupović (mi251018)
-
 \section{Uvod}
 
 Bezbednost kriptosistema koji se danas koriste se zasniva na pretpostavci da su jednosmerne funkcije na kojima se zasnivaju teške, to jest da ne postoje algoritmi koji ih rešavaju na klasičnom računaru u polinomijalnom vremenu. Sistemi kao što su RSA i Difi-Helmanova razmena ključeva se zasnivaju na problemima faktorizacije i diskretnog logaritma i za njih se smatra da su teški. Pretpostavka o težini se zasniva na višedecenijskim neuspelim pokušajima da se ovi problemi reše na klasičnom računaru. 
 
 Ako bi bio pronađen algoritam koji u polinomijalnom vremenu rešava probleme faktorizacije ili diskretnog logaritma, sve informacije koje su do sada šifrovane bi postale kompromitovane. Pojava kvantnih računara ovu situaciju čini mogućom. Šor je pokazao da postoje efikasni algoritmi za faktorizaciju i problem diskretnog logaritma na kvantnim računarima \cite{Shor_1997}. Ovo znači da se sa realizacijom kvantnih računara bezbednost kriptosistema gubi. 
 
-Iako još uvek ne postoje kvantni računari, napori da se oni kreiraju su značajni i verovatno će se pojaviti u budućnosti. Zbog toga treba gledati unapred i razvijati kriptosisteme koji će se odupreti napadima od strane algoritama koji se izvršavaju na kvantnim računarima. Veruje se da su kriptografski sistemi zasnovani na heš funkcijama, kodu, rešetkama, jednačinama sa više promenljivih i kriptografija tajnog ključa kvantnorezistentni \cite{postquantumcryptography:2009}. Ovo poglavlje će se fokusirati na sisteme zasnovane na rešetkama.
+Iako još uvek ne postoje kvantni računari, napori da se oni kreiraju su značajni i verovatno će se pojaviti u budućnosti. Zbog toga treba gledati unapred i razvijati kriptosisteme koji će se odupreti napadima od strane algoritama koji se izvršavaju na kvantnim računarima. Veruje se da su kriptografski sistemi zasnovani na heš funkcijama, kodu, rešetkama, jednačinama sa više promenljivih i kriptografija tajnog ključa kvantnorezistentni \cite{postquantumcryptography:2009} \footnote{Strana 1, pasus 3}. Ovo poglavlje će se fokusirati na sisteme zasnovane na rešetkama.
 
 \section{Kvantni računari}
 
 Trenutno postoje različiti predlozi za arhitekturu kvantnog računara koja će prevazići probleme kvantne mehanike i fizička ograničenja. Iz tog razloga se nećemo osvrtati na konkretne aspekte pravljenja kvantnog računara već ćemo se pozabaviti konceptualnim prikazom elemenata jedne takve mašine. 
 
-Kvantni računar se razlikuje od klasičnog po tome što je u svakom trenutku u superpoziciji \footnote{Superpozicija predstavlja linearnu kombinaciju baznih stanja sistema. Kada govorimo o sistemu sa jednim bitom, stanje bi se moglo opisati formulom $ \ket{\psi} = \alpha \ket{0} + \beta \ket{1}$, gde su $\ket{0}$ i $\ket{1}$ bazna stanja sistema.} stanja koja se mogu predsaviti nizom bitova. Jedan bit kvantnog računara se naziva \textit{kubit} (eng. \textit{qubit}) i on opisuje superpoziciju stanja $0$ i $1$. Ovo se može opisati dvodimenzionim Hilbertovim prostorom: $\mathcal{H} = \mathcal{H}_1 = \mathbb{C} \oplus \mathbb{C} \cong \mathbb{C}^2 $, čiju bazu čine vektori $(1, 0) = \ket{0}$ i $(0,1) = \ket{1}$ \cite{postquantumcryptography:2009}.
+Kvantni računar se razlikuje od klasičnog po tome što je u svakom trenutku u superpoziciji \footnote{Superpozicija predstavlja linearnu kombinaciju baznih stanja sistema. Kada govorimo o sistemu sa jednim bitom, stanje bi se moglo opisati formulom $ \ket{\psi} = \alpha \ket{0} + \beta \ket{1}$, gde su $\ket{0}$ i $\ket{1}$ bazna stanja sistema.} stanja koja se mogu predsaviti nizom bitova. Jedan bit kvantnog računara se naziva \textit{kubit} (eng. \textit{qubit}) i on opisuje superpoziciju stanja $0$ i $1$. Ovo se može opisati dvodimenzionim Hilbertovim prostorom: $\mathcal{H} = \mathcal{H}_1 = \mathbb{C} \oplus \mathbb{C} \cong \mathbb{C}^2 $, čiju bazu čine vektori $(1, 0) = \ket{0}$ i $(0,1) = \ket{1}$ \cite{postquantumcryptography:2009} \footnote{Strana 20, pasus 2}.
 
 Kako je za opisivanje stanja kvantnog računara sa jednim bitom bio potreban dvodimenzioni prostor, tako će za opisvanje mašine sa $n$ bitova biti potreban prostor dimenzije $2^n$. Ovo se jednostavno postiže tenzorskim proizvodom Hilbertovih prostora: $\mathcal{H}_n = \mathcal{H} \otimes ... \otimes \mathcal{H}$. Baza ovog prostora je tenzorski proizvod pojedinačnih baza, tj $ \ket{i_1...i_n} = \ket{i_1} \otimes ... \otimes  \ket{i_n} $, gde je $i_1...i_n \in \mathcal{I}_n = \{0,1\}^n$ \cite{postquantumcryptography:2009}.
 
@@ -37,7 +34,7 @@ Kada se izvrši program, kvantno stanje treba prevesti u konkretno stanje reprez
 
 Ako je krajnje stanje kvantne mašine $v = \sum_{I \in I_n} \alpha_I \ket{I} $, očitavanje zavisi od raspodele verovatnoća za stanje $s$. Verovatnoća očitavanja stanja $v$ je $P_v(I) = \frac{|\alpha_I|^2}{\sum_{J \in I_n} |\alpha_J|^2} $. \cite{postquantumcryptography:2009} Nakon merenja, sistem kolapsira u izmereno stanje i ponovnim merenjem dobija se isti rezultat.
 
-Na ovako definisanom modelu je Šor \cite{Shor_1997} definisao algoritam koji efikasno rešavaju probleme faktorizacije i diskretnog logaritma. Kada se uspe sa kreiranjem kvantnog računara, kriptosistemi zasnovani na ovim funkcijama će postati ranjivi. Zbog toga je neophodno  kreirati sisteme koji su kvantnorezistentni, kao što su sistemi zasnovani na rešetkama.
+Na ovako definisanom modelu je Šor \cite{Shor_1997} definisao algoritam koji efikasno rešavaju probleme faktorizacije i diskretnog logaritma. Kada se uspe sa kreiranjem kvantnog računara dovoljne jačine, kriptosistemi zasnovani na ovim funkcijama će postati ranjivi. Zbog toga je neophodno  kreirati sisteme koji su kvantnorezistentni, kao što su sistemi zasnovani na rešetkama.
 
 \section{Rešetke}
 
@@ -47,11 +44,11 @@ Ovo poglavlje posvećeno je rešetkama (engl. \textit{lattices}), koje su se u k
     \textbf{Rešetka} $\latt$ je skup celobrojnih linearnih kombinacija linearno nezavisnih vektora $\{b_1, ..., b_m\}, b_i \in \mathbb{R}^n$. Drugim rečima, rešetka $\latt = \{ \sum_{i=1}^m a_ib_i \mid a_i \in \mathbb{Z} \} = \{ B \textbf{a} \mid \textbf{a} \in \mathbb{Z}^n \}$, gde je $B = [b_1, ..., b_m]$ bazna matrica rešetke, a vektori $\{b_1, ..., b_m\}$ čine bazu rešetke.
 \end{definition}
 
-Kako je rešetka $\latt$ diskretan skup, može se definisati minimalna dužina nenula vektora $\lambda_1(\latt) := \min \{||x|| \ | x \in \latt, x \neq 0 \} $. Element za koji važi da  mu je dužina jednaka $\lambda_1$ se naziva \textit{najkraći nenula vektor rešetke} i nalaženje ovog elementa se generalno smatra teškim \cite{smart2016cryptography}. 
+Kako je rešetka $\latt$ diskretan skup, može se definisati minimalna dužina nenula vektora $\lambda_1(\latt) := \min \{||x|| \ | x \in \latt, x \neq 0 \} $. Element za koji važi da  mu je dužina jednaka $\lambda_1$ se naziva \textit{najkraći nenula vektor rešetke} i nalaženje ovog elementa se generalno smatra teškim \cite{smart2016cryptography} \footnote{Strana 81, pasus 2}. 
 
 Za rešetku $\latt$ i njenu baznu matricu $B$ možemo definisati \textit{diskriminantu} $\Delta(\latt) = |\det(B^TB)|^{1/2} $, to jest $\Delta(\latt) = |\det(B)|$ ako je $B$ kvadratna matrica. Vrednost diskriminante definiše zapreminu fundamentalnog paralelepipeda koji razapinju bazni vektori \cite{smart2016cryptography}. 
 
-Jedna rešetka ima beskonačan broj baza, pa se može definisati šta je dobra, a šta loša baza za jednu rešetku. \textit{Dobra baza} je ona čiji su vektori kratki i međusobno približno ortogonalni. \textit{Loša baza} se sastoji od relativno dugih vektora između kojih je mali ugao. Na slici \ref{fig:osnovna_rešetka_2d} je prikazana rešetka čija je dobra baza $\{(1,0), (0,1)\}$ jer su vektori međusobno ortogonalni i kratki, a loša $\{(3,0), (5,1)\}$ \cite{postquantumcryptography:2009}. 
+Jedna rešetka ima beskonačan broj baza, pa se može definisati šta je dobra, a šta loša baza za jednu rešetku. \textit{Dobra baza} je ona čiji su vektori kratki i međusobno približno ortogonalni. \textit{Loša baza} se sastoji od relativno dugih vektora između kojih je mali ugao. Na slici \ref{fig:osnovna_rešetka_2d} je prikazana rešetka čija je dobra baza $\{(1,0), (0,1)\}$ jer su vektori međusobno ortogonalni i kratki, a loša $\{(3,0), (5,1)\}$ \cite{meyer2025postquantumcryptographyanalysiscodebased} \footnote{Strana 7, pasus 3}. 
 
 \begin{figure}[h]
     \centering
@@ -68,3 +65,7 @@ Poseban tip rešetki su $q$-arne (eng. \textit{q-ary lattice}). Rešetka $\latt$
 \[\Lambda_q^{\bot}(A) = \{y \in \mathbb{Z}^m \mid Ay = 0 \pmod q\} \].
 
 Ovaj tip rešetki igra centralnu ulogu u konstrukciji savremenih kriptosistema zasnovanih na rešetkama i biće korišćene u nastavku rada.
+
+
+
+
