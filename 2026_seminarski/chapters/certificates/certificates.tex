@@ -3,46 +3,38 @@
 
 \section{Uvod}
 
-U simetričnoj kriptografiji obe strane koriste isti tajni ključ. Takav ključ mora biti poznat samo učesnicima komunikacije. Zato se javlja osnovni problem distribucije ključeva. Ako dve strane nemaju unapred uspostavljen bezbedan kanal, nije jasno kako tajni ključ mogu bezbedno razmeniti.
+Jedan od osnovnih problema u kriptografiji jeste uspostavljanje zajedničkog ključa između strana koje žele da komuniciraju. U simetričnoj kriptografiji obe strane koriste isti tajni ključ. Taj ključ mora biti poznat samo učesnicima komunikacije. Ako strane nemaju unapred uspostavljen bezbedan kanal, postavlja se pitanje kako tajni ključ mogu bezbedno razmeniti.
 
-Kriptografija javnog ključa ublažava ovaj problem. Svaki korisnik ima par ključeva. Javni ključ može biti dostupan svima, dok privatni ključ mora ostati poznat samo vlasniku. Pošiljalac zato ne mora unapred da deli tajni ključ sa primaocem. Pošiljalac može da upotrebi javni ključ primaoca za uspostavljanje novog simetričnog ključa ili za proveru digitalnog potpisa.
+Kriptografija javnog ključa ublažava ovaj problem. Svaki korisnik ima par ključeva: javni i privatni ključ. Javni ključ može biti dostupan svima, dok privatni ključ mora ostati poznat samo vlasniku. Pošiljalac zato ne mora unapred da deli tajni ključ sa primaocem. Umesto toga, javni ključ može da se koristi za uspostavljanje novog simetričnog ključa ili za proveru digitalnog potpisa \cite{smart2016cryptography}.
 
-U tom kontekstu razlikuju se dve vrste ključeva.
+U ovom kontekstu razlikuju se dugoročni i kratkoročni ključevi. Dugoročni, odnosno statički ključevi, koriste se tokom dužeg vremenskog perioda. Njihovo kompromitovanje može imati ozbiljne posledice, jer može ugroziti poverenje u identitet korisnika i buduću komunikaciju. Kratkoročni, odnosno sesijski ili efemerni ključevi, koriste se za jednu komunikacionu sesiju ili tokom ograničenog vremenskog perioda. Ako je kompromitovan jedan sesijski ključ, posledice bi trebalo da budu ograničene na tu sesiju \cite{smart2016cryptography}.
 
-\begin{itemize}
-\item \emph{Dugoročni} ili \emph{statički ključevi} koriste se tokom dužeg vremenskog perioda. Kompromitovanje ovakvog ključa može imati ozbiljne posledice, jer može ugroziti buduću komunikaciju i poverenje u identitet korisnika.
+Međutim, javni ključ je bezbedno upotrebljiv samo ako postoji pouzdan način da se utvrdi kome pripada. Sama dostupnost javnog ključa nije dovoljna, jer napadač može objaviti svoj javni ključ i predstaviti ga kao ključ drugog korisnika. Ako pošiljalac prihvati takav ključ kao ispravan, bezbednost daljeg protokola može biti narušena \cite{smart2016cryptography}.
 
-\item \emph{Kratkoročni}, \emph{sesijski} ili \emph{efemerni ključevi} koriste se tokom jedne komunikacione sesije ili tokom ograničenog vremenskog perioda. Njihova osnovna uloga je da zaštite konkretnu komunikaciju. Ako je kompromitovan jedan sesijski ključ, posledice bi trebalo da budu ograničene na tu sesiju\cite{smart2016cryptography}.
-
-\end{itemize}
-
-
-Međutim, time nastaje novi problem. Potrebno je proveriti da li javni ključ zaista pripada subjektu kojem se pripisuje. Sama dostupnost javnog ključa nije dovoljna. Napadač može objaviti svoj javni ključ i predstaviti ga kao ključ nekog drugog korisnika. Ako pošiljalac prihvati takav ključ kao ispravan, bezbednost daljeg protokola može biti narušena. \cite{smart2016cryptography}
-
-Zbog toga je kriptografiji javnog ključa potreban mehanizam za proveru autentičnosti javnih ključeva. Digitalni sertifikati imaju upravo tu ulogu. Oni povezuju identitet subjekta sa njegovim javnim ključem. Tu vezu potvrđuje poverljiva treća strana, koja se naziva sertifikaciono telo(\emph{Certificate Authority}). \cite{smart2016cryptography}
+Zbog toga su u sistemima javnog ključa potrebni mehanizmi za proveru autentičnosti javnih ključeva. Tu ulogu imaju digitalni sertifikati. Oni povezuju identitet subjekta sa njegovim javnim ključem, a tu vezu potvrđuje poverljiva treća strana, najčešće sertifikaciono telo, odnosno \emph{Certificate Authority} (CA) \cite{smart2016cryptography,rfc5280}.
 
 \section{Sertifikati i sertifikaciona tela}
 
-Kriptografija javnog ključa rešava važan deo problema distribucije ključeva, jer javni ključ ne mora da ostane tajan. Ipak, time se ne rešava pitanje poverenja. Korisnik mora da zna da javni ključ koji koristi zaista pripada subjektu sa kojim želi da komunicira. Ako takva veza nije proverena, napadač može podmetnuti svoj javni ključ i predstaviti ga kao ključ drugog korisnika. U tom slučaju kriptografski algoritam može biti pravilno primenjen, ali komunikacija ipak neće biti bezbedna, jer se poverenje zasniva na pogrešnom ključu.
+Kriptografija javnog ključa rešava deo problema distribucije ključeva, ali ne rešava sama po sebi pitanje poverenja. Korisnik mora imati pouzdan način da proveri da javni ključ zaista pripada subjektu sa kojim želi da komunicira.
 
 Zbog toga je u sistemima javnog ključa jedan od osnovnih pojmova vezivanje javnog ključa.
 
 \begin{definition}
-Vezivanje javnog ključa\emph{binding} je postupak kojim se javni ključ povezuje sa određenim subjektom. Subjekt može biti osoba, računar, server, organizacija ili proces \cite{smart2016cryptography}.
+Vezivanje javnog ključa \emph{binding} je postupak kojim se javni ključ povezuje sa određenim subjektom. Subjekt može biti osoba, računar, server, organizacija ili proces \cite{smart2016cryptography}.
 \end{definition}
 
-U suštini, ovo nam govori da je javni ključ upotrebljiv tek kada postoji pouzdan način da se utvrdi kome pripada. Tu potvrdu nam daje digitalni sertifikat.
+Tu potvrdu nam daje digitalni sertifikat.
 
 \begin{definition}
 Digitalni sertifikat je digitalno potpisana struktura podataka koja sadrži javni ključ subjekta i podatke koji identifikuju vlasnika sertifikata, kao što su ime, naziv organizacije i period važenja, čime se javni ključ povezuje sa određenim subjektom \cite{rfc5280,ibmDigitalCertificates}.
 \end{definition}
 
-Digitalni sertifikat se zato može posmatrati kao elektronska potvrda identiteta u sistemu javnog ključa. Vrednost sertifikata potiče iz činjenice da tu vezu potvrđuje strana kojoj se veruje. U klasičnom modelu to je poverljiva treća strana, odnosno \emph{Trusted Third Party} (TTP). U kontekstu digitalnih sertifikata tu ulogu najčešće ima sertifikaciono telo\emph{Certificate Authority} (CA) \cite{smart2016cryptography}.
+Vrednost sertifikata potiče iz činjenice da tu vezu potvrđuje strana kojoj se veruje. U klasičnom modelu to je poverljiva treća strana, odnosno \emph{Trusted Third Party} (TTP). U kontekstu digitalnih sertifikata tu ulogu najčešće ima sertifikaciono telo\emph{Certificate Authority} (CA) \cite{smart2016cryptography}.
 
-Važno je napomenuti da sertifikat sam po sebi ne garantuje bezbednost ukoliko privatni ključ subjekta nije zaštićen. Ako je privatni ključ kompromitovan, napadač može zloupotrebiti sertifikat i predstaviti se kao njegov vlasnik \cite{ibmDigitalCertificates}. Zbog toga se poverenje u sertifikat ne zasniva samo na njegovom sadržaju, već i na zaštiti privatnih ključeva, pouzdanosti sertifikacionog tela i pravilima po kojima se sertifikati izdaju, proveravaju i opozivaju.
+Sertifikat sam po sebi ne garantuje bezbednost ukoliko privatni ključ subjekta nije zaštićen. Ako je privatni ključ kompromitovan, napadač može zloupotrebiti sertifikat i predstaviti se kao njegov vlasnik \cite{ibmDigitalCertificates}. Zbog toga se poverenje u sertifikat ne zasniva samo na njegovom sadržaju, već i na zaštiti privatnih ključeva, pouzdanosti sertifikacionog tela i pravilima po kojima se sertifikati izdaju, proveravaju i opozivaju.
 
 \begin{definition}
-Sertifikaciono telo,\emph{Certificate Authority} (CA), jeste poverljivi autoritet koji izdaje digitalne sertifikate i svojim digitalnim potpisom potvrđuje da određeni javni ključ pripada određenom subjektu \cite{smart2016cryptography}.
+Sertifikaciono telo, \emph{Certificate Authority} (CA), jeste poverljivi autoritet koji izdaje digitalne sertifikate i svojim digitalnim potpisom potvrđuje da određeni javni ključ pripada određenom subjektu \cite{smart2016cryptography}.
 \end{definition}
 
 Korisnik koji proverava sertifikat ne proverava neposredno identitet subjekta, već proverava potpis sertifikacionog tela. Ako korisnik veruje javnom ključu tog tela, onda može da proveri da li je sertifikat zaista potpisalo to telo i da li su podaci u sertifikatu ostali neizmenjeni. Zbog toga je zaštita privatnog ključa sertifikacionog tela od posebnog značaja. Ako bi taj ključ bio kompromitovan, napadač bi mogao da izdaje sertifikate koji izgledaju kao da dolaze od pouzdanog autoriteta.
@@ -50,12 +42,10 @@ Korisnik koji proverava sertifikat ne proverava neposredno identitet subjekta, v
 U manjim sistemima moguće je da postoji samo jedno sertifikaciono telo kojem svi učesnici veruju. U većim sistemima to nije dovoljno praktično. Različite organizacije, domeni ili države mogu imati sopstvena sertifikaciona tela, pa se postavlja pitanje kako uspostaviti poverenje između njih. Jedan od načina za to je unakrsna sertifikacija.
 
 \begin{definition}
-Unakrsna sertifikacija, odnosno \emph{cross-certification}, je postupak u kojem jedno sertifikaciono telo izdaje sertifikat drugom sertifikacionom telu, čime se uspostavlja odnos poverenja između ta dva sertifikaciona tela. \cite{rfc5280}.
+Unakrsna sertifikacija, odnosno \emph{cross-certification}, je postupak u kojem jedno sertifikaciono telo izdaje sertifikat drugom, čime se uspostavlja odnos poverenja između njih \cite{rfc5280}.
 \end{definition}
 
 Takav odnos poverenja mora biti jasno određen. Kada jedno sertifikaciono telo prihvati drugo, ono omogućava da se poverenje prenese i na sertifikate koje izdaje to drugo telo. Zbog toga se kod sertifikata sertifikacionih tela koriste pravila i ograničenja koja određuju za koje namene sertifikat može da se koristi i u kojoj meri poverenje može dalje da se prenosi.
- 
-Kada korisnik ne veruje neposredno sertifikacionom telu koje je izdalo sertifikat, poverenje se proverava kroz niz povezanih sertifikata. Taj niz vodi do sertifikacionog tela kojem korisnik već veruje i naziva se lanac sertifikata ili lanac poverenja.
 
 \begin{definition}
 Lanac sertifikata, \emph{certification path}, je niz sertifikata kojim se poverenje prenosi od unapred poznatog poverljivog javnog ključa do sertifikata krajnjeg subjekta \cite{rfc5280}.
@@ -66,21 +56,18 @@ Početna tačka lanca naziva se sidro poverenja. To je sertifikaciono telo kojem
 Da bi se sertifikati koristili na isti način u različitim sistemima, potreban je zajednički standard. Najznačajniji standard za digitalne sertifikate je X.509, koji određuje njihov format, osnovna polja i način provere \cite{rfc5280}. X.509 sertifikat sadrži podatke o subjektu, njegov javni ključ, podatke o izdavaocu, period važenja i digitalni potpis, dok ekstenzije u verziji v3 omogućavaju da se odredi namena ključa i ograničenja upotrebe sertifikata \cite{rfc5280}.
 
 Iako se sertifikat izdaje za određeni period važenja, on može postati nepouzdan i pre isteka tog perioda. To se dešava, na primer, ako je privatni ključ kompromitovan, ako se promeni veza između subjekta i sertifikacionog tela, ili ako podaci u sertifikatu više nisu tačni \cite{rfc5280}. U takvim slučajevima sertifikat se opoziva.
+
 Jedan od osnovnih načina za proveru opoziva jeste lista opozvanih sertifikata, odnosno \emph{Certificate Revocation List} (CRL). CRL je potpisana lista opozvanih sertifikata, pri čemu se svaki sertifikat prepoznaje po svom serijskom broju \cite{rfc5280}.
 
 \section{Generisanje efemernih simetričnih ključeva iz statičkih simetričnih ključeva}
 
-U ovim protokolima dugoročni simetrični ključevi se ne koriste za zaštitu celokupne komunikacije. Njihova uloga je da omoguće uspostavljanje novog sesijskog ključa između učesnika. Nakon toga se sesijski ključ koristi za zaštitu jedne konkretne sesije ili tokom ograničenog vremenskog perioda.
-
-Ovakav pristup smanjuje posledice mogućeg kompromitovanja ključa. Ako napadač dođe do jednog sesijskog ključa, ugrožena je samo komunikacija koja je tim ključem zaštićena. Dugoročni ključ, kao i druge sesije, ostaju odvojeni od tog napada.
+U ovim protokolima dugoročni simetrični ključevi služe za uspostavljanje novog sesijskog ključa, a ne za zaštitu celokupne komunikacije. Nakon uspostavljanja, sesijski ključ se koristi za jednu komunikacionu sesiju ili tokom ograničenog vremenskog perioda. Time se smanjuju posledice kompromitovanja ključa, jer se napad na jedan sesijski ključ ograničava na komunikaciju koja je tim ključem zaštićena.
 
 Koristimo sledeće oznake:
 \begin{itemize}
 \item \(A\) i \(B\) označavaju strane koje žele da uspostave zajednički ključ,
 \item \(S\) označava poverljivu treću stranu, odnosno server za distribuciju ključeva,
-\item \(K_{AS}\) označava dugoročni simetrični ključ koji dele \(A\) i \(S\),
-\item \(K_{BS}\) označava dugoročni simetrični ključ koji dele \(B\) i \(S\),
-\item \(K_{AB}\) označava novi sesijski ključ koji treba da dele \(A\) i \(B\),
+\item \(K_{AS}\), \(K_{BS}\) i \(K_{AB}\) označavaju tajne simetrične ključeve poznate redom stranama \(A\) i \(S\), \(B\) i \(S\), odnosno \(A\) i \(B\),
 \item \(\{M\}_{K}\) označava poruku \(M\) šifrovanu ključem \(K\),
 \item \(N_A\) i \(N_B\) označavaju brojeve koji se koriste samo jednom, odnosno \emph{nonce} vrednosti,
 \item \(T_A\), \(T_B\) i \(T_S\) označavaju vremenske oznake\cite{smart2016cryptography}.
@@ -88,157 +75,338 @@ Koristimo sledeće oznake:
 
 \subsection{Wide-Mouth Frog protokol}
 
-Wide-Mouth Frog protokol je jednostavan protokol za raspodelu sesijskog ključa. Njegova ideja je da strana \(A\) izabere novi sesijski ključ \(K_{AB}\), a zatim da ga preko poverljive treće strane \(S\) dostavi strani \(B\). Server \(S\) ovde ne generiše ključ, već samo posreduje u njegovom prenosu.
-Protokol se sastoji iz dve poruke:
+Wide-Mouth Frog protokol je jednostavan protokol za raspodelu sesijskog ključa. Strana \(A\) bira novi sesijski ključ \(K_{AB}\), a zatim ga preko poverljive treće strane \(S\) dostavlja strani \(B\). Protokol se sastoji iz dve poruke:
 
-\[
-A \rightarrow S : A, \{T_A, B, K_{AB}\}_{K_{AS}}
-\]
+\[ \begin{aligned} A &\rightarrow S : A, \{T_A, B, K_{AB}\}_{K_{AS}} \\ S &\rightarrow B : \{T_S, A, K_{AB}\}_{K_{BS}} \end{aligned} \]
 
-\[
-S \rightarrow B : \{T_S, A, K_{AB}\}_{K_{BS}}
-\]
+U prvoj poruci \(A\) šalje serveru svoj identitet i šifrovani deo koji sadrži vremensku oznaku \(T_A\), identitet strane \(B\) i sesijski ključ \(K_{AB}\). Ako server proceni da je vremenska oznaka sveža, prihvata zahtev i šalje strani \(B\) poruku šifrovanu ključem \(K_{BS}\). Kada je \(B\) dešifruje, dobija informaciju da strana \(A\) želi da koristi ključ \(K_{AB}\) za dalju komunikaciju \cite{smart2016cryptography}.
 
-U prvoj poruci strana \(A\) šalje serveru svoj identitet i šifrovani deo poruke. Taj deo sadrži vremensku oznaku \(T_A\), identitet strane \(B\) i sesijski ključ \(K_{AB}\). Pošto je poruka šifrovana ključem \(K_{AS}\), može je dešifrovati samo server \(S\), koji taj ključ deli sa stranom \(A\).
-
-Ako server proceni da je vremenska oznaka sveža, prihvata zahtev i šalje novu poruku strani \(B\). Ta poruka je šifrovana ključem \(K_{BS}\), koji dele \(S\) i \(B\). Kada je \(B\) dešifruje, dobija informaciju da strana \(A\) želi da koristi ključ \(K_{AB}\) za dalju komunikaciju \cite{smart2016cryptography}.
-
-Prednost ovog protokola je njegova jednostavnost. Protokol ima samo dve poruke, pa ne zahteva mnogo komunikacije između učesnika. Međutim, ta jednostavnost istovremeno predstavlja i njegovo ograničenje.
-
-Prvi problem je zavisnost od vremenskih oznaka. Svežina poruke proverava se na osnovu vremena, pa satovi učesnika moraju biti dovoljno usklađeni. Ako nisu, ispravna poruka može biti odbačena. Sa druge strane, previše široko prihvatanje vremenskih oznaka može olakšati ponavljanje starih poruka.
-
-Drugi problem je izbor sesijskog ključa. Ključ \(K_{AB}\) bira strana \(A\), a server \(S\) ga samo prosleđuje strani \(B\). Zbog toga \(B\) mora da veruje da je \(A\) izabrala dobar i zaista nov ključ. Ako je ključ ranije generisan, ponovo upotrebljen ili loše čuvan, vremenska oznaka potvrđuje samo svežinu poruke, ali ne i svežinu samog ključa.
-
-Wide-Mouth Frog protokol je koristan za objašnjenje osnovne ideje raspodele sesijskog ključa pomoću poverljive treće strane. Ipak, zbog pomenutih slabosti, nije dovoljno pouzdan kao praktično rešenje za složenije sisteme \cite{smart2016cryptography}.
+Prednost ovog protokola je jednostavnost, jer ima samo dve poruke. Ipak, protokol zavisi od vremenskih oznaka, pa satovi učesnika moraju biti dovoljno usklađeni. Osim toga, sesijski ključ bira strana \(A\), dok ga server samo prosleđuje. Zbog toga \(B\) mora da veruje da je \(A\) izabrala dobar i zaista nov ključ\cite{smart2016cryptography}.
 
 \subsection{Needham--Schroeder protokol}
 
-Wide-Mouth Frog protokol je jednostavan, ali ima važno ograničenje. Sesijski ključ bira strana \(A\), dok server \(S\) samo posreduje u njegovom prenosu. Zbog toga strana \(B\) mora da veruje da je \(A\) izabrala dobar i svež ključ. Needham--Schroeder protokol uvodi drugačiji pristup. Ovde sesijski ključ generiše poverljiva treća strana \(S\). Time se poverenje u izbor ključa premešta sa učesnika komunikacije na server.
+Needham--Schroeder protokol se razlikuje od Wide-Mouth Frog protokola po tome što sesijski ključ ne bira strana \(A\), već ga generiše poverljiva treća strana \(S\). Na taj način se poverenje u izbor ključa premešta sa učesnika komunikacije na server \cite{smart2016cryptography}.
 
-Do konačnog oblika protokola dolazi se postepeno\cite{smart2016cryptography}. Najjednostavnija ideja bila bi da \(A\) zatraži ključ od servera, da server pošalje ključ \(A\), a da ga zatim \(A\) prosledi strani \(B\):
+Do konačnog oblika protokola dolazi se postepeno \cite{smart2016cryptography}. Najjednostavnija ideja je da \(A\) zatraži ključ od servera, da server pošalje ključ \(A\), a da ga zatim \(A\) prosledi strani \(B\):
+\[ \begin{aligned} A &\rightarrow S : A, B \\ S &\rightarrow A : K_{AB} \\ A &\rightarrow B : K_{AB}, A \end{aligned} \]
 
-\[
-A \rightarrow S : A, B
-\]
+Ovakav protokol nije bezbedan, jer se ključ \(K_{AB}\) šalje otvoreno. Zato se uvodi šifrovanje pomoću dugoročnih ključeva koje učesnici dele sa serverom:
+\[ \begin{aligned} A &\rightarrow S : A, B \\ S &\rightarrow A : \{K_{AB}\}_{K_{AS}}, \{K_{AB}\}_{K_{BS}} \\ A &\rightarrow B : \{K_{AB}\}_{K_{BS}}, A \end{aligned} \]
 
-\[
-S \rightarrow A : K_{AB}
-\]
+Ova verzija čuva tajnost ključa, ali ne sprečava ponavljanje stare poruke. Napadač može sačuvati poruku koju \(A\) šalje strani \(B\) i kasnije je ponovo poslati. Zbog toga \(B\) ne zna da li je ključ nov ili potiče iz stare sesije.
 
-\[
-A \rightarrow B : K_{AB}, A
-\]
+U sledećem koraku se u šifrovane poruke dodaju identiteti učesnika:
 
-Ovakav protokol nije bezbedan, jer se ključ \(K_{AB}\) šalje otvoreno. Svako ko prisluškuje komunikaciju može da sazna sesijski ključ. Zato se uvodi šifrovanje pomoću dugoročnih ključeva koje učesnici dele sa serverom:
+\[ \begin{aligned} A &\rightarrow S : A, B \\ S &\rightarrow A : \{K_{AB}, A\}_{K_{BS}}, \{K_{AB}, B\}_{K_{AS}} \\ A &\rightarrow B : \{K_{AB}, A\}_{K_{BS}} \end{aligned} \]
 
-\[
-A \rightarrow S : A, B
-\]
-
-\[
-S \rightarrow A : \{K_{AB}\}_{K_{AS}}, \{K_{AB}\}_{K_{BS}}
-\]
-
-\[
-A \rightarrow B : \{K_{AB}\}_{K_{BS}}, A
-\]
-
-Ova verzija čuva tajnost ključa, ali i dalje ima problem. Poruka koju \(A\) šalje strani \(B\) može se ponoviti. Napadač može sačuvati staru poruku i kasnije je ponovo poslati strani \(B\). Tada \(B\) ne može da zna da li je ključ nov ili potiče iz stare sesije.
-
-Zato se u sledećem koraku u šifrovane poruke dodaju identiteti učesnika:
-
-\[
-A \rightarrow S : A, B
-\]
-
-\[
-S \rightarrow A : \{K_{AB}, A\}_{K_{BS}}, \{K_{AB}, B\}_{K_{AS}}
-\]
-
-\[
-A \rightarrow B : \{K_{AB}, A\}_{K_{BS}}
-\]
-
-Na taj način se jasnije određuje kome je ključ namenjen. Strana \(B\) sada vidi da je ključ namenjen za komunikaciju sa stranom \(A\). Ipak, problem ponavljanja stare poruke nije potpuno rešen. \(B\) i dalje ne zna da li je ključ \(K_{AB}\) svež.
+Na taj način se određuje kome je ključ namenjen. Strana \(B\) vidi da je ključ namenjen za komunikaciju sa stranom \(A\). Ipak, problem svežine nije potpuno rešen, jer \(B\) i dalje ne zna da li je ključ \(K_{AB}\) nov.
 
 Zbog toga se uvodi nonce vrednost \(N_A\). Ona omogućava strani \(A\) da proveri da odgovor servera pripada njenom trenutnom zahtevu:
+\[ \begin{aligned} A &\rightarrow S : A, B, N_A \\ S &\rightarrow A : \{N_A, B, K_{AB}, \{K_{AB}, A\}_{K_{BS}}\}_{K_{AS}} \\ A &\rightarrow B : \{K_{AB}, A\}_{K_{BS}} \end{aligned} \]
 
-\[
-A \rightarrow S : A, B, N_A
-\]
+Pošto se \(N_A\) nalazi u odgovoru servera, \(A\) zna da odgovor nije preuzet iz stare sesije. Međutim, to ne daje isti dokaz strani \(B\), jer ona dobija samo deo \(\{K_{AB}, A\}_{K_{BS}}\).
 
-\[
-S \rightarrow A : \{N_A, B, K_{AB}, \{K_{AB}, A\}_{K_{BS}}\}_{K_{AS}}
-\]
+Konačna verzija protokola dodaje još dva koraka za proveru da obe strane poseduju isti sesijski ključ:
+\[ \begin{aligned} A &\rightarrow S : A, B, N_A \\ S &\rightarrow A : \{N_A, B, K_{AB}, \{K_{AB}, A\}_{K_{BS}}\}_{K_{AS}} \\ A &\rightarrow B : \{K_{AB}, A\}_{K_{BS}} \\ B &\rightarrow A : \{N_B\}_{K_{AB}} \\ A &\rightarrow B : \{N_B - 1\}_{K_{AB}} \end{aligned} \]
 
-\[
-A \rightarrow B : \{K_{AB}, A\}_{K_{BS}}
-\]
+U prvoj poruci \(A\) traži od servera ključ za komunikaciju sa \(B\), a \(N_A\) povezuje zahtev sa odgovorom. Server zatim šalje novi sesijski ključ \(K_{AB}\), identitet strane \(B\) i isti nonce \(N_A\). U okviru odgovora nalazi se i deo \(\{K_{AB}, A\}_{K_{BS}}\), koji je namenjen strani \(B\). Strana \(A\) ga samo prosleđuje.
 
-Pošto se \(N_A\) nalazi u odgovoru servera, strana \(A\) zna da odgovor nije preuzet iz neke stare sesije. Međutim, ovo važi samo za \(A\). Strana \(B\) i dalje dobija samo šifrovani deo \(\{K_{AB}, A\}_{K_{BS}}\), pa ne dobija neposredan dokaz da je ključ nov.
+Poslednje dve poruke služe za potvrdu posedovanja ključa. Strana \(B\) šalje nonce \(N_B\), šifrovan sesijskim ključem \(K_{AB}\), a \(A\) vraća vrednost \(N_B - 1\). Time pokazuje da poseduje isti sesijski ključ.
 
-Konačna verzija protokola dodaje još dva koraka. Njima se proverava da obe strane zaista imaju isti sesijski ključ:
-
-\[
-A \rightarrow S : A, B, N_A
-\]
-
-\[
-S \rightarrow A : \{N_A, B, K_{AB}, \{K_{AB}, A\}_{K_{BS}}\}_{K_{AS}}
-\]
-
-\[
-A \rightarrow B : \{K_{AB}, A\}_{K_{BS}}
-\]
-
-\[
-B \rightarrow A : \{N_B\}_{K_{AB}}
-\]
-
-\[
-A \rightarrow B : \{N_B - 1\}_{K_{AB}}
-\]
-
-U prvoj poruci \(A\) traži od servera ključ za komunikaciju sa \(B\). Vrednost \(N_A\) služi da se zahtev poveže sa odgovorom servera. U drugoj poruci server šalje novi sesijski ključ \(K_{AB}\), identitet strane \(B\) i isti nonce \(N_A\). Cela poruka je šifrovana ključem \(K_{AS}\), pa je može pročitati samo \(A\).
-
-U okviru druge poruke nalazi se i deo \(\{K_{AB}, A\}_{K_{BS}}\). Taj deo je namenjen strani \(B\). Strana \(A\) ga ne čita i ne menja, već ga samo prosleđuje. Kada ga \(B\) dešifruje pomoću ključa \(K_{BS}\), dobija sesijski ključ \(K_{AB}\) i informaciju da je taj ključ namenjen za komunikaciju sa \(A\).
-
-Poslednje dve poruke služe za potvrdu posedovanja ključa. Strana \(B\) šalje nonce \(N_B\), šifrovan sesijskim ključem \(K_{AB}\). Strana \(A\) zatim vraća vrednost \(N_B - 1\), takođe šifrovanu istim ključem. Time \(A\) pokazuje da zaista poseduje \(K_{AB}\).
-
-Slabost ovog protokola je što strana \(B\) ne dobija direktan dokaz da je ključ \(K_{AB}\) svež. Ako napadač kasnije sazna stari sesijski ključ i ponovo pošalje staru treću poruku, \(B\) može da prihvati stari ključ kao da je nov. Zbog toga ovaj protokol pokazuje da tajnost ključa nije dovoljna. U protokolima za uspostavljanje ključa svaka strana mora imati i pouzdan dokaz da je ključ namenjen baš toj sesiji \cite{smart2016cryptography}.
+Slabost protokola je što strana \(B\) ne dobija direktan dokaz da je ključ \(K_{AB}\) svež. Ako napadač kasnije sazna stari sesijski ključ i ponovo pošalje staru treću poruku, \(B\) može prihvatiti stari ključ kao da je nov. Zato ovaj protokol pokazuje da tajnost ključa nije dovoljna. Svaka strana mora imati dokaz da je ključ namenjen baš toj sesiji \cite{smart2016cryptography}.
 
 \subsection{Kerberos}
 
-Kerberos polazi od slične ideje kao Needham--Schroeder protokol, ali uvodi praktičnije rešenje za proveru svežine. Umesto nonce vrednosti koristi vremenske oznake i ograničeno vreme važenja ključa \cite{smart2016cryptography}.
+Kerberos polazi od slične ideje kao Needham--Schroeder protokol, ali proveru svežine zasniva na vremenskim oznakama i ograničenom vremenu važenja ključa. Umesto da koristi samo nonce vrednosti, Kerberos uvodi tiket, odnosno šifrovanu potvrdu koju strana \(A\) može da pokaže strani \(B\) \cite{smart2016cryptography}.
 
-Kerberos je sistem za autentifikaciju zasnovan na simetričnoj kriptografiji. U osnovi, korisnik ne dobija samo sesijski ključ, već i tiket. Tiket predstavlja šifrovanu potvrdu koju korisnik može da pokaže serveru kojem želi da pristupi. Na taj način server ne mora direktno da pita poverljivu treću stranu svaki put kada korisnik želi pristup nekom resursu.
+Pojednostavljen oblik protokola može se zapisati na sledeći način:
 
-Protokol se u pojednostavljenom obliku može zapisati na sledeći način:
+\[ \begin{aligned} A &\rightarrow S : A, B \\ S &\rightarrow A : \{T_S, L, K_{AB}, B, \{T_S, L, K_{AB}, A\}_{K_{BS}}\}_{K_{AS}} \\ A &\rightarrow B : \{T_S, L, K_{AB}, A\}_{K_{BS}}, \{A, T_A\}_{K_{AB}} \\ B &\rightarrow A : \{T_A + 1\}_{K_{AB}} \end{aligned} \]
+
+U prvoj poruci \(A\) traži od servera \(S\) pristup strani, odnosno resursu, \(B\). Server zatim šalje sesijski ključ \(K_{AB}\), vremensku oznaku \(T_S\) i period važenja \(L\). Ovi podaci određuju koliko dugo se ključ i tiket mogu koristiti.
+
+U odgovoru servera nalazi se i tiket \(\{T_S, L, K_{AB}, A\}_{K_{BS}}\), koji je namenjen strani \(B\). Strana \(A\) ga ne menja, već ga prosleđuje strani \(B\). Uz tiket šalje i potvrdu \(\{A, T_A\}_{K_{AB}}\), kojom pokazuje da zna sesijski ključ i da trenutno učestvuje u komunikaciji.
+
+Ako je tiket važeći i vremenska oznaka nije zastarela, \(B\) prihvata ključ \(K_{AB}\). U poslednjoj poruci \(B\) vraća vrednost \(\{T_A + 1\}_{K_{AB}}\), čime potvrđuje da poseduje isti sesijski ključ.
+
+Kerberos smanjuje mogućnost ponavljanja starih poruka tako što uvodi vremensko ograničenje tiketa. Međutim, zbog oslanjanja na vremenske oznake, zahteva da satovi učesnika budu dovoljno usklađeni. Ako vreme nije sinhronizovano, ispravni tiketi mogu biti odbačeni ili se može pogrešno proceniti njihova svežina \cite{smart2016cryptography}.
+
+
+
+\section{Generisanje efemernih simetričnih ključeva iz statičkih javnih ključeva}
+
+U prethodnim protokolima sesijski ključ se uspostavljao pomoću dugoročnih simetričnih ključeva i poverljive treće strane. U ovom delu razmatra se drugačiji pristup, u kojem strane koriste statičke javne ključeve za uspostavljanje novog simetričnog ključa za jednu sesiju \cite{smart2016cryptography}.
+
+Ovakav pristup smanjuje potrebu za unapred deljenim tajnama. Međutim, javni ključ mora biti autentičan, pa se ovi protokoli oslanjaju na digitalne sertifikate i infrastrukturu javnog ključa \cite{smart2016cryptography,rfc5280}.
+
+U X.509 sertifikatima namena javnog ključa može biti posebno označena. Javni ključ može biti namenjen za prenos ključa, odnosno \emph{key transport}, ili za dogovor ključa, odnosno \emph{key agreement}. Kod prenosa ključa jedna strana bira ključ i šalje ga drugoj strani. Kod dogovora ključa obe strane učestvuju u izračunavanju zajedničkog ključa \cite{smart2016cryptography,rfc5280}.
+
+Koristimo sledeće oznake:
+\begin{itemize}
+\item \(A\) i \(B\) označavaju strane koje žele da uspostave zajednički sesijski ključ,
+\item \(pk_A\) i \(pk_B\) označavaju javne ključeve strana \(A\) i \(B\),
+\item \(sk_A\) i \(sk_B\) označavaju njihove privatne ključeve,
+\item \(\mathsf{Enc}_{pk}(M)\) označava šifrovanje poruke \(M\) javnim ključem \(pk\),
+\item \(\mathsf{Sig}_{sk}(M)\) označava digitalni potpis poruke \(M\) privatnim ključem \(sk\),
+\item \(G\) označava cikličku grupu reda \(q\), a \(g\) njen generator,
+\item \(H\) označava funkciju za izvođenje ključa iz zajedničke tajne.
+\end{itemize}
+
+\subsection{Prenos ključa pomoću javnog ključa}
+
+Najjednostavniji način upotrebe javnog ključa za uspostavljanje sesijskog ključa jeste prenos ključa. Strana \(A\) generiše novi simetrični ključ \(K_{AB}\), šifruje ga javnim ključem strane \(B\) i šalje ga strani \(B\) \cite{smart2016cryptography}:
+\[
+A \rightarrow B : \mathsf{Enc}_{pk_B}(K_{AB})
+\]
+Poruku može da dešifruje samo strana \(B\), jer samo ona poseduje odgovarajući privatni ključ \(sk_B\). Nakon toga strane \(A\) i \(B\) imaju zajednički simetrični ključ za dalju komunikaciju. Ovakav pristup podseća na hibridno šifrovanje. Javni ključ se koristi samo za zaštitu sesijskog ključa, dok se podaci kasnije šifruju simetričnim algoritmom \cite{smart2016cryptography,stallings2011cryptography}.
+
+Međutim, ova verzija ne obezbeđuje autentifikaciju pošiljaoca. Strana \(B\) može da dešifruje ključ, ali ne zna da li ga je zaista poslala strana \(A\). Napadač \(E\) može generisati svoj ključ \(K_{EB}\), šifrovati ga javnim ključem strane \(B\) i poslati poruku kao da dolazi od \(A\) \cite{smart2016cryptography}:
 
 \[
-A \rightarrow S : A, B
+E \rightarrow B : \mathsf{Enc}_{pk_B}(K_{EB})
 \]
+
+U tom slučaju \(B\) dobija ispravno šifrovan ključ, ali ga pogrešno povezuje sa stranom \(A\). Zato se uvodi digitalni potpis:
 
 \[
-S \rightarrow A : \{T_S, L, K_{AB}, B, \{T_S, L, K_{AB}, A\}_{K_{BS}}\}_{K_{AS}}
+A \rightarrow B : c = \mathsf{Enc}_{pk_B}(K_{AB}),\ \mathsf{Sig}_{sk_A}(c)
 \]
 
+Strana \(B\) proverava potpis pomoću javnog ključa \(pk_A\). Ako je potpis ispravan, \(B\) zna da je šifrat poslala strana koja poseduje privatni ključ \(sk_A\). Ipak, ni ova verzija nije dovoljna, jer identitet pošiljaoca nije vezan za sadržaj šifrata. Napadač \(E\) može presresti šifrat \(c\), ukloniti potpis strane \(A\), potpisati isti šifrat svojim privatnim ključem i proslediti ga strani \(B\) \cite{smart2016cryptography}:
 \[
-A \rightarrow B : \{T_S, L, K_{AB}, A\}_{K_{BS}}, \{A, T_A\}_{K_{AB}}
+\begin{aligned}
+A &\rightarrow E : c = \mathsf{Enc}_{pk_B}(K_{AB}),\ \mathsf{Sig}_{sk_A}(c) \\
+E &\rightarrow B : c = \mathsf{Enc}_{pk_B}(K_{AB}),\ \mathsf{Sig}_{sk_E}(c)
+\end{aligned}
 \]
 
+Strana \(B\) tada može zaključiti da ključ deli sa napadačem \(E\), iako je ključ zapravo izabrala strana \(A\). Zbog toga se identitet pošiljaoca uključuje u šifrovani deo poruke:
 \[
-B \rightarrow A : \{T_A + 1\}_{K_{AB}}
+A \rightarrow B : c = \mathsf{Enc}_{pk_B}(A \parallel K_{AB}),\ \mathsf{Sig}_{sk_A}(c)
 \]
-U prvoj poruci strana \(A\) traži od servera \(S\) pristup strani, odnosno resursu, \(B\). Server zatim proverava zahtev i, ako je zahtev prihvaćen, šalje strani \(A\) sesijski ključ \(K_{AB}\). Uz ključ šalje se i vremenska oznaka \(T_S\), kao i period važenja \(L\). Ovi podaci određuju koliko dugo se ključ i tiket mogu koristiti.
 
-Druga poruka je šifrovana ključem \(K_{AS}\), pa je može pročitati samo strana \(A\). U njoj se nalazi i tiket \(\{T_S, L, K_{AB}, A\}_{K_{BS}}\). Taj tiket je namenjen strani \(B\). Strana \(A\) ga ne menja, već ga kasnije prosleđuje strani \(B\).
+Nakon dešifrovanja, \(B\) vidi da je ključ povezan sa identitetom strane \(A\). Time se sprečava jednostavna zamena potpisa nad istim šifratom. Ipak, protokol i dalje mora da obezbedi svežinu poruke, jer bi stara poruka mogla biti ponovo poslata i prihvaćena kao nova \cite{smart2016cryptography}.
 
-U trećoj poruci \(A\) šalje strani \(B\) tiket i dodatnu potvrdu svog prisustva. Ta dodatna potvrda je \(\{A, T_A\}_{K_{AB}}\). Ona pokazuje da \(A\) zaista zna sesijski ključ \(K_{AB}\) i da trenutno učestvuje u komunikaciji.
+Glavno ograničenje prenosa ključa jeste to što ključ bira samo jedna strana. Strana \(B\) mora da veruje da je \(A\) generisala dovoljno slučajan i svež ključ. Osim toga, ovaj pristup nema svojstvo \emph{forward secrecy}. Ako se kasnije kompromituje privatni ključ \(sk_B\), napadač koji je ranije snimio poruke može dešifrovati stare sesijske ključeve i time ugroziti prethodnu komunikaciju \cite{smart2016cryptography}.
 
-Strana \(B\) zatim proverava tiket. Ako je tiket važeći i ako vremenska oznaka nije zastarela, \(B\) prihvata ključ \(K_{AB}\). U poslednjoj poruci \(B\) vraća vrednost \(\{T_A + 1\}_{K_{AB}}\). Time pokazuje da je uspešno dešifrovao poruku, da poseduje isti sesijski ključ i da je komunikacija uspostavljena sa aktivnom stranom \(A\).
+\begin{definition}
+\emph{Forward secrecy} je svojstvo protokola po kojem kompromitovanje dugoročnog privatnog ključa ne otkriva ranije uspostavljene sesijske ključeve \cite{smart2016cryptography}.
+\end{definition}
 
-Kerberos rešava problem koji se javlja kod Needham--Schroeder protokola tako što uvodi vremensko ograničenje tiketa. Stari tiket ne može da se koristi neograničeno dugo, jer ima period važenja \(L\). Time se smanjuje mogućnost ponavljanja starih poruka.
+Zbog ovih ograničenja uvode se protokoli za dogovor ključa. Kod njih obe strane doprinose nastanku sesijskog ključa. Najpoznatiji primer je Diffie--Hellman protokol.
 
-Međutim, Kerberos zahteva da satovi učesnika budu dovoljno usklađeni. Ako vreme nije sinhronizovano, ispravni tiketi mogu biti odbačeni ili se može pogrešno proceniti njihova svežina. \cite{smart2016cryptography}.
+\subsection{Diffie--Hellman protokol}
+
+Diffie--Hellman protokol predstavlja osnovni primer dogovora ključa. Za razliku od prenosa ključa, nijedna strana ne šalje gotov sesijski ključ. Obe strane učestvuju u njegovom izračunavanju \cite{smart2016cryptography,stallings2011cryptography}.
+
+
+Neka su javno poznati grupa \(G\), generator \(g\) i red grupe \(q\). Strana \(A\) bira slučajnu tajnu vrednost \(a\), a strana \(B\) bira slučajnu tajnu vrednost \(b\). Zatim razmenjuju javne efemerne vrednosti:
+\[
+\begin{aligned}
+A &\rightarrow B : g^a \\
+B &\rightarrow A : g^b
+\end{aligned}
+\]
+
+Nakon razmene, strane nezavisno računaju istu zajedničku tajnu:
+\[
+\begin{aligned}
+A &: K = (g^b)^a = g^{ab} \\
+B &: K = (g^a)^b = g^{ab}
+\end{aligned}
+\]
+
+
+Tajne vrednosti \(a\) i \(b\) se ne šalju kroz komunikacioni kanal. Iz zajedničke tajne se zatim izvodi simetrični ključ:
+\[
+K_{AB} = H(g^{ab})
+\]
+
+Bezbednost protokola zasniva se na težini Diffie--Hellman problema. Napadač koji prisluškuje komunikaciju vidi \(g^a\) i \(g^b\), ali iz tih vrednosti ne bi trebalo da može efikasno da izračuna \(g^{ab}\). Ova pretpostavka je povezana sa problemom diskretnog logaritma\cite{smart2016cryptography,stallings2011cryptography}.
+
+Prednost ovog protokola je u tome što obe strane doprinose nastanku ključa. Sesijski ključ zavisi od obe efemerne tajne. Ako se vrednosti \(a\) i \(b\) obrišu nakon završetka sesije, protokol može da obezbedi svojstvo \emph{forward secrecy} \cite{smart2016cryptography}.
+
+
+
+Međutim, osnovni Diffie--Hellman protokol ne obezbeđuje autentifikaciju. Strane mogu izračunati zajednički ključ, ali ne mogu biti sigurne sa kim su ga izračunale. Zbog toga je protokol ranjiv na napad čoveka u sredini, odnosno \emph{man-in-the-middle} napad:
+\[
+\begin{aligned}
+A &\rightarrow E : g^a \\
+E &\rightarrow A : g^m \\
+E &\rightarrow B : g^n \\
+B &\rightarrow E : g^b
+\end{aligned}
+\]
+
+Strana \(A\) tada računa ključ sa napadačem \(E\), a ne sa stranom \(B\). Isto važi i za stranu \(B\). Napadač može da dešifruje poruke, izmeni ih i ponovo šifruje pre prosleđivanja. Zbog toga osnovni Diffie--Hellman rešava problem tajnog dogovora ključa, ali ne rešava problem autentifikacije učesnika \cite{smart2016cryptography,stallings2011cryptography}.
+
+
+\subsection{Potpisani Diffie--Hellman protokol}
+
+Nedostatak autentifikacije u osnovnom Diffie--Hellman protokolu može se ublažiti digitalnim potpisima. Svaka strana potpisuje svoju javnu efemernu vrednost \cite{smart2016cryptography}:
+\[
+\begin{aligned}
+A &\rightarrow B : g^a,\ \mathsf{Sig}_{sk_A}(g^a) \\
+B &\rightarrow A : g^b,\ \mathsf{Sig}_{sk_B}(g^b)
+\end{aligned}
+\]
+
+Strana \(B\) proverava potpis strane \(A\), a strana \(A\) proverava potpis strane \(B\). Na taj način se sprečava jednostavna zamena Diffie--Hellman vrednosti, jer napadač ne može da pošalje svoju vrednost kao da dolazi od druge strane bez odgovarajućeg privatnog ključa.
+
+Ipak, potpisivanje samo pojedinačne efemerne vrednosti nije dovoljno. Potpis treba da obuhvati širi kontekst sesije, najčešće obe Diffie--Hellman vrednosti i identitete učesnika. Time se sprečava da se poruke iz jedne sesije iskoriste u drugoj ili da se ključ poveže sa pogrešnim identitetom \cite{smart2016cryptography}.
+
+\subsection{Station-to-Station protokol}
+Station-to-Station (STS) protokol predstavlja autentifikovanu verziju Diffie--Hellman protokola. Cilj protokola je da spreči napad čoveka u sredini. Osnovna ideja je da strane prvo razmene Diffie--Hellman efemerne vrednosti, a zatim da potpišu celu razmenu. Potpisi se štite ključem izvedenim iz zajedničke Diffie--Hellman tajne \cite{smart2016cryptography}.
+
+Protokol se može zapisati na sledeći način:
+\[
+\begin{aligned}
+A &\rightarrow B : et_A = g^a \\
+B &\rightarrow A : et_B = g^b,\ \{ \mathsf{Sig}_{sk_B}(et_B, et_A) \}_{k} \\
+A &\rightarrow B : \{ \mathsf{Sig}_{sk_A}(et_A, et_B) \}_{k}
+\end{aligned}
+\]
+
+Ključ \(k\) izvodi se iz zajedničke Diffie--Hellman tajne:
+\[
+k = H(g^{ab}).
+\]
+
+Strana \(B\) računa \(k = H(et_A^b)\), dok strana \(A\) računa \(k = H(et_B^a)\). Pošto važi \(et_A^b = et_B^a = g^{ab}\), obe strane dobijaju isti ključ.
+
+Potpisi obuhvataju obe efemerne vrednosti. Strana \(B\) potpisuje par \((et_B, et_A)\), dok strana \(A\) potpisuje par \((et_A, et_B)\). Redosled vrednosti razlikuje uloge inicijatora i odgovarača. Time se potpis vezuje za celu Diffie--Hellman razmenu, a ne samo za jednu poruku \cite{smart2016cryptography}.
+
+Zbog toga napadač ne može jednostavno da zameni efemernu vrednost i zadrži ispravan potpis. Svaka promena vrednosti \(et_A\) ili \(et_B\) menja podatke koji se potpisuju. Na taj način STS protokol obezbeđuje autentifikovani dogovor ključa i štiti osnovni Diffie--Hellman protokol od napada čoveka u sredini.
+
+Postoji i varijanta STS protokola u kojoj se potpisi ne šifruju, već se nad njima računa MAC. Tada se iz zajedničke tajne izvode dva ključa:
+\[
+k \parallel k' = H(g^{ab}).
+\]
+
+Ključ \(k\) koristi se kao dogovoreni sesijski ključ, dok se \(k'\) koristi za autentifikaciju poruka tokom protokola. Ovakvo razdvajanje namena ključeva smanjuje rizik od pogrešne upotrebe istog ključa u različite svrhe \cite{smart2016cryptography}.
+
+\subsection{Blake--Wilson--Menezes protokol}
+
+Blake--Wilson--Menezes protokol omogućava autentifikovan dogovor ključa bez dodatnih potpisa, MAC vrednosti i treće poruke. Ideja je da se efemerne Diffie--Hellman vrednosti kombinuju sa statičkim javnim ključevima učesnika \cite{smart2016cryptography}.
+
+
+Pretpostavimo da strane imaju statičke javne ključeve:
+\[
+pk_A = g^a, \qquad pk_B = g^b,
+\]
+gde su \(a\) i \(b\) odgovarajući privatni ključevi. U svakoj sesiji strane biraju nove efemerne tajne. Strana \(A\) bira \(x\), a strana \(B\) bira \(y\). Zatim razmenjuju efemerne javne vrednosti:
+\[
+\begin{aligned}
+A &\rightarrow B : ek_A = g^x \\
+B &\rightarrow A : ek_B = g^y
+\end{aligned}
+\]
+
+Tok poruka je isti kao kod osnovnog Diffie--Hellman protokola. Razlika je u izvođenju ključa. Ključ se ne izvodi samo iz efemernih vrednosti, već i iz statičkih javnih ključeva \cite{smart2016cryptography}:
+\[
+\begin{aligned}
+A &: k = H(pk_B^x,\ ek_B^a) \\
+B &: k = H(ek_A^b,\ pk_A^y)
+\end{aligned}
+\]
+
+Obe strane dobijaju isti ključ, jer važi:
+\[
+\begin{aligned}
+pk_B^x &= (g^b)^x = g^{bx} = (g^x)^b = ek_A^b, \\
+ek_B^a &= (g^y)^a = g^{ay} = (g^a)^y = pk_A^y.
+\end{aligned}
+\]
+
+
+Autentifikacija se dobija preko statičkih ključeva. Napadač može poslati svoju efemernu vrednost, ali ne može izračunati isti ključ bez odgovarajućeg statičkog privatnog ključa. Zbog toga se izvedeni ključ vezuje za učesnike protokola.
+
+Prednost ovog protokola je jednostavan tok poruka. Potrebne su samo dve poruke, kao kod osnovnog Diffie--Hellman protokola, ali bez dodatnih potpisa kao u STS protokolu. Ograničenje je u tome što izvođenje ključa mora biti pažljivo definisano. U funkciju za izvođenje ključa treba uključiti podatke koji vezuju ključ za učesnike i konkretnu sesiju, kako se ključ ne bi pogrešno povezao sa drugim identitetom \cite{smart2016cryptography}.
+
+\subsection{MQV protokol}
+
+MQV protokol je autentifikovani protokol za dogovor ključa. Kao i Blake--Wilson--Menezes protokol, koristi statičke i efemerne ključeve. Razlika je u načinu na koji se ti ključevi kombinuju pri izvođenju konačnog sesijskog ključa \cite{smart2016cryptography}.
+
+Pretpostavimo da strane imaju statičke javne ključeve:
+\[
+pk_A = g^a, \qquad pk_B = g^b,
+\]
+gde su \(a\) i \(b\) odgovarajući privatni ključevi. U svakoj sesiji strane biraju nove efemerne tajne. Strana \(A\) bira \(x\), a strana \(B\) bira \(y\). Zatim razmenjuju efemerne javne vrednosti:
+\[
+\begin{aligned}
+A &\rightarrow B : ek_A = g^x \\
+B &\rightarrow A : ek_B = g^y
+\end{aligned}
+\]
+
+Tok poruka je isti kao kod osnovnog Diffie--Hellman protokola. Razlika je u računanju ključa. MQV iz efemernih javnih vrednosti izvodi pomoćne vrednosti koje se zatim kombinuju sa statičkim i efemernim privatnim ključevima \cite{smart2016cryptography}.
+
+Strana \(A\) iz vrednosti \(ek_A\) izvodi pomoćnu vrednost \(s_A\), a iz vrednosti \(ek_B\) pomoćnu vrednost \(t_A\). Zatim računa:
+\[
+\begin{aligned}
+h_A &= x + s_A a \pmod q, \\
+K_A &= (ek_B \cdot pk_B^{t_A})^{h_A}.
+\end{aligned}
+\]
+
+Strana \(B\) simetrično izvodi vrednosti \(s_B\) iz \(ek_B\) i \(t_B\) iz \(ek_A\), pa računa:
+\[
+\begin{aligned}
+h_B &= y + s_B b \pmod q, \\
+K_B &= (ek_A \cdot pk_A^{t_B})^{h_B}.
+\end{aligned}
+\]
+
+Pomoćne vrednosti se određuju tako da obe strane, iako koriste različite privatne podatke, dobijaju istu zajedničku vrednost. Iz te vrednosti se zatim izvodi sesijski ključ \cite{smart2016cryptography}.
+
+Suština MQV protokola je u povezivanju dve vrste ključeva. Efemerni ključevi obezbeđuju svežinu sesije, dok statički ključevi vezuju rezultat za identitete učesnika. Zato se dobija autentifikovan dogovor ključa bez dodatnih potpisa i bez treće poruke.
+
+\section{Simbolička analiza protokola}
+
+Protokoli za uspostavljanje ključa često imaju jednostavan zapis, ali njihova bezbednosna analiza može biti složena. Greška ne mora biti u kriptografskom algoritmu, već u redosledu poruka, značenju poruka ili pretpostavkama koje učesnici imaju. Zbog toga se za analizu protokola koriste formalne metode \cite{smart2016cryptography}.
+
+\begin{definition}
+Simbolička analiza protokola je način analize u kojem se protokol posmatra pomoću formalnih oznaka i logičkih pravila. Cilj je da se proveri šta učesnici mogu da zaključe nakon izvršavanja protokola \cite{smart2016cryptography}.
+\end{definition}
+
+U ovom pristupu napadač se obično posmatra kao veoma jak protivnik. On može da presretne poruke, zaustavi ih, promeni im redosled, promeni odredište ili pošalje sopstvene poruke. Zbog toga se često kaže da napadač kontroliše mrežu \cite{smart2016cryptography}.
+
+Najpoznatiji primer simboličke analize je BAN logika, koju su uveli Burrows, Abadi i Needham. BAN logika se ne bavi neposredno bitovima poruka, već verovanjima učesnika. Ona pokušava da formalno opiše šta strana \(A\), strana \(B\) ili poverljiva treća strana \(S\) mogu da smatraju istinitim nakon prijema određene poruke \cite{burrows1990logic}.
+
+U BAN logici koriste se sledeće osnovne oznake:
+
+\begin{itemize}
+\item \(P \mid\equiv X\) znači da strana \(P\) veruje da je iskaz \(X\) tačan,
+\item \(P \triangleleft X\) znači da strana \(P\) vidi poruku \(X\),
+\item \(P \mid\sim X\) znači da je strana \(P\) nekada rekla \(X\),
+\item \(P \Rightarrow X\) znači da strana \(P\) ima nadležnost nad iskazom \(X\),
+\item \(\#(X)\) znači da je poruka ili vrednost \(X\) sveža,
+\item \(P \xleftrightarrow{K} Q\) znači da strane \(P\) i \(Q\) dele tajni ključ \(K\)\cite{burrows1990logic}.
+\end{itemize}
+
+Za protokole uspostavljanja ključa osnovni cilj je da obe strane veruju da dele isti tajni sesijski ključ:
+\[ \begin{aligned} A &\mid\equiv A \xleftrightarrow{K_{AB}} B, \\ B &\mid\equiv A \xleftrightarrow{K_{AB}} B. \end{aligned} \]
+
+Jači cilj je potvrda ključa. Tada strana \(A\) ne samo da veruje da deli ključ sa \(B\), već veruje i da \(B\) to zna. Isto važi i u suprotnom smeru \cite{smart2016cryptography}.
+
+BAN logika koristi pravila zaključivanja. Jedno od osnovnih pravila je pravilo značenja poruke. Ako \(A\) veruje da deli ključ \(K\) sa \(B\), i ako vidi poruku šifrovanu tim ključem, tada \(A\) može da zaključi da je \(B\) nekada rekao sadržaj te poruke:
+
+\[ \frac{ \displaystyle A \mid\equiv A \xleftrightarrow{K} B, \qquad A \triangleleft \{X\}_{K} }{ \displaystyle A \mid\equiv B \mid\sim X } \]
+
+Drugo važno pravilo je pravilo provere svežine. Ako \(A\) veruje da je \(X\) sveže i ako veruje da je \(B\) nekada rekao \(X\), tada \(A\) može da zaključi da \(B\) i dalje veruje u \(X\):
+\[ \frac{ \displaystyle A \mid\equiv \#(X), \qquad A \mid\equiv B \mid\sim X }{ \displaystyle A \mid\equiv B \mid\equiv X } \]
+
+
+Treće važno pravilo je pravilo nadležnosti. Ako \(A\) veruje da je \(B\) nadležan za \(X\), i ako \(A\) veruje da \(B\) veruje u \(X\), tada \(A\) može prihvatiti \(X\):
+
+\[ \frac{ \displaystyle A \mid\equiv B \Rightarrow X, \qquad A \mid\equiv B \mid\equiv X }{ \displaystyle A \mid\equiv X } \]
+
+
+\section{Zaključak}
+
+Ovaj rad pokazuje da uspostavljanje ključa nije samo pitanje izbora jakog kriptografskog algoritma, već i pitanje poverenja, autentifikacije i pravilnog toka poruka. Iz analiziranih protokola može se zaključiti da tajnost ključa sama po sebi nije dovoljna ukoliko učesnici ne mogu pouzdano da utvrde sa kim ga dele i da li je namenjen baš trenutnoj sesiji. Digitalni sertifikati i sertifikaciona tela imaju važnu ulogu u povezivanju javnih ključeva sa identitetima učesnika, dok autentifikovani protokoli za dogovor ključa umanjuju mogućnost napada, kao što je napad čoveka u sredini. Zbog toga je ova oblast posebno značajna za razumevanje bezbedne komunikacije u savremenim sistemima, kao što su internet servisi, elektronsko bankarstvo, VPN mreže i drugi sistemi u kojima je potrebno uspostaviti poverljiv komunikacioni kanal. Bezbednost se ne postiže samo primenom šifrovanja, već pažljivim projektovanjem protokola koji istovremeno obezbeđuje tajnost, autentifikaciju, svežinu i ispravno povezivanje ključa sa učesnicima komunikacije.
+
+
+
+
 
