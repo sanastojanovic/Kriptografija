@@ -107,3 +107,105 @@ Postoji još jedan problem na rešetkama koji je značajan za oblasti učenja sa
 \end{definition}
 
 Problemi koji su pomenuti u ovom poglavlju se smatraju teškim za rešavanje i na klasičnom i na kvantnom računaru, to jest ne postoje algoritmi koji ih rešavaju u polinomijalnom vremenu \cite{postquantumcryptography:2009}. Zbog ove osobine predstavljaju dobru osnovu za kreiranje kvantnorezistentnih kriptosistema. 
+
+
+\section{NTRU}
+
+\textbf{NTRU} je asimetrični kriptografski sistem koji se zasniva na rešetkama i problemu najkraćeg vektora. Zbog pretpostavljene težine rešavanja ovog problema u višim dimenzijama na klasičnom i kvantnom računaru, ovaj kriptosistem je otporan na kvantne napade. Kao takav, NTRU je dobar kandidat za postkvantni kriptosistem.  
+
+NTRU je definisan nad prstenom $R = \mathbb{Z}[X]/(X^N-1)$, što znači da se svi polinomi sa celobrojnim koeficijentima redukuju po modulu $X^N-1$. Sa osobinama ovakvog prstena i operacijama nad njegovim elementima smo se upoznali na početku kursa. U nastavku teksta će se množenje polinoma $f$ i $g$ u prstenu $R$ označavati $ f \conv g$.
+
+\subsection{Generisanje ključa}
+
+Kada Alisa želi da pošalje poruku Bobanu, on prvo mora da generiše parametre sistema. On bira celobrojne vrednosti $N, p$ i $q$ takve da je $p < q$ i da važi $nzd(p,q) = 1$. Nakon ovoga, Boban nasumično generiše dva polinoma $f$ i $g$ stepena manjih od $N$, čiji su koeficijenti mali, najčešće između $-1$ i $1$. Polinom $f$ mora biti invertibilan po modulu $p$ i po modulu $q$, to jest moraju postojati $f_p^{-1}$ i $f_q^{-1}$, takvi da važi $f_p^{-1} \ast f \equiv 1 \pmod p$ i $f_q^{-1} \ast f \equiv 1 \pmod q$ \cite{meyer2025postquantumcryptographyanalysiscodebased} \footnote{Strana 9, pasus 4}.
+
+Nakon generisanja potrebnih parametara i polinoma, Boban računa $h \equiv f_q^{-1} \conv g \pmod q $ i objavljuje svoj \textit{javni ključ} $(N,p,q, h)$, a svoj \textit{tajni ključ} (f) čuva privatno \cite{meyer2025postquantumcryptographyanalysiscodebased}.
+
+\subsection{Šifrovanje}
+
+Alisa prvo kodira svoju poruku u polinom $m$ stepena manjeg on $N$ čiji su koeficijenti po modulu $p$. Koeficijenti u ovom slučaju mogu biti celobrojne vrednosti između $-\frac{p}{2}$ i $\frac{p}{2}$. 
+
+Sledeći korak u procesu šifrovanja je nasumični odabir malog polinoma $r$ i računanje šifrata
+\[ c \equiv pr \conv h + m \pmod q \]
+koji šalje Bobanu.
+
+\subsection{Dešifrovanje}
+
+Da bi dešifrovao šifrat $c$, Boban računa
+\begin{align*}
+    a &\equiv f \conv c \pmod q \equiv f \conv (pr \conv h +m) \pmod q \\
+    &\equiv pr \conv f \conv f_q^{-1} \conv g + f \conv m \pmod q  \\
+    &\equiv pr \conv g + f \conv m \pmod q 
+\end{align*}
+čiji su koeficijenti iz skupa $(-\frac{q}{2}, \frac{q}{2}]$.
+
+Zatim, da bi otkrio originalnu poruku, Boban računa
+
+\begin{align*}
+    m &\equiv f_p^{-1} \conv a \pmod p \equiv f_p^{-1} \conv (pr \conv g + f \conv m) \pmod p \\
+    &\equiv f_p^{-1} \conv (pr \conv g) + f_p^{-1} \conv (f \conv m) \pmod p \\
+    &\equiv p \ast (f_p^{-1} \conv r \conv g) + 1\ast m \pmod p \\
+    &\equiv m \pmod p
+\end{align*}
+
+
+\subsection{Interpretacija pomoću rešetaka}
+
+Iako se u prethodnom opisu rešetke ne pojavljuju eksplicitno, NTRU se može prirodno interpretirati u terminima rešetaka. U nastavku ovog poglavlja će se definisati termini i strukture koje NTRU na rešetkama koristi \cite{meyer2025postquantumcryptographyanalysiscodebased}\footnote{Strana 11, pasus 5}.
+
+Neka je $L$ linearna transformacija koja ciklično pomera elemente vektora. Tada definišemo matricu $L\ast v = [v, Lv, L^2v,..., L^{N-1}v] $ koja sadrži cirkularne pomeraje vektora $v$. NTRU takođe koristi konvolucione modularne rešetke $\Lambda(c, q) = \{(a,b) \in \mathbb{Z}^{2N} \mid a \conv c \equiv b \pmod q\} $ \cite{meyer2025postquantumcryptographyanalysiscodebased} \footnote{Vektori se tumače kao polinomi stepena manjeg od $N$ i to tako da vektor $a = (a_0,..., a_{N-1})$ generiše polinom $a(x)= a_0 + a_1x+...+a_{N-1}x^{N-1}$}.
+
+\subsubsection{Generisanje ključa}
+
+Pre nego što Alisa pošalje poruku Bobanu, on bira parametre sistema i računa tajni i javni ključ. Parametri sistema su prost broj $N$, mali ceo broj $p$ i ceo broj $q$.
+
+\textit{Privatni ključ} je kratki vektor $(f, g) = (f_0, ..., f_{N-1}, g_0,..., g_{N-1}) \in \mathbb{Z}^{2N}$. Elementi $f$ i $g$ se biraju tako da:
+\begin{enumerate}
+    \item $[L\ast f]$ bude invertibilno po modulu $q$
+    \item $f \in e_1 + \{-p, 0, p\}^N$, gde je $e_1$ prvi standardni bazni vektor rešetke i $g \in \{-p, 0, p\}^N$, gde $f-e_1$ i $g$ imaju tačno $d_f+1$ pozitivnih elemenata i $d_f$ negativnih. Posledica ovih ograničenja je da je $[L \ast f] \equiv I \pmod p$ i $[L \ast g] \equiv 0 \pmod p$
+\end{enumerate}
+
+\textit{Javni ključ} je Hermitova normalna forma baze rešetke $\Lambda((L \ast f, L\ast g)^T, q)$, za koju se smatra da je loša baza rešetke. Dakle, javni ključ je
+
+\[H = \begin{bmatrix}
+    I & 0\\
+    L\ast h & q \cdot I
+    \end{bmatrix}\]
+gde je $h \equiv [L \ast f]^{-1} \pmod q$
+
+\subsubsection{Šifrovanje}
+
+Alisa poruku kodira vektorom $m \in \{-1,0,1\}^N$ koji ima tačno $d_f+1$ pozitivnih elemenata i $d_f$ negativnih. Prvo se nasumično generiše vektor $r \in \{-1,0,1\}^N$ koji ima tačno $d_f+1$ pozitivnih elemenata i $d_f$ negativnih. Ovaj vektor se konkatenira na poruku $m$ i tako dobijeni vektor se redukuje po modulu $H$:
+\[
+\begin{bmatrix}
+    r \\
+    m
+\end{bmatrix}
+\bmod
+\begin{bmatrix}
+    I & 0 \\
+    L \ast h & qI
+\end{bmatrix}
+=
+\begin{bmatrix}
+    0 \\
+    \bigl(m + (L \ast h)r\bigr) \bmod q
+\end{bmatrix}
+\]
+Dakle šifrat je $c \equiv (m + [L \ast h]r) \pmod q$
+
+
+\subsubsection{Dešifrovanje}
+
+Dešifrovanje šifrata $c$ započinje računanjem izraza:
+\begin{align*}
+[L\ast f]c
+&\equiv [L\ast f](m+[L\ast h]r) \\
+&\equiv [L\ast f]m + [L\ast f][L\ast h]r \\
+&\equiv [L\ast f]m + [L\ast g]r
+\pmod q
+\end{align*}
+
+Dobijeni vektor ima elemente koji su između $-\frac{q}{2}$ i $\frac{q}{2}$, pa je dovoljno da se redukuje po modulu $p$ kako bi se dobila originalna poruka:
+\[[L \ast f ]m + [L \ast g]r \equiv I \ast m + 0\ast r \equiv m \pmod p \]
+
