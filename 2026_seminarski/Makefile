@@ -9,7 +9,7 @@ AUX_PATTERNS := *.aux *.bbl *.bcf *.blg *.dvi *.fdb_latexmk *.fls *.ilg *.ind *.
 all: main
 
 main:
-	cd $(BASE) && $(PDFLATEX) main.tex && $(PDFLATEX) main.tex
+	cd $(BASE) && $(PDFLATEX) main.tex && bibtex main && $(PDFLATEX) main.tex && $(PDFLATEX) main.tex
 	mv -f $(BASE)/main.pdf $(BASE)/kriptografija_napredne_teme.pdf
 	$(MAKE) clean-aux-main
 

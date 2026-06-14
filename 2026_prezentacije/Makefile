@@ -34,7 +34,7 @@ new:
 			'\author{Your Name}' \
 			'\date{\today}' \
 			'' \
-			'\usetheme{wildcat}' \
+			'\usetheme[sectionpage=none]{wildcat}' \
 			'' \
 			'\begin{document}' \
 			'' \

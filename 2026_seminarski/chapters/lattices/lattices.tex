@@ -52,7 +52,7 @@ Jedna rešetka ima beskonačan broj baza, pa se može definisati šta je dobra, 
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.5\linewidth]{images/osnovna_rešetka_2d.png}
+    \includegraphics[width=0.5\linewidth]{images/lattices/osnovna_rešetka_2d.png}
     \caption{Struktura rešetke, sa prikazom dobre (plava) i loše (crvena) baze. }
     \label{fig:osnovna_rešetka_2d}
 \end{figure}
@@ -66,6 +66,44 @@ Poseban tip rešetki su $q$-arne (eng. \textit{q-ary lattice}). Rešetka $\latt$
 
 Ovaj tip rešetki igra centralnu ulogu u konstrukciji savremenih kriptosistema zasnovanih na rešetkama i biće korišćene u nastavku rada.
 
+\subsection{Teški problemi na rešetkama}
 
+Postoje dva problema na rešetkama koja se smatraju teškim, to su problem najkraćeg vektora i problem najbližeg vektora. Pošto se pretpostavlja da je teško rešiti ove probleme i na klasičnom i na kvantnom računaru, postoje predlozi za postkvantne kriptosisteme koji se zasnivaju na njima. NIST (eng. \textit{National Institute of Standards and Technology}) je 2024. godine objavio standarde za postkvantnu kriptografiju koji se zasnivaju na teškim problemima na rešetkama i dao preporuku da se započne njihova upotreba što pre \cite{niststandard}.
 
+\begin{definition}
+    \textbf{Problem najkraćeg vektora (eng. \textit{Shortest Vector Problem - SVP}):} Neka je $\latt$ rešetka čija je baza $B$, tada je problem najkraćeg vektora nalaženje nenula vektora $x \in \latt$ za koji važi $||x|| \leq ||y||$ za svaki nenula vektor $y \in \latt$. Drugim rečima, treba naći $x$ takav da je $||x|| = \lambda_1 (\latt)$.
+\end{definition}
 
+Postoje i alternativne definicije ovog problema, kao što je \textbf{aproksimativni problem najkraćeg vektora}, u oznaci SVP$_\gamma$. Ova verzija problema se odnosi na nalaženje vektora $x \in \latt$ takvog da je $||x|| \leq \gamma \cdot \lambda_1 (\latt)$, za neku malu konstantnu $\gamma$. LLL algoritam nam omogućava da nađemo ovu vrstu najkraćeg vektora u rešetki, pri čemu je $\gamma = 2 ^ {(n-1)/2}$ \cite{smart2016cryptography} \footnote{Strana 86, pasus 1}.
+
+Rešenje problema najkraćeg vektora nije jedinstveno jer ako je vektor $x$ njegovo rešenje, onda je i vektor $-x$. Na slici \ref{fig:svp_rešenje} se vidi primer dva najkraća vektora u dvodimenzionalnoj rešetki pri čemu su oni međusobno suprotni vektori.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.75\linewidth]{images/lattices/svp_rešenje.png}
+    \caption{Primer rešenja problema najkraćeg vektora u dvodimenzionalnoj rešetki. Crvenom bojom su označeni najkraći vektori, dok su crne strelice bazni vektori.}
+    \label{fig:svp_rešenje}
+\end{figure}
+
+\begin{definition}
+    \textbf{Problem najbližeg vektora (eng. \textit{Closest Vector Problem - CVP})}: Neka je $\latt$ $n$-dimenziona rešetka sa bazom $B$ i $x \in \mathbb{R}^n$ vektor koji ne pripada rešetki, problem najbližeg vektora se sastoji od nalaženja vektora $y \in \latt$ takvog da je $||x-y|| \leq ||x-z||$ za svako $z \in \latt$.
+\end{definition}
+
+Kao i kod problema najkraćeg vektora, imamo i aproksimativni problem najbližeg vektora, koji se često označava sa CVP$_\gamma$. Cilj ovog problema je naći $y$ takvo da je $||x-y|| \leq \gamma ||x-z||$ za svaki vektor $z\in \latt$, za neku malu konstantnu vrednost $\gamma$. Na slici \ref{fig:cvp_resenje} se vidi primer jedne dvodimenzionalne rešetke, sa njenim baznim vektorima i vektorom koji je najbliži vektoru koji nije iz rešetke.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.75\linewidth]{images/lattices/cvp_rešenja.png}
+    \caption{Primer rešenja problema najbližeg vektora u dvodimenzionalnoj rešetki. Crvenom bojom je označen vektor koji pripada rešetki i najbliži je plavo obeleženom vektoru koji joj ne pripada, dok su crne strelice bazni vektori.}
+    \label{fig:cvp_resenje}
+\end{figure}
+
+%TODO: dodati reference na poglavlja, kada budu napisana
+%TODO: proveriti prevod za BDD
+Postoji još jedan problem na rešetkama koji je značajan za oblasti učenja sa greškama i potpuno homomorfne enkripcije. Taj problem je \textit{problem dekodiranja na ograničenoj udaljenosti} koji je sličan problemu najbližeg vektora ali sa dodatom informacijom o granici za udaljenost između vektora koji pripada rešetki i onome koji ne pripada.
+
+\begin{definition}
+    \textbf{Problem dekodiranja na ograničenoj udaljenosti (eng. \textit{Bounded-Distance Decoding Problem - BDD}) } Neka je $B$ baza rešetke $\latt$ u $n$-dimenzionalnom realnom prostoru i $x\in \mathbb{R}^n$ vektor koji ne pripada rešetki $\latt$. BDD$_\lambda$ problem se odnosi na pronalaženje vektora $y \in \latt$ takvog da je $||x-y|| \leq \lambda \cdot\lambda_1(\latt)$, za realan broj $\lambda$.
+\end{definition}
+
+Problemi koji su pomenuti u ovom poglavlju se smatraju teškim za rešavanje i na klasičnom i na kvantnom računaru, to jest ne postoje algoritmi koji ih rešavaju u polinomijalnom vremenu \cite{postquantumcryptography:2009}. Zbog ove osobine predstavljaju dobru osnovu za kreiranje kvantnorezistentnih kriptosistema. 

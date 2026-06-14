@@ -1,2 +1,800 @@
-% Poglavlje: ZK-stark (teorijska osnova i prakticna upotreba, paralela sa zk-snark)
-% Autor: Stanković Matija (mi21207)
+U prethodnom poglavlju, Poglavlju 6, predstavljeni su zk-SNARK sistemi, njihove
+osnovne osobine i način na koji omogućavaju generisanje kratkih neinteraktivnih
+dokaza i njihovu efikasnu verifikaciju. Posebno je objašnjeno da mnoge zk-SNARK
+konstrukcije zahtevaju fazu poverljivog podešavanja
+(engl. \textit{trusted setup}).
+
+Tokom faze poverljivog podešavanja generišu se javni parametri koji se kasnije
+koriste za formiranje i proveru dokaza. Istovremeno nastaju i tajne pomoćne
+vrednosti. Te vrednosti moraju biti nepovratno uništene nakon završetka
+podešavanja. Ukoliko bi ih neko sačuvao ili naknadno kompromitovao, mogao bi
+da generiše validne dokaze za netačne tvrdnje, čime bi bila narušena ispravnost
+čitavog sistema.
+
+Potreba za dokaznim sistemom koji zadržava skalabilnost i svojstvo nultog znanja,
+ali ne zahteva fazu poverljivog podešavanja, dovela je do razvoja zk-STARK
+sistema. Naziv zk-STARK predstavlja skraćenicu izraza
+\textit{Zero-Knowledge Scalable Transparent Argument of Knowledge}.
+
+Kao i zk-SNARK, zk-STARK omogućava dokazivaču da ubedi verifikatora u
+ispravnost određenog izračunavanja bez otkrivanja tajnog svedoka ili poverljivih
+ulaznih podataka. Međutim, zk-STARK koristi drugačiji pristup. Umesto
+poverljivo generisanih parametara i konstrukcija zasnovanih na eliptičkim
+krivama, oslanja se na javnu nasumičnost, kriptografske heš funkcije,
+polinomske reprezentacije i kodove za korekciju grešaka \cite{stark2018}.
+
+U nastavku se izraz STARK koristi kada se govori o osnovnoj arhitekturi
+dokaznog sistema, dok se izraz zk-STARK koristi kada se posebno naglašava
+svojstvo nultog znanja.
+
+Glavne osobine zk-STARK sistema sadržane su u samom nazivu:
+
+\begin{itemize}
+    \item \textbf{Nulto znanje} (engl. \textit{zero knowledge}) -- dokaz
+    ne otkriva tajni svedok niti dodatne informacije o izračunavanju, osim
+    činjenice da je tvrdnja tačna.
+
+    \item \textbf{Skalabilnost} (engl. \textit{scalability}) -- vreme rada
+    dokazivača raste približno kvazilinearno sa veličinom izračunavanja, dok
+    vreme rada verifikatora raste znatno sporije.
+
+    \item \textbf{Transparentnost} (engl. \textit{transparency}) -- nije
+    potrebna faza poverljivog podešavanja. Parametri sistema mogu biti javno
+    generisani i provereni.
+
+    \item \textbf{Argument znanja} (engl. \textit{argument of knowledge}) --
+    dokazivač može proizvesti validan dokaz samo ako poseduje odgovarajući
+    svedok, osim sa zanemarljivom verovatnoćom.
+\end{itemize}
+
+zk-STARK sistemi praktično su predstavljeni u radu
+\textit{Scalable, Transparent, and Post-Quantum Secure Computational Integrity}
+autora Elija Ben-Sasona i saradnika \cite{stark2018}. Njihov cilj nije bio samo
+očuvanje privatnosti, već i efikasna provera integriteta velikih izračunavanja
+nad poverljivim podacima.
+
+\section{Motivacija i računarski integritet}
+
+Posmatrajmo organizaciju koja poseduje veliki skup poverljivih podataka
+\(D\) i izvršava program \(C\) nad tim podacima. Organizacija zatim objavljuje
+rezultat \(y\).
+
+Veza između programa, ulaznih podataka i rezultata može se zapisati kao
+
+\begin{equation}
+    y = C(D).
+\end{equation}
+
+Postavlja se pitanje kako nezavisni verifikator može biti siguran da je rezultat
+zaista dobijen korektnim izvršavanjem programa \(C\), a ne proizvoljno izabran
+ili falsifikovan.
+
+Najjednostavniji način provere bio bi da verifikator dobije podatke \(D\), ponovo
+izvrši program i proveri da li je dobijeni rezultat jednak \(y\). Ovakav pristup
+ima dva ozbiljna problema. Prvo, ukoliko su podaci poverljivi, njihovo otkrivanje
+nije dozvoljeno. Drugo, ponovno izvršavanje programa može biti jednako skupo
+kao i originalno izračunavanje, pa verifikacija ne donosi nikakvu uštedu.
+
+zk-STARK rešava ovaj problem tako što dokazivač generiše kriptografski dokaz
+\(\pi\) da postoji skup podataka \(D\) za koji važi
+
+\begin{equation}
+    C(D) = y.
+\end{equation}
+
+Verifikator pri tome ne dobija podatke \(D\), niti mora ponovo da izvrši program
+\(C\). Umesto toga, proverava samo dokaz \(\pi\), koristeći relativno mali broj
+računarskih operacija.
+
+U originalnom radu autori razmatraju primer nacionalne baze forenzičkih DNK
+profila. Policija tvrdi da se DNK profil određene osobe ne nalazi u bazi.
+Javnost ne želi da slepo veruje toj tvrdnji, dok policija ne sme da objavi celu
+bazu DNK profila. zk-STARK omogućava policiji da dokaže da je pretraga korektno
+izvršena i da profil nije pronađen, bez otkrivanja samog profila ili sadržaja baze
+\cite{stark2018}.
+
+\section{Transparentnost i odsustvo poverljivog podešavanja}
+
+Jedna od najvažnijih razlika između mnogih zk-SNARK sistema i zk-STARK sistema
+odnosi se na način generisanja javnih parametara.
+
+Kod brojnih zk-SNARK konstrukcija neophodno je sprovesti fazu poverljivog
+podešavanja. U toj fazi generišu se javni parametri koje kasnije koriste
+dokazivač i verifikator, kao i tajne pomoćne vrednosti koje ne smeju ostati
+dostupne nakon završetka postupka.
+
+Tajne vrednosti nastale tokom poverljivog podešavanja često se neformalno
+nazivaju \textit{toxic waste}. Ovaj izraz označava podatke koji su potrebni samo
+tokom generisanja javnih parametara, ali koji nakon toga moraju biti bezbedno i
+nepovratno uništeni. Ukoliko ih neko sačuva ili naknadno kompromituje, može
+steći mogućnost da generiše naizgled validne dokaze za netačne tvrdnje, čime se
+narušava ispravnost čitavog sistema.
+
+zk-STARK ne zahteva ovakav postupak. Sistem koristi javno dostupnu nasumičnost
+i kriptografske heš funkcije, pa ne postoji tajni parametar čije bi čuvanje
+omogućilo falsifikovanje dokaza. Ovakav način inicijalizacije naziva se
+transparentnim podešavanjem (engl. \textit{transparent setup})
+\cite{stark2018,ethstark2023}.
+
+Transparentnost ne znači da sistem nema parametre. Potrebno je odabrati
+konačno polje, heš funkciju, parametre kodiranja, faktor proširenja i
+bezbednosni nivo. Razlika je u tome što su svi ti parametri javni i njihovo
+poznavanje ne omogućava generisanje lažnih dokaza.
+
+\section{Postkvantna sigurnost}
+
+Brojni zk-SNARK sistemi zasnivaju svoju sigurnost na problemu diskretnog
+logaritma nad eliptičkim krivama i na bilinearnim uparivanjima
+(engl. \textit{bilinear pairings}) \cite{nitulescu2023snarks}.
+
+Problem diskretnog logaritma podrazumeva da je, za poznate elemente \(P\) i
+\(Q\) u grupi eliptičke krive, gde važi
+
+\begin{equation}
+    Q = kP,
+\end{equation}
+
+računarski teško odrediti tajni skalar \(k\).
+
+Bilinearno uparivanje je preslikavanje oblika
+
+\begin{equation}
+    e \colon G_1 \times G_2 \longrightarrow G_T,
+\end{equation}
+
+koje za elemente \(P \in G_1\), \(Q \in G_2\) i skalare \(a\) i \(b\)
+zadovoljava svojstvo
+
+\begin{equation}
+    e(aP,bQ) = e(P,Q)^{ab}.
+\end{equation}
+
+Ovo svojstvo omogućava da se određeni algebarski odnosi provere pomoću kratkih
+jednačina, što doprinosi maloj veličini dokaza i brzoj verifikaciji kod pairing
+zasnovanih zk-SNARK sistema. Bilinearna uparivanja, međutim, nisu sama po sebi
+pretpostavka težine. Sigurnost zavisi od problema diskretnog logaritma i srodnih
+problema u izabranim grupama.
+
+Ovi problemi smatraju se teškim za klasične računare kada su parametri pravilno
+izabrani, ali nisu otporni na poznate kvantne napade. Šorov algoritam omogućava
+dovoljno snažnom kvantnom računaru da u polinomijalnom vremenu rešava
+faktorizaciju velikih celih brojeva i problem diskretnog logaritma. Zbog toga bi
+mogao da ugrozi RSA, kriptografiju eliptičkih krivih i zk-SNARK konstrukcije
+koje zavise od tih pretpostavki \cite{Shor_1997}.
+
+zk-STARK sistemi se ne zasnivaju na problemu diskretnog logaritma niti na
+bilinearnim uparivanjima. Njihova kriptografska sigurnost prvenstveno se oslanja
+na svojstva kriptografskih heš funkcija, dok se proveravanje polinomskih tvrdnji
+zasniva na Reed--Solomonovim kodovima i testovima bliskosti
+\cite{stark2018,ethstark2023}.
+
+Koliziona otpornost heš funkcije znači da je računarski teško pronaći dve
+različite poruke \(m_1\) i \(m_2\) takve da istovremeno važi
+
+\begin{equation}
+    m_1 \neq m_2
+\end{equation}
+
+i
+
+\begin{equation}
+    H(m_1) = H(m_2).
+\end{equation}
+
+Takav par poruka naziva se kolizija. Koliziona otpornost ne znači da kolizije
+ne postoje, već da ih je za pravilno odabranu heš funkciju računarski
+neizvodljivo pronaći.
+
+Kvantni algoritmi mogu ubrzati generičke napade na heš funkcije, ali ih ne
+narušavaju na isti način na koji Šorov algoritam narušava diskretni logaritam.
+Groverov algoritam ubrzava generičku pretragu preimage-a sa približno
+\(O(2^n)\) na \(O(2^{n/2})\) za heš izlaz dužine \(n\) bitova. Zbog toga se
+pri izboru parametara mora uzeti u obzir smanjen sigurnosni nivo u kvantnom
+modelu \cite{postquantumcryptography:2009}.
+
+zk-STARK sistemi se zato opisuju kao verovatno postkvantno sigurni
+(engl. \textit{plausibly post-quantum secure}) \cite{stark2018}. Ovaj izraz ne
+predstavlja apsolutnu garanciju otpornosti na sve buduće kvantne napade, već
+označava da sistem ne zavisi od matematičkih problema za koje već postoji
+poznat efikasan kvantni algoritam.
+
+\section{Od izvršavanja programa do polinomskih ograničenja}
+
+Verifikator ne može efikasno proveravati proizvoljno izvršavanje programa samo
+na osnovu malog broja nasumičnih provera. Zbog toga se izvršenje programa najpre
+prevodi u matematičku reprezentaciju zasnovanu na elementima konačnog polja i
+polinomskim relacijama. Ovaj postupak naziva se aritmetizacija
+(engl. \textit{arithmetization}) \cite{stark2018}.
+
+Aritmetizacija ne menja rezultat programa, već njegovo izvršavanje opisuje na
+način pogodan za kriptografsku proveru. Stanja programa predstavljaju se
+elementima konačnog polja, dok se pravila prelaska iz jednog stanja u drugo
+izražavaju polinomskim jednačinama.
+
+Osnovna struktura koja nastaje ovim postupkom naziva se trag izvršavanja
+(engl. \textit{execution trace}). Trag izvršavanja je tabela koja sadrži
+međustanja programa. Svaki red predstavlja stanje u jednom koraku izvršavanja,
+dok kolone predstavljaju registre, memorijske vrednosti ili druge promenljive
+koje opisuju stanje sistema.
+
+Posmatrajmo program koji počinje vrednošću \(x_0\) i u svakom koraku računa
+
+\begin{equation}
+    x_{i+1} = x_i^2 + c,
+\end{equation}
+
+gde je \(c\) javno poznata konstanta.
+
+Ispravan prelaz između dva uzastopna stanja mora zadovoljavati polinomsku
+relaciju
+
+\begin{equation}
+    x_{i+1} - x_i^2 - c = 0.
+\end{equation}
+
+Na ovaj način korektnost izvršavanja programa svodi se na proveravanje da određene
+polinomske jednačine važe u svim odgovarajućim redovima traga.
+
+Skup polinomskih pravila koja opisuju ispravno izvršavanje naziva se algebarska
+međureprezentacija (engl. \textit{Algebraic Intermediate Representation}, AIR)
+\cite{stark2018,ethstark2023}.
+
+AIR obično sadrži dve vrste ograničenja:
+
+\begin{itemize}
+    \item \textbf{granična ograničenja} (engl. \textit{boundary constraints}),
+    koja određuju početne i završne vrednosti;
+
+    \item \textbf{tranziciona ograničenja}
+    (engl. \textit{transition constraints}), koja određuju dozvoljene prelaze
+    između susednih redova traga.
+\end{itemize}
+
+\section{Polinomi traga i proširenje domena}
+
+Nakon formiranja traga izvršavanja, svaka njegova kolona posmatra se kao skup
+vrednosti nekog polinoma nad konačnim poljem \(\mathbb{F}\).
+
+Neka se trag sastoji od \(n\) redova i neka je domen izvršavanja
+
+\begin{equation}
+    H = \left\{\omega^0,\omega^1,\ldots,\omega^{n-1}\right\}.
+\end{equation}
+
+Za vrednosti jedne kolone
+
+\begin{equation}
+    x_0,x_1,\ldots,x_{n-1},
+\end{equation}
+
+postoji jedinstveni polinom \(f(X)\) stepena manjeg od \(n\) takav da za svaki
+indeks \(i\) važi
+
+\begin{equation}
+    f\left(\omega^i\right) = x_i.
+\end{equation}
+
+Dokazivač interpolira ovaj polinom, a zatim ga evaluira na većem domenu \(L\).
+Ovaj postupak naziva se proširenje niskog stepena
+(engl. \textit{low-degree extension}, LDE).
+
+Ako je veličina originalnog domena \(n\), a proširenog domena \(bn\), broj
+\(b\) naziva se faktor proširenja.
+
+Proširenje domena zasniva se na Reed--Solomonovim kodovima. Vektor evaluacija
+polinoma niskog stepena predstavlja kodnu reč Reed--Solomonovog koda.
+Interpolacija i evaluacija nad odgovarajuće strukturisanim domenima efikasno se
+izvršavaju FFT\footnote{FFT (engl. \textit{Fast Fourier Transform}) označava
+brzu Furijeovu transformaciju.} algoritmima nad konačnim poljima. Za fiksnu širinu
+traga i odgovarajuće izabrane parametre, dominantne polinomske operacije imaju
+kvazilinearnu složenost, koja se u pojednostavljenom obliku često zapisuje kao
+
+\begin{equation}
+    O(n\log n).
+\end{equation}
+
+Ova procena ne obuhvata nužno sve troškove kompletnog dokazivača, jer ukupna
+složenost zavisi i od širine traga, stepena ograničenja i izabranih parametara
+protokola \cite{stark2018,ethstark2023}.
+
+\section{Posvećivanje vrednostima pomoću Merklovog stabla}
+
+Dokazivač nakon proširenja domena poseduje veliki broj evaluacija polinoma.
+Kada bi sve te vrednosti neposredno poslao verifikatoru, dokaz bi bio veoma
+veliki i verifikacija ne bi bila skalabilna.
+
+Umesto toga, dokazivač nad nizom vrednosti gradi Merklovo stablo
+(engl. \textit{Merkle tree}). Listovi stabla sadrže heševe pojedinačnih
+vrednosti ili grupa vrednosti, dok svaki unutrašnji čvor sadrži heš svojih
+potomaka. Koren stabla predstavlja kratku kriptografsku posvetu celom skupu
+podataka.
+
+Neka su vrednosti koje dokazivač želi da posveti
+
+\begin{equation}
+    v_0,v_1,\ldots,v_{m-1}.
+\end{equation}
+
+Najpre se računaju listovi
+
+\begin{equation}
+    h_i = H(v_i),
+\end{equation}
+
+gde je \(H\) kriptografska heš funkcija.
+
+Zatim se susedne vrednosti kombinuju prema pravilu
+
+\begin{equation}
+    h_{i,j} = H\left(h_i \parallel h_j\right),
+\end{equation}
+
+sve dok se ne dobije jedan koren stabla.
+
+Dokazivač prvo objavljuje koren stabla. Nakon toga ne može neprimetno promeniti
+neku od posvećenih vrednosti bez promene korena. Verifikator zatim bira mali broj
+slučajnih pozicija i zahteva odgovarajuće vrednosti zajedno sa autentifikacionim
+putanjama.
+
+Za proveru jednog lista nije potrebno dobiti celo stablo. Dovoljno je dobiti
+približno
+
+\begin{equation}
+    \log_2 m
+\end{equation}
+
+susednih heševa, gde je \(m\) broj listova \cite{ethstark2023}.
+
+\section{Polinom kompozicije}
+
+AIR može sadržati veliki broj različitih ograničenja. Direktno proveravanje svakog
+ograničenja odvojeno povećalo bi veličinu dokaza. Zato se ograničenja kombinuju
+u polinom kompozicije (engl. \textit{composition polynomial}).
+
+Pretpostavimo da postoje polinomska ograničenja
+
+\begin{equation}
+    C_1(X),C_2(X),\ldots,C_k(X).
+\end{equation}
+
+Verifikator bira nasumične koeficijente
+
+\begin{equation}
+    \alpha_1,\alpha_2,\ldots,\alpha_k \in \mathbb{F},
+\end{equation}
+
+a dokazivač formira njihovu linearnu kombinaciju
+
+\begin{equation}
+    C(X) = \alpha_1 C_1(X)+\alpha_2 C_2(X)+\cdots+\alpha_k C_k(X).
+\end{equation}
+
+Nasumični koeficijenti sprečavaju dokazivača da unapred prilagodi greške tako
+da se one međusobno ponište.
+
+Ograničenja se često dele polinomima koji nestaju na odgovarajućem domenu.
+Neka je
+
+\begin{equation}
+    Z_H(X) = \prod_{h \in H}\left(X-h\right)
+\end{equation}
+
+polinom nestajanja (engl. \textit{vanishing polynomial}) domena \(H\). Ako
+polinom ograničenja nestaje u svim tačkama domena, tada je deljiv sa \(Z_H(X)\),
+pa odgovarajući količnik mora imati očekivani ograničeni stepen
+\cite{stark2018,ethstark2023}.
+
+\section{FRI protokol}
+
+Ključna komponenta STARK sistema je FRI protokol, čiji naziv predstavlja
+skraćenicu izraza
+\textit{Fast Reed-Solomon Interactive Oracle Proof of Proximity}. FRI je
+interaktivni dokaz bliskosti sa pristupom proročištu
+(engl. \textit{Interactive Oracle Proof of Proximity}, IOPP), kojim verifikator
+proverava da li je prosleđena funkcija bliska Reed--Solomonovoj kodnoj reči,
+odnosno evaluacijama polinoma ograničenog stepena
+\cite{stark2018,ethstark2023,deepfri2020}.
+
+Važno je razlikovati dve tvrdnje:
+
+\begin{enumerate}
+    \item vrednosti zadovoljavaju AIR ograničenja;
+    \item vrednosti predstavljaju evaluacije polinoma dozvoljenog stepena.
+\end{enumerate}
+
+Samo proveravanje lokalnih AIR ograničenja nije dovoljno, jer proizvoljan niz
+vrednosti ne mora predstavljati evaluacije jednog konzistentnog polinoma.
+
+FRI koristi rekurzivno presavijanje polinoma. Polinom \(f(X)\) može se zapisati
+u obliku
+
+\begin{equation}
+    f(X) = f_{\mathrm{even}}\left(X^2\right)
+    + Xf_{\mathrm{odd}}\left(X^2\right).
+\end{equation}
+
+Verifikator bira slučajnu vrednost \(\beta\), a dokazivač formira novi polinom
+
+\begin{equation}
+    g(Y) = f_{\mathrm{even}}(Y)+\beta f_{\mathrm{odd}}(Y).
+\end{equation}
+
+Ovaj postupak ponavlja se kroz više rundi:
+
+\begin{equation}
+    f_0 \longrightarrow f_1 \longrightarrow f_2
+    \longrightarrow \cdots \longrightarrow f_r.
+\end{equation}
+
+U svakoj rundi dokazivač se pomoću Merklovog stabla posvećuje evaluacijama
+novog polinoma. Na kraju se dobija dovoljno mali polinom koji verifikator može
+neposredno proveriti.
+
+Ako su početne vrednosti daleko od svake evaluacije polinoma dozvoljenog
+stepena, ponavljanje slučajnih upita smanjuje verovatnoću prihvatanja
+neispravnog dokaza \cite{deepfri2020}.
+
+\section{DEEP-FRI}
+
+DEEP-FRI predstavlja unapređenje FRI protokola. Skraćenica DEEP potiče od
+izraza \textit{Domain Extension for Eliminating Pretenders}
+\cite{deepfri2020}.
+
+Neispravna funkcija može na originalnom domenu biti relativno bliska većem
+broju različitih polinoma niskog stepena. Takvi polinomi predstavljaju lažne
+kandidate, odnosno \textit{pretenders}. Verifikator zato bira nasumičnu tačku
+\(z\) izvan osnovnog domena evaluacije i od dokazivača zahteva vrednost
+
+\begin{equation}
+    f(z).
+\end{equation}
+
+Pošto različiti kandidati uglavnom daju različite vrednosti u tački \(z\),
+odgovor dokazivača ga vezuje za znatno uži skup mogućih polinoma.
+
+Zatim se razmatra polinom
+
+\begin{equation}
+    g(X) = \frac{f(X)-f(z)}{X-z}.
+\end{equation}
+
+Ako je \(f\) polinom stepena najviše \(d\), tada je \(g\) polinom stepena
+najviše \(d-1\). FRI se potom primenjuje na odgovarajuću transformisanu funkciju.
+DEEP-FRI poboljšava granice pouzdanosti testa, uz očuvanje linearne
+aritmetičke složenosti dokazivača i logaritamske aritmetičke složenosti
+verifikatora \cite{deepfri2020}.
+
+\section{Pretvaranje u neinteraktivni dokaz}
+
+Osnovni STARK protokol opisuje se kao interaktivni dokaz sa pristupom
+proročištu (engl. \textit{Interactive Oracle Proof}, IOP), u kojem dokazivač
+šalje posvete, a verifikator bira javne slučajne izazove. Za neinteraktivnu
+upotrebu primenjuje se Fiat--Šamirova heuristika \cite{ethstark2023}.
+
+Ako su prethodne posvete
+
+\begin{equation}
+    c_1,c_2,\ldots,c_i,
+\end{equation}
+
+sledeći izazov može se dobiti kao
+
+\begin{equation}
+    \alpha_i = H\left(x,c_1,c_2,\ldots,c_i\right),
+\end{equation}
+
+gde je \(x\) javna tvrdnja. Verifikator kasnije ponavlja isto heširanje i
+proverava da li su svi izazovi pravilno izvedeni.
+
+\section{Pojednostavljen primer zk-STARK postupka}
+
+Posmatrajmo funkciju koja počinje tajnom vrednošću \(x_0\) i tri puta primenjuje
+pravilo
+
+\begin{equation}
+    x_{i+1} = x_i^2 + 1.
+\end{equation}
+
+Dokazivač želi da dokaže da je nakon tri koraka dobijena javna vrednost \(y\),
+ali ne želi da otkrije početnu vrednost \(x_0\).
+
+AIR sadrži tranziciono ograničenje
+
+\begin{equation}
+    x_{i+1}-x_i^2-1 = 0,
+    \qquad i \in \{0,1,2\},
+\end{equation}
+
+kao i završno ograničenje
+
+\begin{equation}
+    x_3-y = 0.
+\end{equation}
+
+Dokazivač interpolira kolonu traga polinomom \(f(X)\), računa evaluacije na
+proširenom domenu, posvećuje se tim evaluacijama Merklovim korenom, formira
+polinom kompozicije, izvršava FRI i koristi Fiat--Šamirovu heuristiku.
+
+Verifikator za izabranu poziciju proverava relaciju
+
+\begin{equation}
+    f\left(\omega^{i+1}\right)
+    - f\left(\omega^i\right)^2
+    - 1 = 0.
+\end{equation}
+
+Opisani primer prikazuje proveru računarskog integriteta i osnovni tok STARK
+protokola, ali sam po sebi ne obezbeđuje nulto znanje. Da bi sistem bio
+zk-STARK, potrebno je primeniti dodatne tehnike nasumičnog maskiranja
+polinoma i traga, tako da mali broj upita verifikatora ne otkriva poverljive
+vrednosti svedoka \cite{stark2018,ethstark2023}.
+
+
+\section{Skalabilnost}
+
+Za trag izvršavanja dužine \(n\), pri fiksnoj širini traga i odgovarajuće
+izabranim parametrima, dominantne operacije dokazivača, kao što su
+interpolacija, proširenje domena i izgradnja FRI slojeva, imaju kvazilinearnu
+složenost. Ona se u pojednostavljenom obliku često zapisuje kao
+
+\begin{equation}
+    O(n\log n).
+\end{equation}
+
+Ukupna složenost kompletnog dokazivača ipak zavisi i od memorijskog prostora
+programa, širine traga, stepena AIR ograničenja, faktora proširenja i drugih
+parametara protokola \cite{stark2018,ethstark2023}.
+
+Verifikator proverava mali broj nasumično odabranih pozicija i Merklovih
+autentifikacionih putanja, pa njegova složenost raste polilogaritamski u odnosu
+na dužinu izvršavanja. U pojednostavljenom obliku može se zapisati kao
+
+\begin{equation}
+    O\left(\log^k n\right),
+\end{equation}
+
+za neku malu konstantu \(k\), čija vrednost zavisi od konkretne konstrukcije i
+izbora parametara \cite{stark2018}.
+
+U eksperimentu sa DNK bazom originalni STARK rad razmatrao je bazu sa približno
+\(1{,}14\) miliona profila. Za najveći testirani slučaj vreme verifikacije bilo
+je približno šest puta manje od vremena naivne provere, dok je komunikacija bila
+približno sto puta manja od veličine svedoka \cite{stark2018}. Ove rezultate
+treba tumačiti u okviru konkretne implementacije, bezbednosnog nivoa i hardvera
+korišćenog u eksperimentu.
+
+\section{Primene zk-STARK sistema}
+
+Najpoznatije oblasti primene obuhvataju skaliranje blockchain mreža, proverljivo
+računanje nad poverljivim podacima i dokazivanje svojstava identiteta.
+
+U sistemima za skaliranje blockchain mreža veliki broj tranzicija stanja može se
+izvršiti van osnovnog lanca, dok se na osnovni lanac šalju rezultat izvršavanja i
+kriptografski dokaz njegove ispravnosti. Time se smanjuje potreba da svaki učesnik
+ponovo izvršava čitavo računanje. Originalni STARK rad ovaj pravac navodi kao jednu
+od važnih mogućih primena skalabilne transparentne verifikacije
+\cite{stark2018}.
+
+Dokazi nultog znanja mogu se koristiti i za proveru tvrdnji nad medicinskim,
+finansijskim i identitetskim podacima, bez objavljivanja samih poverljivih
+vrednosti \cite{lavin2024survey}.
+
+Ipak, zbog troška generisanja i relativno velike veličine dokaza, zk-STARK nije
+uvek pogodan za male ili resursno ograničene uređaje. Eksperimentalno poređenje
+u IoT okruženju pokazuje da veličina dokaza i vreme generisanja mogu predstavljati
+značajan praktičan problem \cite{comparison2025}. Rezultati tog rada odnose se na
+konkretnu implementaciju i eksperimentalnu konfiguraciju, pa ih ne treba
+generalizovati na sve STARK sisteme.
+
+
+\section{Poređenje zk-SNARK i zk-STARK sistema}
+
+\begin{table}[ht]
+    \centering
+    \small
+
+    \begin{tabular}{
+        |p{0.27\textwidth}
+        |p{0.30\textwidth}
+        |p{0.30\textwidth}|
+    }
+    \hline
+
+    \textbf{Osobina}
+    &
+    \textbf{zk-SNARK}
+    &
+    \textbf{zk-STARK}
+    \\
+    \hline
+
+    Poverljivo podešavanje
+    &
+    Često potrebno
+    &
+    Nije potrebno
+    \\
+    \hline
+
+    Osnovne pretpostavke
+    &
+    Eliptičke krive i bilinearna uparivanja
+    &
+    Heš funkcije i kodovi za korekciju grešaka
+    \\
+    \hline
+
+    Postkvantna sigurnost
+    &
+    Uglavnom ne
+    &
+    Verovatno postkvantno siguran
+    \\
+    \hline
+
+    Veličina dokaza
+    &
+    Veoma mala
+    &
+    Veća
+    \\
+    \hline
+
+    Vreme verifikacije
+    &
+    Veoma kratko
+    &
+    Kratko, ali često veće
+    \\
+    \hline
+
+    Transparentnost
+    &
+    Zavisi od sistema
+    &
+    Osnovna osobina
+    \\
+    \hline
+
+    Pogodnost za velike proračune
+    &
+    Dobra
+    &
+    Veoma dobra
+    \\
+    \hline
+
+    \end{tabular}
+
+    \caption{Kvalitativno poređenje tipičnih pairing zasnovanih zk-SNARK konstrukcija i zk-STARK sistema \cite{stark2018,aurora2019,comparison2025}.}
+    \label{tab:snark-stark}
+\end{table}
+
+Konkretne performanse zavise od dokazivane relacije, implementacije,
+bezbednosnog nivoa i hardvera. Tabelu~\ref{tab:snark-stark} zato treba tumačiti
+kao kvalitativni pregled tipičnih svojstava, a ne kao univerzalno pravilo za
+svaku pojedinačnu konstrukciju.
+
+\section{Aurora i drugi transparentni sistemi}
+
+Aurora je primer transparentnog zk-SNARK sistema namenjenog dokazivanju
+zadovoljivosti R1CS\footnote{R1CS
+(engl. \textit{Rank-1 Constraint Satisfaction}) predstavlja sistem ograničenja
+oblika \((Az)\circ(Bz)=Cz\), koji se često koristi za predstavljanje aritmetičkih
+kola.} instanci \cite{aurora2019}.
+
+Glavna razlika između Aurore i STARK sistema jeste model izračunavanja. Aurora
+polazi od eksplicitno zadatog aritmetičkog kola ili R1CS sistema, dok STARK
+prirodnije opisuje uniformno izvršavanje programa kroz trag izvršavanja i AIR.
+
+Za aritmetičko kolo sa \(N\) kapija, Aurora rad navodi vreme dokazivača
+
+\begin{equation}
+    T_{\mathrm{prover}} = O(N\log N),
+\end{equation}
+
+vreme verifikatora
+
+\begin{equation}
+    T_{\mathrm{verifier}} = O(N),
+\end{equation}
+
+i veličinu dokaza
+
+\begin{equation}
+    O\left(\log^2 N\right).
+\end{equation}
+
+Linearna složenost verifikatora ovde uključuje obradu eksplicitno zadate R1CS
+instance; samo čitanje instance sa \(N\) ograničenja već zahteva linearno vreme.
+Aurora i STARK zato ne treba posmatrati kao potpuno zamenljiva rešenja, već kao
+sisteme optimizovane za različite modele izračunavanja \cite{aurora2019}.
+
+\clearpage
+
+\section{Prednosti i nedostaci zk-STARK sistema}
+
+U tabeli~\ref{tab:stark-prednosti-nedostaci} prikazane su najvažnije prednosti
+i nedostaci zk-STARK sistema.
+
+\begin{table}[ht]
+\centering
+\small
+
+\begin{tabular}{
+    |p{0.45\textwidth}
+    |p{0.45\textwidth}|
+}
+\hline
+
+\textbf{Prednosti}
+&
+\textbf{Nedostaci}
+\\
+\hline
+
+Nije potrebna faza poverljivog podešavanja.
+&
+Dokazi su obično veći nego kod pairing zasnovanih zk-SNARK sistema.
+\\
+\hline
+
+Sistem je verovatno postkvantno siguran.
+&
+Dokazivač može imati visoke memorijske zahteve.
+\\
+\hline
+
+Verifikacija je skalabilna i zahteva proveru samo malog broja pozicija.
+&
+Aritmetizacija i projektovanje AIR ograničenja mogu biti složeni.
+\\
+\hline
+
+Dokazivač koristi efikasne FFT algoritme za interpolaciju i evaluaciju polinoma.
+&
+Fiksni trošak generisanja dokaza može biti visok za mala izračunavanja.
+\\
+\hline
+
+Dokaz može biti javno proverljiv nakon primene Fiat--Šamirove heuristike.
+&
+Neinteraktivna verzija zavisi od modela slučajnog proročišta.
+\\
+\hline
+
+Različiti programi mogu se predstaviti pomoću AIR ograničenja.
+&
+Izbor parametara, kao što su faktor proširenja i broj FRI upita, zahteva pažljivu bezbednosnu analizu.
+\\
+\hline
+
+\end{tabular}
+
+\caption{Prednosti i nedostaci zk-STARK sistema}
+\label{tab:stark-prednosti-nedostaci}
+\end{table}
+
+\section{Zaključak}
+
+zk-STARK sistemi predstavljaju važan korak u razvoju praktičnih dokaza nultog
+znanja. Oni omogućavaju dokazivanje ispravnosti velikih izračunavanja nad
+poverljivim podacima bez otkrivanja samih podataka i bez oslanjanja na fazu
+poverljivog podešavanja.
+
+Osnovna ideja jeste prevođenje programskog izvršavanja u matematičku
+reprezentaciju. Izvršavanje se predstavlja tragom, a njegova korektnost AIR
+ograničenjima. Kolone traga interpoliraju se polinomima i evaluiraju na
+proširenom domenu. Merklova stabla omogućavaju dokazivaču da se obaveže na
+veliki broj vrednosti, dok FRI i DEEP-FRI omogućavaju efikasnu proveru niskog
+stepena.
+
+Važno je razlikovati osnovnu STARK proveru računarskog integriteta od
+zk-STARK konstrukcije. Svojstvo nultog znanja zahteva dodatno maskiranje
+polinoma i drugih podataka koje verifikator otvara tokom protokola
+\cite{stark2018,ethstark2023}.
+
+U odnosu na zk-SNARK sisteme, zk-STARK ima veće dokaze i zahtevnijeg
+dokazivača. Međutim, transparentno podešavanje, skalabilna verifikacija i
+postkvantna orijentacija čine ga pogodnim za sisteme u kojima su dugoročna
+sigurnost, decentralizacija i javno poverenje od ključnog značaja.
