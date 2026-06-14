@@ -1,2 +1,417 @@
 % Poglavlje: LWE
 % Autor: Tanja Gavrić (mr251065)
+
+\section{Uvod}
+
+U prethodnom poglavlju smo videli zašto su nam potrebni kriptosistemi otporni
+na kvantne računare i da su rešetke jedna od osnova za konstrukciju tih kriptosistema.
+Ostaje, međutim, pitanje na kakvim tačno problemima formiramo ove sisteme. 
+Takođe, kako da formalno opravdamo da su ovi problemi teški.
+Matematički okvir kojim ćemo se služiti da opišemo težinu ovih problema je teorija složenosti.
+
+Centralnu ulogu u teoriji složenosti ima klasa $NP$,
+kojoj pripadaju problemi čije se potencijalno rešenje može verifikovati (ne i pronaći!) u polinomijalnom vremenu.
+Najtežim problemima u ovoj klasi se smatraju \emph{$NP$-kompletni} problemi,
+jer bi pronalaženje polinomijalnog algoritma za rešavanje bilo kog od njih
+dokazalo jednakost klasa $P$ i $NP$.
+
+Moglo bi se očekivati da bi onda najteži kriptosistemi bili upravo oni zasnovani na $NP$-kompletnim problemima.
+Međutim, više pokušaja konstrukcije $NP$-kompletnih sistema koji su se pojavili u praksi pokazalo se nebezbednim,
+nađeni su algoritmi koji ih razbijaju.
+Na primer, Merkle-Helman kriptosistem zasnovan na $NP$-kompletnom problemu ranca,
+može se razbiti tehnikama zasnovanim na LLL algoritmu, o kom smo pričali u prethodnom poglavlju~\cite{lagariasOdlyzko1985}.
+
+Problem leži u tome što $NP$-kompletnost garantuje težinu samo za najgori slučaj datih problema.
+U kriptografiji se najčešće koriste instance koje nastaju prema nekoj raspodeli, odnosno prosečni slučajevi.
+Zato je moguće da je opšti problem težak, 
+a da su specijalne instance koje se pojavljuju u konkretnim kriptosistemima mnogo lakše za rešavanje.
+
+Način da se formalno osiguramo da je naša konstrukcija teška i da nas uspešno brani od napada upravo u prosečnom slučaju
+jeste \emph{redukcija iz najgoreg u prosečan slučaj} (engl.\ \emph{worst-case to average-case reduction}).
+Ideja je da se rešavanje prosečne instance jednog problema poveže sa rešavanjem najgore
+instance nekog problema za koji verujemo da je težak.
+Ako takva redukcija postoji, 
+i ako se ona izvodi u polinomijalnom vremenu,
+tada prosečna težina prvog problema sledi iz težine najgoreg slučaja drugog.
+Ovakve redukcije postoje za probleme na rešetkama,
+pa su one posebno pogodne za postkvantnu kriptografiju.
+
+Baš ova redukcija je u osnovi konstrukcije koju ćemo razmatrati u
+nastavku: problem \emph{učenja sa greškama} (engl.\ \emph{Learning With Errors}, LWE),
+čija je prosečna težina povezana sa najgorim slučajem teškog problema na rešetkama.
+U nastavku će najpre biti definisan LWE problem,
+zatim njegova algebarska varijanta Ring-LWE, a na kraju i kriptografska šema
+Kyber, koja se zasniva na modulnoj varijanti LWE problema.
+
+
+
+\section{LWE}
+
+Problem \emph{učenja sa greškama} uveo je Oded Regev u radu
+\emph{On Lattices, Learning with Errors, Random Linear Codes, and Cryptography}~\cite{regev2005lwe},
+za koji je 2018. godine dobio G\"odelovu nagradu.
+
+Pre formalne definicije korisno je prvo objasniti šta u ovom kontekstu znači "učenje".
+Pretpostavimo da postoji neka skrivena linearna veza koju želimo da otkrijemo. 
+
+\begin{example}
+    \label{ex:lwe-bez-greske}
+    Neka su nepoznate vrednosti $s_1$ i $s_2$, a poznate su jednačine
+    
+    \[
+    \begin{aligned}
+    2s_1 + s_2 &= 7, \\
+    s_1 + 3s_2 &= 11, \\
+    3s_1 + 2s_2 &= 12.
+    \end{aligned}
+    \]
+
+    Ovaj sistem je lako rešiti i dobija se $ s_1 = 2, s_2 = 3. $
+\end{example}
+
+Dakle, iz tačnih linearnih jednačina možemo direktno da \emph{naučimo}, 
+odnosno odredimo, 
+skrivene vrednosti $s_1$ i $s_2$.
+Kod LWE problema situacija je slična, ali jednačine nisu potpuno tačne. Svakoj
+jednačini dodata je mala greška. 
+
+\begin{example}
+    Umesto prethodnog sistema mogli bismo imati
+
+    \[
+    \begin{aligned}
+    2s_1 + s_2 &= 7 \textcolor{red}{+ 1}, \\
+    s_1 + 3s_2 &= 11 \textcolor{red}{- 1}, \\
+    3s_1 + 2s_2 &= 12 \textcolor{red}{+ 2}.
+    \end{aligned}
+    \]
+
+    Ove jednačine više ne odgovaraju tačno istoj linearnoj vezi, 
+    već su samo blizu nje. 
+\end{example}
+
+Zadatak je da se, iz takvih približno tačnih jednačina, rekonstruišu skrivene vrednosti.
+Upravo dodavanje male greške, koje na prvi pogled deluje bezazleno, čini problem znatno težim.
+
+Da bismo ovo matematički opisali, potrebno je uvesti raspodelu greške.
+\begin{definition}
+    \textbf{Diskretna Gausova raspodela}, sa oznakom $D_{\mathbb{Z}^n,\sigma}$, predstavlja raspodelu greške nad
+    celobrojnim
+    vektorima dimenzije $n$. Raspodela proizvodi vektore čije su koordinate približno raspodeljene kao normalna raspodela sa srednjom vrednošću nula i standardnom devijacijom $\sigma$.
+\end{definition}
+
+\begin{example}
+    Ako je $n=8$ i ako je $\sigma$ malo, jedan mogući izlaz raspodele $D_{\mathbb{Z}^n,\sigma}$ mogao bi biti vektor $e = (0,-1,2,0,-3,1,0,2).$
+\end{example}
+
+\begin{definition}
+    \textbf{Pretraživački problem učenja sa greškama} (engl.\ \emph{Search-LWE}).
+    Neka je $q$ prirodan, najčešće prost broj, i neka je $\mathbb{Z}_q = \mathbb{Z}/q\mathbb{Z}$ skup ostataka po modulu $q$.
+    Posmatrajmo matricu $A \in \mathbb{Z}_q^{n \times m},$
+    tajni vektor $s \in \mathbb{Z}_q^m$,
+    i vektor greške $
+    e \leftarrow D_{\mathbb{Z}^n,\sigma}$.
+    Tada se LWE uzorak može zapisati u obliku \[ b = A \cdot s + e \pmod q \]
+    Matrica $A$ i vektor $b$ su poznati,
+    dok su tajni vektor $s$ i greška $e$ nepoznati.
+    Dakle, pretraživački LWE je problem pronalaženja tajnog vektora $s \in \mathbb{Z}_q^m$ na osnovu para $(A,b)$.
+\end{definition}
+
+Da greške nema, odnosno da je $e=0$, problem bi se sveo na rešavanje sistema linearnih jednačina
+$ A \cdot s = b \pmod q $, što smo videli u primeru~\ref{ex:lwe-bez-greske}.
+Međutim, umesto tačnog linearnog sistema, dodavanjem greške dobija se sistem približno tačnih linearnih jednačina,
+iz kojeg treba rekonstruisati tajni vektor.
+
+Veza između LWE problema i rešetki leži u posebnoj vrsti rešetki koje smo već pominjali, a to su $q$-arne rešetke.
+Za matricu $A$ posmatrajmo rešetku
+\[
+    \latt = \Lambda_q(A^T) =
+    \{x \in \mathbb{Z}^n \mid x \equiv A z \pmod q,\ z \in \mathbb{Z}^m \}
+\]
+
+Vektor $A \cdot s$ pripada ovoj rešetki, dok je poznati vektor $b$ dobijen dodavanjem
+male greške: $ b = A \cdot s + e \pmod q$.
+
+Dakle, vektor $b$ se nalazi blizu nekog vektora iz rešetke $\latt$.
+LWE problem može se zato geometrijski posmatrati kao problem u kom treba pronaći
+rešetkasti vektor koji je blizak datom vektoru $b$.
+Možemo čak i proceniti koliko su bliska ova dva vektora,
+jer znamo da je $e$ dobijeno iz naše raspodele greške.
+Sa veoma velikom verovatnoćom, norma vektora $e$ je $ \|e\| \leq \frac{2 \cdot \sigma \cdot \sqrt{m}}{\sqrt{2} \cdot \pi} $. 
+Ovo je upravo ideja problema dekodiranja na ograničenoj udaljenosti(eng. \textit{Bounded-Distance Decoding Problem - BDD}). 
+Tačnije, LWE se iz ove perspektive može posmatrati kao $BDD_\alpha$ problem, gde je
+$ \alpha = \frac{2\sigma\sqrt{m}}{\sqrt{2}\pi \lambda_1(\latt)} $.
+
+%todo referenca na lattices
+
+Ovo pokazuje intuiciju iza redukcije LWE problema.
+Formalna redukcija iz najgoreg u prosečan slučaj je složenija,
+ali upravo ova veza sa problemima na rešetkama daje osnovu za tvrdnju da je LWE težak problem u prosečnom slučaju.
+
+\subsection{Protokol javnog ključa zasnovan na LWE}
+
+Na osnovu LWE problema može se konstruisati jednostavan protokol javnog ključa.
+Ovaj protokol nije najefikasnija praktična šema,
+ali je koristan jer jasno pokazuje kako se ideja LWE problema koristi u kriptografiji.
+Malu grešku ćemo koristiti za sakrivanje tajne vrednosti,
+dok će dešifrovanje i dalje biti moguće ako greška ne postane prevelika.
+
+Neka su dati parametri $n$, $m$ i $q$, gde je $q$ neparan prost broj.
+Poruka koju šifrujemo biće jedan bit, pa ćemo je označiti sa $\textcolor{red}{M} \in \{0,1\}$.
+
+\noindent\textbf{Generisanje ključa.}
+
+Za tajni ključ bira se vektor $ \textcolor{red}{s} \in \mathbb{Z}_q^n $.
+
+Zatim se za $i = 1,\ldots,m$ nasumično biraju vektori javnog ključa $ \textcolor{blue}{a_i} \in \mathbb{Z}_q^n $
+i male greške $ \textcolor{red}{e_i} \leftarrow D_{\mathbb{Z},\sigma} $. 
+
+Za svaki indeks $i$ računa se $ \textcolor{blue}{b_i} = \textcolor{blue}{a_i} \cdot \textcolor{red}{s} - 2\cdot\textcolor{red}{e_i} \pmod q $.
+
+Objavljujemo javni ključ:
+$ \textcolor{blue}{pk} = ((\textcolor{blue}{a_1},\textcolor{blue}{b_1}),\ldots,(\textcolor{blue}{a_m},\textcolor{blue}{b_m})), $
+
+Na primer, neka je $q=17$, $s=(2,3)$,
+$a_1=(1,2)$, $a_2=(4,1)$, $a_3=(2,4)$,
+i neka su greške $e_1=1$, $e_2=-1$, $e_3=2$.
+Tada dobijamo:
+\[ 
+\begin{aligned} 
+    {\color{blue}b_1} &= {\color{blue}(1,2)}\cdot{\color{red}(2,3)} - 2\cdot {\color{red}1} = 8 - 2 = 6 \pmod {17}, \\ 
+    {\color{blue}b_2} &= {\color{blue}(4,1)}\cdot{\color{red}(2,3)} - 2\cdot{\color{red}(-1)} = 11 + 2 = 13 \pmod {17}, \\ 
+    {\color{blue}b_3} &= {\color{blue}(2,4)}\cdot{\color{red}(2,3)} - 2\cdot {\color{red}2} = 16 - 4 = 12 \pmod {17}. 
+\end{aligned} 
+\]
+
+\noindent\textbf{Enkripcija.}
+
+Da bi se šifrovala poruka ${\color{red}M} \in \{0,1\}$, pošiljalac prvo bira nasumične indikatorske vrednosti
+$ {\color{red}\iota_i} \in \{0,1\}, \qquad i=1,\ldots,m $.
+Ove vrednosti određuju koji će se elementi javnog ključa koristiti pri formiranju šifrata. 
+
+Zatim se računa šifrat:
+
+\[
+    {\color{blue}c} = \sum_{i=1}^{m} {\color{red}\iota_i} {\color{blue}a_i} \pmod q
+\qquad
+\text{i}
+\qquad
+    {\color{blue}d} = {\color{red}M} - \sum_{i=1}^{m} {\color{red}\iota_i} {\color{blue}b_i} \pmod q.
+\]
+
+\noindent\textbf{Dekripcija.}
+
+Primalac, koji zna tajni ključ ${\color{red}s}$, računa
+\[
+    \begin{aligned}
+        {\color{blue}c} \cdot {\color{red}s} + {\color{blue}d} \pmod q
+        &=
+        \left(\sum_{i=1}^{m} {\color{red}\iota_i} {\color{blue}a_i}\right) \cdot {\color{red}s}
+        + {\color{red}M}
+        - \sum_{i=1}^{m} {\color{red}\iota_i} {\color{blue}b_i} \pmod q \\
+        &=
+        \sum_{i=1}^{m} {\color{red}\iota_i} ({\color{blue}a_i} \cdot {\color{red}s})
+        + {\color{red}M}
+        - \sum_{i=1}^{m} {\color{red}\iota_i} ({\color{blue}a_i} \cdot {\color{red}s} - 2{\color{red}e_i}) \pmod q \\
+        &=
+        {\color{red}M} + 2\sum_{i=1}^{m} {\color{red}\iota_i} {\color{red}e_i} \pmod q.
+    \end{aligned}
+\]
+
+Vrednost $ \eta = 2\sum_{i=1}^{m} {\color{red}\iota_i} {\color{red}e_i} $
+naziva se šum šifrata. 
+Pošto su greške $e_i$ male, 
+očekujemo da i njihov zbir ostane mali u odnosu na modul $q$.
+Ako je šum dovoljno mali, pri redukciji modulo $q$ ne dolazi do preskakanja
+preko granice modula, pa izraz možemo posmatrati kao celobrojnu vrednost
+$M+\eta$.
+
+Kako je $\eta$ paran broj, poruka se dobija redukcijom modulo $2$:
+
+\[
+    ({\color{red}M} + \eta) \pmod 2 = {\color{red}M}.
+\]
+
+Zato dešifrovanje uspeva sve dok je šum dovoljno mali.
+
+
+\section{Ring-LWE}
+
+U prethodnom delu videli smo kako se LWE problem može iskoristiti za konstrukciju protokola javnog ključa.
+Međutim, običan LWE ima jedan praktičan problem:
+javni ključ i šifrat mogu biti veoma veliki.
+U protokolu koji smo opisali javni ključ se sastoji od velikog broja vektora,
+a šifrat sadrži vektor i jednu dodatnu vrednost.
+Zbog toga je memorijsko opterećenje relativno veliko.
+
+Da bi se ovo smanjilo, uvodi se varijanta LWE problema zasnovana na prstenima polinoma,
+koja se naziva \emph{prstenasti LWE} (engl.\ \emph{Ring Learning With Errors}, Ring-LWE).
+Osnovna ideja je da se umesto opštih matrica i vektora koriste polinomi iz prstena polinoma.
+Na taj način se dobija kompaktniji zapis, a računanje postaje efikasnije.
+
+Kod običnog LWE problema osnovna operacija je množenje matrice i vektora, $ x \longmapsto A \cdot x $.
+Kod Ring-LWE problema ovu operaciju zamenjujemo množenjem polinoma u odgovarajućem prstenu.
+Posmatrajmo prsten $ R = \mathbb{Z}[X]/(F(X)) $, gde je $F(X)$ celobrojni polinom stepena $n$.
+Elementi ovog prstena mogu se posmatrati kao polinomi stepena manjeg od $n$ sa celobrojnim koeficijentima.
+Sabiranje se vrši kao obično sabiranje polinoma,
+dok se množenje vrši kao množenje polinoma,
+nakon čega se rezultat redukuje po modulu polinoma $F(X)$.
+
+Pošto u kriptografskim primenama radimo i po modulu $q$, uvodimo oznaku
+$ R_q = (\mathbb{Z}/q\mathbb{Z})[X]/(F(X)) $.
+Elementi prstena $R_q$ su polinomi stepena manjeg od $n$, čiji se koeficijenti
+posmatraju po modulu $q$.
+
+Veza između običnog LWE i Ring-LWE problema dolazi iz toga što se polinom može
+posmatrati i kao vektor njegovih koeficijenata.
+Na primer, polinom
+\[
+    a(X) = a_0 + a_1X + \cdots + a_{n-1}X^{n-1}
+    \qquad
+    \text{zapisujemo kao}
+    \qquad
+    a = (a_0,a_1,\ldots,a_{n-1}).
+\]
+Slično tome, množenje nekim fiksiranim polinomom $a(X)$ može se predstaviti kao
+množenje posebnom matricom.
+Ako je
+\[
+    c(X) = a(X) \cdot b(X) \pmod {F(X)},
+\]
+onda se koeficijenti polinoma $c(X)$ mogu dobiti kao
+\[
+    c = M_a \cdot b,
+\]
+gde je $M_a$ matrica koja odgovara množenju polinomom $a(X)$.
+
+Kao i kod običnog LWE problema, potrebno je uvesti raspodelu greške.
+\begin{definition}
+    \textbf{Diskretna Gausova raspodela}, sa oznakom $D_{R,\sigma}$, predstavlja raspodelu koja daje polinome iz $R$ čiji su koeficijenti mali,
+    odnosno približno raspodeljeni kao normalna raspodela sa srednjom vrednošću nula
+    i standardnom devijacijom $\sigma$. 
+    Drugim rečima, ako je $ e(X) = e_0 + e_1X + \cdots + e_{n-1}X^{n-1} $,
+    onda su koeficijenti $e_i$ sa velikom verovatnoćom mali.
+\end{definition}
+
+\begin{definition}
+    \textbf{Pretraživački Ring-LWE problem}
+    (engl.\ \emph{Search Ring-LWE}) definiše se na sledeći način.
+    Neka su $a,s \in R_q$, neka je $e \leftarrow D_{R,\sigma}$ i neka je
+    \[
+        b = a \cdot s + e \pmod q.
+    \]
+    Za dati par $(a,b)$, cilj je pronaći tajni polinom $s$.
+\end{definition}
+
+Ova definicija veoma liči na običan LWE problem.
+Razlika je u tome što umesto matrice $A$, vektora $s$ i vektora greške $e$,
+sada radimo sa polinomima $a$, $s$ i $e$ u prstenu $R_q$.
+Dakle, izraz
+\[
+    b = A \cdot s + e \pmod q
+\]
+iz običnog LWE problema zamenjen je izrazom
+\[
+    b = a \cdot s + e \pmod q
+\]
+u prstenu polinoma.
+
+Prednost Ring-LWE problema je u tome što se pomoću jednog polinoma može
+predstaviti struktura koja bi kod običnog LWE zahtevala celu matricu. Time se
+smanjuje veličina javnog ključa i šifrata, a množenje polinoma može se računati
+efikasnije od opšteg množenja matrice i vektora. Zbog toga Ring-LWE predstavlja
+važan korak od teorijske LWE konstrukcije ka praktičnijim kriptografskim protokolima.
+
+\subsection{Protokol javnog ključa zasnovan na Ring-LWE}
+
+Protokol javnog ključa koji smo opisali kod običnog LWE problema možemo preneti i u Ring-LWE okruženje.
+Ali nije nam cilj samo da prepišemo istu konstrukciju sa polinomima,
+već i da smanjimo veličinu javnog ključa.
+Kod LWE protokola javni ključ je sadržao veliki broj vrednosti koje se mogu posmatrati kao šifrovanja nule.
+Kod Ring-LWE protokola želimo da takva šifrovanja nule pravimo po potrebi,
+tokom enkripcije, umesto da ih sve unapred čuvamo u javnom ključu.
+
+Neka su $p$ i $q$ uzajamno prosti brojevi, pri čemu je $p \ll q$.
+Takođe, neka je zadat prsten $R$, odgovarajući prsten $R_q$, kao i raspodela greške $D_{R,\sigma}$.
+Parametri $p$, $q$, $R$ i $\sigma$ predstavljaju javne parametre sistema.
+Poruke koje šifrujemo pripadaju prstenu $R_p$.
+
+\noindent\textbf{Generisanje ključa.}
+
+Za tajni ključ biramo male polinome $ {\color{red}s}, {\color{red}e} \leftarrow D_{R,\sigma}$.
+
+Zatim biramo i nasumičan element $ {\color{blue}a} \leftarrow R_q $.
+
+Računamo $ {\color{blue}b} = {\color{blue}a} \cdot {\color{red}s} + p \cdot {\color{red}e} \pmod q $.
+
+Javni ključ: $ {\color{blue}pk} = ({\color{blue}a},{\color{blue}b}) $, tajni ključ: $ {\color{red}sk} = {\color{red}s} $.
+
+Javni ključ se može posmatrati kao nasumično šifrovanje nule.
+
+\noindent\textbf{Enkripcija.}
+
+Neka je poruka $ {\color{red}M} \in R_p $.
+Da bismo šifrovali poruku, radimo sledeće:
+\[
+\begin{aligned}
+    {\color{red}e_0},{\color{red}e_1},{\color{red}e_2} \leftarrow D_{R,\sigma} \\
+    {\color{blue}c_0} = {\color{blue}b} \cdot {\color{red}e_0} + p \cdot {\color{red}e_1} + {\color{red}M} \pmod q \\
+    {\color{blue}c_1} = {\color{blue}a} \cdot {\color{red}e_0} + p \cdot {\color{red}e_2} \pmod q
+\end{aligned}
+    \]
+Šifrat je par $ ({\color{blue}c_0},{\color{blue}c_1}) $.
+
+Ovde polinom $e_0$ služi za nasumičnost, dok polinomi $e_1$ i $e_2$ dodaju mali
+šum. Na taj način se tokom enkripcije pravi novo nasumično šifrovanje nule, koje
+se zatim dodaje poruci $M$.
+
+\noindent\textbf{Dekripcija.}
+
+Za dekripciju koristimo tajni ključ ${\color{red}s}$ i računamo
+\[
+    \begin{aligned}
+        {\color{blue}c_0} - {\color{blue}c_1} \cdot {\color{red}s}
+        &=
+        ({\color{blue}b} \cdot {\color{red}e_0} + p \cdot {\color{red}e_1} + {\color{red}M})
+        -
+        ({\color{blue}a} \cdot {\color{red}e_0} + p \cdot {\color{red}e_2})\cdot {\color{red}s} \pmod q \\
+        &=
+        (({\color{blue}a} \cdot {\color{red}s} + p \cdot {\color{red}e})\cdot {\color{red}e_0} + p \cdot {\color{red}e_1} + {\color{red}M})
+        -
+        ({\color{blue}a} \cdot {\color{red}e_0} \cdot {\color{red}s} + p \cdot {\color{red}e_2} \cdot {\color{red}s}) \pmod q \\
+        &=
+        p \cdot {\color{red}e} \cdot {\color{red}e_0} + p \cdot {\color{red}e_1} + {\color{red}M}
+        -
+        p \cdot {\color{red}e_2} \cdot {\color{red}s} \pmod q \\
+        &=
+        {\color{red}M} + p \cdot ({\color{red}e} \cdot {\color{red}e_0} + {\color{red}e_1} - {\color{red}e_2} \cdot {\color{red}s}) \pmod q.
+    \end{aligned}
+\]
+Označimo šum šifrata sa
+\[
+    \eta = {\color{red}e} \cdot {\color{red}e_0} + {\color{red}e_1} - {\color{red}e_2} \cdot {\color{red}s}.
+\]
+Tada je rezultat dekripcije oblika
+\[
+    {\color{red}M} + p \cdot \eta \pmod q.
+\]
+Pošto su polinomi $s$, $e$, $e_0$, $e_1$ i $e_2$ birani iz raspodele greške,
+njihovi koeficijenti su mali, pa je i šum $\eta$ mali. Ako je šum dovoljno mali,
+ne dolazi do preskakanja preko modula $q$, pa izraz možemo posmatrati kao
+\[
+    {\color{red}M} + p \cdot \eta.
+\]
+Na kraju redukujemo rezultat po modulu $p$:
+\[
+    {\color{red}M} + p \cdot \eta \equiv {\color{red}M} \pmod p.
+\]
+Dakle, dobija se originalna poruka ${\color{red}M}$.
+
+Ovaj protokol pokazuje dve glavne prednosti Ring-LWE konstrukcije.
+Prvo, poruke više nisu samo bitovi iz skupa $\{0,1\}$, već mogu biti elementi prstena $R_p$.
+Drugo, javni ključ je znatno manji nego kod osnovne LWE šeme,
+jer se sastoji samo od dva elementa prstena, $a$ i $b$.
+
+\section{Kyber}
+
+
