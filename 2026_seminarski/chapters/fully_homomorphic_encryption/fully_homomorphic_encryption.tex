@@ -154,21 +154,14 @@ Nedovoljno pravne regulacije kao i kr\v senje postoje\' ce regulacije daje vlasn
 
 \subsection{Ma\v sinsko u\v cenje}
 
-Homomorfna enkripcija nalazi primene u ma\v sinskom u\v cenju - veoma prirodna primena sa obzirom na to da se svaki model ma\v sinskog u\v cenja svodi na aritmeti\v cke funkcije, i da je mnoge modele korisno trenirati na osetljivim podacima \cite{marcolla2022survey} \footnote{Strana 22, sekcija FHE FOR MACHINE LEARNING}.
+Homomorfna enkripcija nalazi primene u ma\v sinskom u\v cenju - veoma prirodno sa obzirom na to da se svaki model ma\v sinskog u\v cenja svodi na kompoziciju aritmeti\v ckih operacija, i da je mnoge modele potrebno trenirati na osetljivim podacima \cite{marcolla2022survey} \footnote{Strana 22, sekcija FHE FOR MACHINE LEARNING}.
+Od zna\v caja su i \v sifrovanj podataka pri upotrebi gotovog modela, i treniranje modela na \v sifrovanim podacima. Koristiti model sa \v sifrovanim podacima mo\v ze biti korisno za sakrivanje osetljivih upita postavljenih velikom jezi\v ckom modelu. Treniranje modela na \v sifrovanim podacima izme\dj u ostalog omogu\' cava bezbednu kolaboraciju. Recimo, nekoliko bolnica \v zeli zajedno da u\v cestvuju u treniranju modela, ali svaka bolnica je du\v zna da sakrije osetljive medicinske podatke svojih pacijenata. Uz FHE, svaka bolnica doprinosi enkriptovanim podacima, a model se trenira tako da nijedna institucija nije videla podatke druge.
 
-Treniranje modela na \v sifrovanim podacima omogu\' cava bezbednu kolaboraciju: recimo, nekoliko bolnica \v zele zajedno da u\v cestvuju u treniranju modela, ali svaka bolnica je du\v zna da sakrije osetljive medicinske podatke svojih pacijenata.
-
-Upotreba istreniranog modela uz \v sifrovanje tako\dj e je zna\v cajna. Na primer, korisnik \v zeli da postavi osetljiv upit velikom jezi\v ckom modelu.
-
-\subsubsection{Bezbedna kolaboracija}
-
-Pomenuli smo ve\' c na primeru ma\v sinskog u\v cenja, ali FHE je korisna uvek kada vi\v se korisnika \v zeli da vr\v si zajedni\v cko izra\v cunavanje funkcije nad osetljivim podacima.
-Osim primera sa bolnicom, primer je banka koja \v zeli da organizuje aukciju bez otkrivanja (i bez saznavanja!) pojedina\v cnih ponuda u\v cesnika i cena prodavaca \cite{MITHenzingerHE2}.
+Isti princip bezbedne kolaboracije primenjuje se \v sire od ma\v sinskog u\v cenja — na primer, banka mo\v ze da organizuje aukciju u kojoj \v cak ni ona kao organizator ne saznaje pojedina\v cne ponude u\v cesnika i cene prodavaca \cite{MITHenzingerHE2}.
 
 \subsection{Internet stvari}
 
-Iako su ure\dj aji povezani u internet stvari korisni, oslanjanje na takve ure\dj aje zna\v ci prihvatiti da \' ce li\v cni podaci (o zdravlju, lokaciji, navikama) biti de\v sifrovani na serveru pre bilo kakve obrade. Upotreba FHE u ovom kontekstu pru\v za dodatan potreban nivo bezbednosti.
-\cite{marcolla2022survey} \footnote{Strana 23, sekcija HE IN FOG COMPUTING FOR IOT}.
+Ure\dj aji povezani u internet stvari kontinuirano prikupljaju li\v cne podatke — o zdravlju, lokaciji, svakodnevnim navikama — koji se tipi\c no \v salju na server radi obrade. FHE omogu\' cava da ta obrada ostane u potpunosti u \v sifrovanom domenu, i time korisnicima pru\v za nivo privatnosti koji tradicionalne arhitekture ne garantuju \cite{marcolla2022survey} \footnote{Strana 23, sekcija HE IN FOG COMPUTING FOR IOT}.
 
 \section{Otvorena pitanja}
 
