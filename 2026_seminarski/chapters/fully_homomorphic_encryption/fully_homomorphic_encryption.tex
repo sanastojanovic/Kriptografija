@@ -61,7 +61,7 @@ $$\mathrm{D}(\mathrm{Eval}(f, (c_1, ..., c_n), ek)) = f(m_1, ..., m_n)$$
 
 Svaka poznata homomorfna \v sema enkripcije se zasniva propabilisti\v ckom algoritmu koji pri \v sifrovanju dodaje slu\v cajan \v sum. Vr\v senjem aritmeti\v ckih operacija \v sum raste, i nakon dovoljnog broja operacija, \v sifrat se vi\v se ne mo\v ze de\v sifrovati. Zna\v ci, svaka \v sema se zapravo zasniva na delimi\v cno homomorfnoj enkripciji.
 Potpuno homomorfna enkripcija je nastala kada je Gentri 2009. na\v sao na\v cin da SHE \v semu pretvori u FHE.
-Gentri je smislio na\v cin da smanji \v sum \v sifrovanoj poruci, i ovo naziva \textit{butstreping}. 
+Gentri je smislio na\v cin da smanji \v sum \v sifrovanoj poruci, i ovo naziva \textit{bootstraping}. 
 
 Dakle, FHE se, u svim poznatim \v semama, vr\v si ponavljanjem slede\' ca dva koraka:
 \begin{enumerate}
@@ -70,7 +70,7 @@ Dakle, FHE se, u svim poznatim \v semama, vr\v si ponavljanjem slede\' ca dva ko
 \end{enumerate}
 
 \section{DGHV}
-Rad koji opisuje DGHV je iza\v sao 2010. godine, godinu dana nakon Gentrijevog revolucionarnog phd-a, a napisali su ga Dijk, Gentry, Halevi i Vaikuntanatha (otuda naziv \v semi DGHV).
+Rad koji opisuje DGHV je iza\v sao 2010. godine, godinu dana nakon Gentrijeve revolucionarne doktorske disertacije, a napisali su ga Dijk, Gentry, Halevi i Vaikuntanatha (otuda naziv \v semi DGHV).
 Ova enkripciona \v sema je ra\v cunski vrlo skupa i nije nigde u upotrebi, ali je razumljiva, i navodi se iz pedago\v skih razloga. O DGHV se mo\v ze \v citati u \cite{marcolla2022survey} \footnote{Strana 9, sekcija First Generation: FHE based on the AGCD problem}, ali blog \cite{paliares2024dghv} daje \v citkiji opis. Pre uvo\dj enja DGHV, posmatramo jedan uvodni primer.
 
 \subsection{Uvodni primer}
@@ -95,7 +95,7 @@ Dakle, enkripcija i dekripcija rade. Kako se pona\v saju aritmeti\v cke operacij
 \textbf{Sabiranje}:  Lako se vidi da va\v zi $c_1 + c_2 = (m_1 + m_2) + 2\cdot (r_1 + r_2) + p\cdot (q_1 + q_2)$.
 Dakle, ako su $r_1$ i $r_2$ bili dovoljno mali na po\v cetku poruka se i dalje mo\v ze de\v sifrovati, ali ve\' c sad se vidi da, koliko god mali bili, imamo samo kona\v cno mnogo sabiranja pre nego \v sto \v sum postane preveliki.
 
-\textbf{Mno\v zenje} $c_1\cdot c_2 = m_1\cdot m_2 + 2\cdot (r_2\cdot m_1 + r_1\cdot m_2 + 2\cdot r_1\cdot r_2) + p(q_1m_2 + 2q_1r_2 + 2q_1q_2 + 2q_2r_1 + q_2m_1)$. Velika zagrada koja stoji pomno\v zena sa $p$ mo\v ze biti novo veliko slu\v cajno $q$, tu nema problema. \v Sum je sada pribli\v zno velik kao $(r_1+r_2)^2$ (podsetnik da je $m$ je samo jedan bit).
+\textbf{Mno\v zenje} $c_1\cdot c_2 = m_1\cdot m_2 + 2\cdot (r_2\cdot m_1 + r_1\cdot m_2 + 2\cdot r_1\cdot r_2) + p(q_1m_2 + 2q_1r_2 + 2q_1q_2 + 2q_2r_1 + q_2m_1)$. Velika zagrada koja stoji pomno\v zena sa $p$ mo\v ze biti novo veliko slu\v cajno $q$, tu nema problema. \v Sum je sada pribli\v zno velik kao $r_1\cdot r_2$ (podsetnik da je $m$ je samo jedan bit).
 
 Ovo je lepo, ali koja je poenta homomorfne enkripcije ako server ima klju\v c kojim je mogao samo da de\v sifruje podatke i izvr\v si operacije? Su\v stina homomorfne enkripcije da server nema pristup podacima kojima ra\v cuna, tako da je davanje tajnog klju\v ca serveru nedopustivo. Ovo je bio samo uvod za enkripcionu \v semu sa javnim klju\v cem DGHV, u kojoj klijent ne\' ce dati svoj tajni klju\v c $p$ serveru, ali je sr\v z matematike koja stoji iza ove \v seme ilustrovana ovim uvodnim primerom.
 
@@ -127,8 +127,8 @@ Kako smo $r_0$ odabrali tako da bude paran, vidimo da je $c$ opet oblika $m + 2R
 
 Sabiranje i mno\v zenje se pona\v saju identi\v cno kao u primeru gore.
 
-\section{Butstreping}
-Tehnika butstrepinga \footnote{Bele\v ske sa predavanja \cite{MITHenzingerHE2} odli\v cno obja\v snjavaju butstreping} omogu\' cava da se od \v sifrata koji šifruje poruku $m$ uz veliku količinu šuma (nastalu kao posledica izvođenja homomorfnih računanja) dobije novi \v sifrat koji šifruje istu poruku $m$, ali sa malom količinom šuma. Tako, kada \v sum dobijen kao posledica aritmeti\v ckih operacija postane preveliki, \v sifrati se osve\v ze, i nad njima server nastavi da vr\v si homomorfna izra\v cunavanja. Tako se povremenim osve\v zavanjem od delimi\v cno homomorfne enkripcije dobija potpuno homomorfna. 
+\section{bootstraping}
+Tehnika butstrepinga \footnote{Bele\v ske sa predavanja \cite{MITHenzingerHE2} odli\v cno obja\v snjavaju bootstraping} omogu\' cava da se od \v sifrata koji šifruje poruku $m$ uz veliku količinu šuma (nastalu kao posledica izvođenja homomorfnih računanja) dobije novi \v sifrat koji šifruje istu poruku $m$, ali sa malom količinom šuma. Tako, kada \v sum dobijen kao posledica aritmeti\v ckih operacija postane preveliki, \v sifrati se osve\v ze, i nad njima server nastavi da vr\v si homomorfna izra\v cunavanja. Tako se povremenim osve\v zavanjem od delimi\v cno homomorfne enkripcije dobija potpuno homomorfna. 
 
 \textbf{Intuicija} Po definiciji, algoritam za de\v sifrovanje $\mathrm{D}(c, sk)$ uklanja \v sum iz \v sifrata $c$. Ako bi server imao tajni klju\v c $sk$, mogao bi da izvr\v si algoritam $\mathrm{D}(c, sk)$ koji uklanja \v sum, i da ponovo \v sifruje i dobije \v sifrat $c'$ sa malim, sve\v zim \v sumom. Jasno je da je nedopustivo serveru otkriti tajni klju\v c $sk$, jer je osnovni zahtev sakrivanje podataka serveru.
 Ovde dolazimo do Gentrijeve revolucionarne ideje: i algoritam $\mathrm{D}(c, sk)$ za de\v sifrovanje i uklanjanje \v suma je samo aritmeti\v cka funkcija koja se mo\v ze izvr\v siti homomorfno u \v sifrovanom domenu! Klijent serveru \v salje tajni klju\v c $sk$ \v sifrovano. Ovo je zapravo evaluacioni klju\v c $ek$. Evaluacioni klju\v c je zapravo \v sifrat tajnog klju\v ca $ek = \mathrm{E}(sk, sk)$.
@@ -140,7 +140,7 @@ Tako se od delimi\v cno homomorfne enkripcione \v seme dobija potpuno homomorfna
 
 Da bi ova konstrukcija bila mogu\' ca, funkcija $\mathrm{D}$ mora biti „dovoljno jednostavna” , odnosno mora pripadati familiji funkcija  kojima polazna delimi\v cno homomorfna enkripciona \v sema barata.
 
-Primetimo da se butstreping oslanja na jo\v s jednu pretpostavku o bezbednosti. Nju nazivamo \textit{kru\v zna bezbednost} - server dobija \v sifrat tajnog klju\v ca. Ovo nije bezbedno u svakoj enkripcionoj \v semi. Za neke \v seme se zna da nisu kru\v zno bezbedne i one se, naravno, ne koriste za FHE. Za \v seme koje se koriste (npr. GSW) se ne zna da li su kru\v zno bezbedne. Pretpostavlja se da jesu, jer nijedan napad nije objavljen, ali trenutno ne postoji dokaz da jesu bezbedne.
+Primetimo da se bootstraping oslanja na jo\v s jednu pretpostavku o bezbednosti. Nju nazivamo \textit{kru\v zna bezbednost} - server dobija \v sifrat tajnog klju\v ca. Ovo nije bezbedno u svakoj enkripcionoj \v semi. Za neke \v seme se zna da nisu kru\v zno bezbedne i one se, naravno, ne koriste za FHE. Za \v seme koje se koriste (npr. GSW) se ne zna da li su kru\v zno bezbedne. Pretpostavlja se da jesu, jer nijedan napad nije objavljen, ali trenutno ne postoji dokaz da jesu bezbedne.
 Sve FHE \v seme koje trenutno postoje se oslanjaju na pretpostavku o kru\v znoj bezbednosti. Na\' ci neku koja se ne oslanja predstavlja jedno otvoreno pitanje za dalji razvoj.
 
 
@@ -174,7 +174,7 @@ Iako su ure\dj aji povezani u internet stvari korisni, oslanjanje na takve ure\d
 
 Iako implementacije FHE postoje (HElib, Microsoft SEAL, OpenFHE i druge), upotreba je trenutno ograni\v cena zbog ekonomisanja ra\v cunarskim resursima. 
 Sve implementacije se oslanjaju na vr\v senje operacija uz gomilanje \v suma i redovno butstrepovanje \cite{gentry2010computing}. Ovaj proces je ra\v cunarski zahtevan.
-Bilo bi revolucionarno na\' ci \v semu koja ne zahteva butstreping, ali svaki pronalazak \v seme sa ra\v cunski manje zahtevnim butstrepingom je zna\v cajan pomak.
+Bilo bi revolucionarno na\' ci \v semu koja ne zahteva bootstraping, ali svaki pronalazak \v seme sa ra\v cunski manje zahtevnim butstrepingom je zna\v cajan pomak.
 
 
 Osim ovoga, postji prostor za napredak u nala\v zenju FHE \v sema koje se ne oslanjaju na re\v setke. Sve moderne implementacije se oslanjaju na LWE ili prstenasti LWE \cite{MITHenzingerHE2}.
