@@ -1,25 +1,26 @@
-% Poglavlje: LWE
+% Poglavlje: Učenje sa greškama
 % Autor: Tanja Gavrić (mr251065)
 
 \section{Uvod}
 
 U prethodnom poglavlju smo videli zašto su nam potrebni kriptosistemi otporni
-na kvantne računare i da su rešetke jedna od osnova za konstrukciju tih kriptosistema.
-Ostaje, međutim, pitanje na kakvim tačno problemima formiramo ove sisteme. 
-Takođe, kako da formalno opravdamo da su ovi problemi teški.
+na napade kvantnih računara, i da su rešetke jedna od osnova za konstrukciju tih kriptosistema.
+Saznali smo i koji problemi na rešetkama su najrelevantniji, 
+ali nam ostaje da vidimo kako se oni koriste za konstrukcije kriptosistema koji su proglašeni za najnoviji standard u svetu kriptografije.
+Takođe, dolazi i do potrebe da formalno opravdamo težinu problema nove generacije.
 Matematički okvir kojim ćemo se služiti da opišemo težinu ovih problema je teorija složenosti.
 
 Centralnu ulogu u teoriji složenosti ima klasa $NP$,
 kojoj pripadaju problemi čije se potencijalno rešenje može verifikovati (ne i pronaći!) u polinomijalnom vremenu.
 Najtežim problemima u ovoj klasi se smatraju \emph{$NP$-kompletni} problemi,
 jer bi pronalaženje polinomijalnog algoritma za rešavanje bilo kog od njih
-dokazalo jednakost klasa $P$ i $NP$.
+dokazalo jednakost klasa $P$ i $NP$.~\cite{goldreich2008complexity}\footnote{Lep uvod u teoriju složenosti može se pronaći u knjizi Goldreich-a}
 
 Moglo bi se očekivati da bi onda najteži kriptosistemi bili upravo oni zasnovani na $NP$-kompletnim problemima.
 Međutim, više pokušaja konstrukcije $NP$-kompletnih sistema koji su se pojavili u praksi pokazalo se nebezbednim,
 nađeni su algoritmi koji ih razbijaju.
 Na primer, Merkle-Helman kriptosistem zasnovan na $NP$-kompletnom problemu ranca,
-može se razbiti tehnikama zasnovanim na LLL algoritmu, o kom smo pričali u prethodnom poglavlju~\cite{lagariasOdlyzko1985}.
+može se razbiti tehnikama zasnovanim na LLL algoritmu, o kom smo pričali u prethodnom poglavlju~\cite{lagariasOdlyzko1985}\footnote{Više informacija o ovom problemu i njegovom razbijanju može se pronaći u radu Lagariasa i Odlyzkoa.}.
 
 Problem leži u tome što $NP$-kompletnost garantuje težinu samo za najgori slučaj datih problema.
 U kriptografiji se najčešće koriste instance koje nastaju prema nekoj raspodeli, odnosno prosečni slučajevi.
@@ -39,19 +40,19 @@ pa su one posebno pogodne za postkvantnu kriptografiju.
 Baš ova redukcija je u osnovi konstrukcije koju ćemo razmatrati u
 nastavku: problem \emph{učenja sa greškama} (engl.\ \emph{Learning With Errors}, LWE),
 čija je prosečna težina povezana sa najgorim slučajem teškog problema na rešetkama.
-U nastavku će najpre biti definisan LWE problem,
-zatim njegova algebarska varijanta Ring-LWE, a na kraju i kriptografska šema
-Kyber, koja se zasniva na modulnoj varijanti LWE problema.
+U nastavku će najpre biti definisan problem \emph{učenja sa greškama},
+zatim njegova algebarska varijanta \emph{učenje sa greškama u prstenu}, a na kraju i kriptografska šema
+\emph{Kyber}, koja se zasniva na modulnoj varijanti problema učenja sa greškama.
 
 
 
-\section{LWE}
+\section{Učenje sa greškama}
 
 Problem \emph{učenja sa greškama} uveo je Oded Regev u radu
 \emph{On Lattices, Learning with Errors, Random Linear Codes, and Cryptography}~\cite{regev2005lwe},
 za koji je 2018. godine dobio G\"odelovu nagradu.
 
-Pre formalne definicije korisno je prvo objasniti šta u ovom kontekstu znači "učenje".
+Pre formalne definicije korisno je prvo objasniti šta u ovom kontekstu znači \glqq učenje\grqq.
 Pretpostavimo da postoji neka skrivena linearna veza koju želimo da otkrijemo. 
 
 \begin{example}
@@ -72,8 +73,8 @@ Pretpostavimo da postoji neka skrivena linearna veza koju želimo da otkrijemo.
 Dakle, iz tačnih linearnih jednačina možemo direktno da \emph{naučimo}, 
 odnosno odredimo, 
 skrivene vrednosti $s_1$ i $s_2$.
-Kod LWE problema situacija je slična, ali jednačine nisu potpuno tačne. Svakoj
-jednačini dodata je mala greška. 
+Kod problema učenja sa greškama, situacija je slična, ali jednačine nisu potpuno tačne. 
+Svakoj jednačini dodata je mala greška. 
 
 \begin{example}
     Umesto prethodnog sistema mogli bismo imati
@@ -95,9 +96,8 @@ Upravo dodavanje male greške, koje na prvi pogled deluje bezazleno, čini probl
 
 Da bismo ovo matematički opisali, potrebno je uvesti raspodelu greške.
 \begin{definition}
-    \textbf{Diskretna Gausova raspodela}, sa oznakom $D_{\mathbb{Z}^n,\sigma}$, predstavlja raspodelu greške nad
-    celobrojnim
-    vektorima dimenzije $n$. Raspodela proizvodi vektore čije su koordinate približno raspodeljene kao normalna raspodela sa srednjom vrednošću nula i standardnom devijacijom $\sigma$.
+    \textbf{Diskretna Gausova raspodela greške nad $\mathbb{Z}^n$ }, sa oznakom $D_{\mathbb{Z}^n,\sigma}$, predstavlja raspodelu greške nad
+    celobrojnim vektorima dimenzije $n$. Raspodela proizvodi vektore čije su koordinate približno raspodeljene kao normalna raspodela sa srednjom vrednošću nula i standardnom devijacijom $\sigma$.
 \end{definition}
 
 \begin{example}
@@ -109,9 +109,8 @@ Da bismo ovo matematički opisali, potrebno je uvesti raspodelu greške.
     Neka je $q$ prirodan, najčešće prost broj, i neka je $\mathbb{Z}_q = \mathbb{Z}/q\mathbb{Z}$ skup ostataka po modulu $q$.
     Posmatrajmo matricu $A \in \mathbb{Z}_q^{n \times m},$
     tajni vektor $s \in \mathbb{Z}_q^m$,
-    i vektor greške $
-    e \leftarrow D_{\mathbb{Z}^n,\sigma}$.
-    Tada se LWE uzorak može zapisati u obliku \[ b = A \cdot s + e \pmod q \]
+    i vektor greške $e \leftarrow D_{\mathbb{Z}^n,\sigma}$.
+    Pomoću njih računamo \[ b = A \cdot s + e \pmod q \]
     Matrica $A$ i vektor $b$ su poznati,
     dok su tajni vektor $s$ i greška $e$ nepoznati.
     Dakle, pretraživački LWE je problem pronalaženja tajnog vektora $s \in \mathbb{Z}_q^m$ na osnovu para $(A,b)$.
@@ -122,37 +121,35 @@ $ A \cdot s = b \pmod q $, što smo videli u primeru~\ref{ex:lwe-bez-greske}.
 Međutim, umesto tačnog linearnog sistema, dodavanjem greške dobija se sistem približno tačnih linearnih jednačina,
 iz kojeg treba rekonstruisati tajni vektor.
 
-Veza između LWE problema i rešetki leži u posebnoj vrsti rešetki koje smo već pominjali, a to su $q$-arne rešetke.
+Veza između problema učenja sa greškama i rešetki leži u posebnoj vrsti rešetki koje smo već pominjali, a to su $q$-arne rešetke.
 Za matricu $A$ posmatrajmo rešetku
 \[
     \latt = \Lambda_q(A^T) =
-    \{x \in \mathbb{Z}^n \mid x \equiv A z \pmod q,\ z \in \mathbb{Z}^m \}
+    \{x \in \mathbb{Z}^n \mid x \equiv A \cdot z \pmod q,\ z \in \mathbb{Z}^m \}
 \]
 
 Vektor $A \cdot s$ pripada ovoj rešetki, dok je poznati vektor $b$ dobijen dodavanjem
 male greške: $ b = A \cdot s + e \pmod q$.
 
 Dakle, vektor $b$ se nalazi blizu nekog vektora iz rešetke $\latt$.
-LWE problem može se zato geometrijski posmatrati kao problem u kom treba pronaći
+Problem učenja sa greškama može se zato geometrijski posmatrati kao problem u kom treba pronaći
 rešetkasti vektor koji je blizak datom vektoru $b$.
 Možemo čak i proceniti koliko su bliska ova dva vektora,
-jer znamo da je $e$ dobijeno iz naše raspodele greške.
-Sa veoma velikom verovatnoćom, norma vektora $e$ je $ \|e\| \leq \frac{2 \cdot \sigma \cdot \sqrt{m}}{\sqrt{2} \cdot \pi} $. 
+jer znamo da je $e$ dobijeno iz naše raspodele greške $D_{\mathbb{Z}^n,\sigma}$.
+Sa veoma velikom verovatnoćom, procenjujemo normu vektora $e$ kao $ \|e\| \leq \frac{2 \cdot \sigma \cdot \sqrt{m}}{\sqrt{2} \cdot \pi} $. 
 Ovo je upravo ideja problema dekodiranja na ograničenoj udaljenosti(eng. \textit{Bounded-Distance Decoding Problem - BDD}). 
-Tačnije, LWE se iz ove perspektive može posmatrati kao $BDD_\alpha$ problem, gde je
+Tačnije, problem učenja sa greškama se iz ove perspektive može posmatrati kao $BDD_\alpha$ problem, gde je
 $ \alpha = \frac{2\sigma\sqrt{m}}{\sqrt{2}\pi \lambda_1(\latt)} $.
 
-%todo referenca na lattices
-
-Ovo pokazuje intuiciju iza redukcije LWE problema.
-Formalna redukcija iz najgoreg u prosečan slučaj je složenija,
+Ovo pokazuje intuiciju iza redukcije problema učenja sa greškama.
+Formalna redukcija iz najgoreg u prosečan slučaj je složenija\cite{regev2005lwe},
 ali upravo ova veza sa problemima na rešetkama daje osnovu za tvrdnju da je LWE težak problem u prosečnom slučaju.
 
-\subsection{Protokol javnog ključa zasnovan na LWE}
+\subsection{Protokol javnog ključa zasnovan na problemu učenja sa greškama}
 
-Na osnovu LWE problema može se konstruisati jednostavan protokol javnog ključa.
+Na osnovu problema učenja sa greškama može se konstruisati jednostavan protokol javnog ključa.
 Ovaj protokol nije najefikasnija praktična šema,
-ali je koristan jer jasno pokazuje kako se ideja LWE problema koristi u kriptografiji.
+ali je koristan jer jasno pokazuje kako se ideja problema koristi u kriptografiji.
 Malu grešku ćemo koristiti za sakrivanje tajne vrednosti,
 dok će dešifrovanje i dalje biti moguće ako greška ne postane prevelika.
 
@@ -219,14 +216,12 @@ Primalac, koji zna tajni ključ ${\color{red}s}$, računa
 \]
 
 Vrednost $ \eta = 2\sum_{i=1}^{m} {\color{red}\iota_i} {\color{red}e_i} $
-naziva se šum šifrata. 
+naziva se \emph{šum šifrata}. 
 Pošto su greške $e_i$ male, 
 očekujemo da i njihov zbir ostane mali u odnosu na modul $q$.
-Ako je šum dovoljno mali, pri redukciji modulo $q$ ne dolazi do preskakanja
-preko granice modula, pa izraz možemo posmatrati kao celobrojnu vrednost
-$M+\eta$.
+Ako je šum dovoljno mali, i nakon primene operacije$\pmod q$ imaćemo vrednost $M+\eta$.
 
-Kako je $\eta$ paran broj, poruka se dobija redukcijom modulo $2$:
+Kako je $\eta$ paran broj, poruka se dobija redukcijom po modulu $2$:
 
 \[
     ({\color{red}M} + \eta) \pmod 2 = {\color{red}M}.
@@ -235,22 +230,20 @@ Kako je $\eta$ paran broj, poruka se dobija redukcijom modulo $2$:
 Zato dešifrovanje uspeva sve dok je šum dovoljno mali.
 
 
-\section{Ring-LWE}
+\section{Učenje sa greškama u prstenu}
 
-U prethodnom delu videli smo kako se LWE problem može iskoristiti za konstrukciju protokola javnog ključa.
-Međutim, običan LWE ima jedan praktičan problem:
+U prethodnom delu videli smo kako se problem učenja sa greškama može iskoristiti za konstrukciju protokola javnog ključa.
+Međutim, protokol ima jedan praktičan problem:
 javni ključ i šifrat mogu biti veoma veliki.
-U protokolu koji smo opisali javni ključ se sastoji od velikog broja vektora,
-a šifrat sadrži vektor i jednu dodatnu vrednost.
 Zbog toga je memorijsko opterećenje relativno veliko.
 
-Da bi se ovo smanjilo, uvodi se varijanta LWE problema zasnovana na prstenima polinoma,
-koja se naziva \emph{prstenasti LWE} (engl.\ \emph{Ring Learning With Errors}, Ring-LWE).
-Osnovna ideja je da se umesto opštih matrica i vektora koriste polinomi iz prstena polinoma.
+Da bi se ono smanjilo, uvodi se varijanta problema zasnovana na prstenovima polinoma,
+koja se naziva \emph{učenje sa greškama u prstenu}, ili \emph{prstenasti LWE} (engl. \emph{Ring-LWE}).
+Osnovna ideja je da se umesto matrica koriste polinomi iz prstenova polinoma.
 Na taj način se dobija kompaktniji zapis, a računanje postaje efikasnije.
 
 Kod običnog LWE problema osnovna operacija je množenje matrice i vektora, $ x \longmapsto A \cdot x $.
-Kod Ring-LWE problema ovu operaciju zamenjujemo množenjem polinoma u odgovarajućem prstenu.
+Kod Ring-LWE problema, umesto matrica koristimo polinome u odgovarajućem prstenu.
 Posmatrajmo prsten $ R = \mathbb{Z}[X]/(F(X)) $, gde je $F(X)$ celobrojni polinom stepena $n$.
 Elementi ovog prstena mogu se posmatrati kao polinomi stepena manjeg od $n$ sa celobrojnim koeficijentima.
 Sabiranje se vrši kao obično sabiranje polinoma,
@@ -263,7 +256,7 @@ Elementi prstena $R_q$ su polinomi stepena manjeg od $n$, čiji se koeficijenti
 posmatraju po modulu $q$.
 
 Veza između običnog LWE i Ring-LWE problema dolazi iz toga što se polinom može
-posmatrati i kao vektor njegovih koeficijenata.
+posmatrati i kao vektor njegovih koeficijenata, ali i kao matrica.
 Na primer, polinom
 \[
     a(X) = a_0 + a_1X + \cdots + a_{n-1}X^{n-1}
@@ -286,15 +279,17 @@ gde je $M_a$ matrica koja odgovara množenju polinomom $a(X)$.
 
 Kao i kod običnog LWE problema, potrebno je uvesti raspodelu greške.
 \begin{definition}
-    \textbf{Diskretna Gausova raspodela}, sa oznakom $D_{R,\sigma}$, predstavlja raspodelu koja daje polinome iz $R$ čiji su koeficijenti mali,
+    \textbf{Diskretna Gausova raspodela greške nad $R$}, sa oznakom $D_{R,\sigma}$, 
+    predstavlja raspodelu koja daje polinome iz $R$ čiji su koeficijenti mali,
     odnosno približno raspodeljeni kao normalna raspodela sa srednjom vrednošću nula
     i standardnom devijacijom $\sigma$. 
+    
     Drugim rečima, ako je $ e(X) = e_0 + e_1X + \cdots + e_{n-1}X^{n-1} $,
     onda su koeficijenti $e_i$ sa velikom verovatnoćom mali.
 \end{definition}
 
 \begin{definition}
-    \textbf{Pretraživački Ring-LWE problem}
+    \textbf{Pretraživački problem učenja sa greškama u prstenu}
     (engl.\ \emph{Search Ring-LWE}) definiše se na sledeći način.
     Neka su $a,s \in R_q$, neka je $e \leftarrow D_{R,\sigma}$ i neka je
     \[
@@ -322,12 +317,15 @@ smanjuje veličina javnog ključa i šifrata, a množenje polinoma može se rač
 efikasnije od opšteg množenja matrice i vektora. Zbog toga Ring-LWE predstavlja
 važan korak od teorijske LWE konstrukcije ka praktičnijim kriptografskim protokolima.
 
-\subsection{Protokol javnog ključa zasnovan na Ring-LWE}
 
-Protokol javnog ključa koji smo opisali kod običnog LWE problema možemo preneti i u Ring-LWE okruženje.
+\subsection{Protokol javnog ključa zasnovan na učenju sa greškama u prstenu}
+
+Protokol javnog ključa koji smo opisali kod običnog učenja sa greškama 
+možemo preneti i u Ring-LWE okruženje.
 Ali nije nam cilj samo da prepišemo istu konstrukciju sa polinomima,
 već i da smanjimo veličinu javnog ključa.
-Kod LWE protokola javni ključ je sadržao veliki broj vrednosti koje se mogu posmatrati kao šifrovanja nule.
+Kod protokola javni ključ je sadržao veliki broj vrednosti 
+koje se mogu posmatrati kao šifrovanja nule.
 Kod Ring-LWE protokola želimo da takva šifrovanja nule pravimo po potrebi,
 tokom enkripcije, umesto da ih sve unapred čuvamo u javnom ključu.
 
@@ -407,11 +405,80 @@ Na kraju redukujemo rezultat po modulu $p$:
 \]
 Dakle, dobija se originalna poruka ${\color{red}M}$.
 
-Ovaj protokol pokazuje dve glavne prednosti Ring-LWE konstrukcije.
+Ovaj protokol pokazuje dve glavne prednosti učenja sa greškama u prstenu.
 Prvo, poruke više nisu samo bitovi iz skupa $\{0,1\}$, već mogu biti elementi prstena $R_p$.
-Drugo, javni ključ je znatno manji nego kod osnovne LWE šeme,
+Drugo, javni ključ je znatno manji nego kod osnovne šeme učenja sa greškama,
 jer se sastoji samo od dva elementa prstena, $a$ i $b$.
+
+Takođe, šema se može pokazati i kao IND-CPA (Indistinguishability under chosen-plaintext attack) bezbedna, 
+što znači da je otporna na napade sa izabranim otvorenim tekstom.
+
+Sa druge strane, učenje sa greškama u ovom osnovnom obliku \emph{nije} 
+IND-CCA (Indistinguishability under chosen-ciphertext attack) bezbedno, 
+jer je moguće iz postojećeg šifrata $c^*$ konstruisati novi validan šifrat $c$, 
+čija je dešifrovana poruka $m$ u određenoj vezi sa originalnom porukom $m^*$.
+Iako je ovo slabost iz ugla otpornosti na napade, 
+od posebnog je značaja za potpuno homomorfno šifrovanje.
+
 
 \section{Kyber}
 
+NSA je 2022. godine objavila CNSA 2.0, skup preporuka za prelazak sistema
+nacionalne bezbednosti na kvantno-otporne algoritme. 
+U tom skupu, Kyber je naveden kao osnovni algoritam za uspostavljanje ključa. 
+Time Kyber postaje jedna od najvažnijih praktičnih primena ideje učenja sa greškama, 
+a njegova standardizovana verzija je 2024. godine objavljena kao ML-KEM u standardu
+FIPS 203.
 
+Pre nego što opišemo samu šemu Kyber,
+potrebno je ukratko objasniti problem na kome se ona zasniva, 
+a to je modulno učenje sa greškama, 
+poznato kao \emph{Module-LWE}.
+
+\subsection{Modulno učenje sa greškama}
+
+\emph{Module Learning With Errors}, odnosno Module-LWE se može posmatrati 
+kao uopštenje običnog LWE i Ring-LWE pristupa. 
+Prostor $\mathbb{Z}_q^n$ zamenjuje modulom $R_q^k$, 
+gde je $R_q^k$ $k$-struki Dekartov proizvod prstena polinoma $R_q$~\cite{nistFips203}. 
+Zato tajni ključ $s$ u Module-LWE problemu nije običan vektor nad $\mathbb{Z}_q$, 
+već element modula $R_q^k$, odnosno vektor čije su komponente polinomi.
+
+Neka je $R_q$ prsten polinoma po modulu $q$, kao u Ring-LWE delu. 
+Umesto jednog elementa $a \in R_q$, kod Module-LWE problema posmatramo matricu
+$ A \in R_q^{k \times k} $ i vektore $s,e \in R_q^k$.
+Osnovni izraz tada ima oblik
+\[
+    b = A \cdot s + e \pmod q.
+\]
+Prednost ovakvog pristupa je u tome što se zadržava veliki deo efikasnosti koju
+daje rad sa prstenom polinoma, 
+ali se dobija fleksibilnija struktura nego kod čistog Ring-LWE problema. 
+Parametar $k$ određuje dimenziju modula, 
+pa se izborom tog parametra mogu dobiti različiti nivoi bezbednosti 
+bez promene osnovnog prstena. 
+
+\subsection{Konstrukcija ML-KEM šeme}
+
+Konstrukcija ML-KEM šeme može se posmatrati u dva koraka.
+Prvo se, na osnovu Module-LWE problema, 
+konstruiše šema javnog ključa (engl.\ \emph{Public-Key Encryption}, PKE). 
+Ova šema koristi istu osnovnu ideju koju smo već videli kod LWE i Ring-LWE konstrukcija.
+
+Drugi korak je pretvaranje te PKE šeme u mehanizam enkapsulacije ključa
+(engl.\ \emph{Key Encapsulation Mechanism}, KEM). 
+To se postiže pomoću Fujisaki--Okamoto transformacije, 
+koja se često koristi za dobijanje jačeg bezbednosnog modela iz osnovne šeme javnog ključa.
+
+Zbog osobina Fujisaki--Okamoto transformacije, očekuje se da dobijeni ML-KEM 
+zadovoljava IND-CCA2 bezbednost.~\cite{nistFips203}
+
+\subsection{Praktična upotreba Kyber-a}
+
+Važnost Kyber-a nije samo teorijska. 
+I pre završne standardizacije, 
+Kyber je počeo da se integriše u kriptografske biblioteke i realne sisteme. 
+Na zvaničnoj stranici projekta Kyber navodi se nekoliko primera takve upotrebe:
+Cloudflare je integrisao Kyber, zajedno sa drugim postkvantnim algoritmima u biblioteku CIRCL; 
+Amazon je u okviru AWS Key Management Service podržao hibridne režime koji uključuju Kyber; 
+a IBM je još 2019. godine predstavio prototip kvantno-bezbednog uređaja za skladištenje podataka koji koristi Kyber.
