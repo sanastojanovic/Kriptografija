@@ -3,80 +3,20 @@
 
 \section{Uvod}
 
-Homomorfna enkripcija omogu\' cava delegiranje vr\v senja operacija nad podacima nekom serveru kome ne verujemo, bez kompromitovanja privatnosti samih podataka. 
+Potpuno homomorfna enkripcija omogu\' cava delegiranje vr\v senja operacija nad podacima, bez kompromitovanja privatnosti samih podataka. 
 
-Mo\v zemo na bezbedan na\v cin delegirati izra\v cunavanje proizvoljne funkcije nad na\v sim podacima potencijalno nebezbednom serveru, tako \v sto enkriptujemo ulazne vrednosti, po\v saljemo ih \v sifrovane serveru, server homomorfno vr\v si operacije nad enkriptovanim podacima, ra\v cuna proizvoljnu funkciju, i \v salje nam rezultat, koji mi treba samo da de\v sifrujemo.
+Klijent mo\v ze na bezbedan na\v cin delegirati izra\v cunavanje proizvoljne funkcije nad privatnim podacima serveru kome ne veruje. Podatke \v salje enkriptovane, server homomorfno vr\v si operacije nad enkriptovanim podacima, i \v salje nam rezultat klijentu, koji klijent treba samo da de\v sifruje.
 
-Klju\v c je u tome da server mo\v ze ovako ne\v sto da radi bez poznavanja tajnog klju\v ca (sa tajnim klju\v cem bilo ko mo\v ze da de\v sifruje pa izra\v cuna).
-
-% todo sredi
-Mogu\' cnost obrade podataka koji su enkriptovani zna\v ci bezbedan cloud computing, ma\v sinsko u\v cenje (zamislite da mo\v zete da pitate bilo \v sta chatgptja, i da ste sigurni da open AI ne mo\v ze da pro\v cita ni upit koji ste mu poslali, ni odgovor koji su oni vama poslali! Svaki veliki jezi\v cki model se, ipak, svodi na aritmeti\v cke operacije, tako da potpuno homomorfna enkripcija ovo omogu\' cava), i jo\v s mnogo toga (sekcija "primene").
-% Gentri CACM clanak
-
-Navikli smo da dobrim enkripcionim \v semama smatramo one u kojima \v sifrat li\v ci na slu\v cajan \v sum, ali sada nam je zapravo veoma po\v zeljno da enkriptovani podaci \v cuvaju odre\dj ene strukture otvorenog teksta - one strukture potrebne za vr\v senje aritmeti\v ckih operacija.
-
-U ovom tekstu izlo\v zi\' cemo teorijske osnove homomorfne enkripcije (glavne pojmove), izlo\v zi\' cemo jednu \v semu koja je dobar uvod i lako ju je razumeti, jo\v s jednu koja se zapravo koristi u bibliotekama koje su trenutno dostupne za upotrebu, ilustrovati koncept kojim je Gentri omogu\' cio da ovaj vid enkripcije bude realna mogu\' cnost a ne pusta \v zelja, izlo\v zi\' cemo glavne primene homomorfne enkripcije i izlo\v ziti koje sve to prepreke ovoliko dugo udaljuju FHE od op\v ste primene, koje su prevazi\dj ene a na kojima se jo\v s uvek radi.
+Navikli smo da dobrim enkripcionim \v semama smatramo one u kojima \v sifrat li\v ci na slu\v cajan \v sum, ali sada nam je zapravo veoma po\v zeljno da enkriptovani podaci \v cuvaju odre\dj ene strukture otvorenog teksta - one strukture potrebne za vr\v senje aritmeti\v ckih operacija \cite{gentry2010computing}.
 
 \section{Istorija}
 
-Ideju homomorfne enkripcije kao ne\v sto \v sto bi bilo dobro da postoji su predlo\v zili  Rivest, Adleman i Dertouzos jo\v s 1978. Tek preko 30 godina kasnije, 2009. godine, Gentry u svojoj doktorskoj disertaciji predla\v ze prvu prakti\v cno mogu\' cu \v semu potpuno homomorfne enkripcije. Nakon toga je koncipirano i implementirano jo\v s puno \v sema, i ra\v cunski efikasnijih i lak\v sih za razumevanje.
-
-\section{Notacija i pojmovi}
-% todo 
-treba nekako da ubacim pri\v cu o tome da dubina funkcije $F$ tako\dj e mora biti ograni\v cena, to jest da ne zavisi od $f$, i za\v sto
-\begin{definition}
-    Neka je $R(+, \cdot)$ prsten. Funkcija $f$ je \textit{aritmeti\v cka} ako se mo\v ze zapisati kao kompozicija sabiranja i mno\v zenja. 
-\end{definition}
-
-\begin{definition}
-    Neka je $N\in \mathbb{N}$. Aritmeti\v cka funkcija $f$ je \textit{dubine} $N$ ako se mo\v ze zapisati kao kompozicija sabiranja i mno\v zenja, tako da se ukupno javljaju manje od $N$ puta.
-\end{definition}
-
-Neka enkripciona \v sema sa javnim klju\v cem radi nad porukama $m \in R$, neka su $E$ i $D$ operacije za \v sifrovanje i de\v sifrovanje, neka je $pk$ javni klju\v c, a $sk$ tajni. Ukratko, imamo
-$$D(E(m, pk), sk) = m $$
-
-
-\begin{definition}
-    Red funkcije $f$ je broj argumenata koje prima.
-\end{definition}
-
-\begin{definition}
-Enkripciona \v sema je \textit{potpuno homomorfna} ako za proizvoljnu aritmeti\v cku funkciju $f$ proizvoljnog reda $n$ postoji metod da se prevede u funkciju $F$ tako\dj e reda $n$ takvu da za proizvoljne $m_1, ..., m_n\in R $ i njihove \v sifrate $c_1 = E(m_1, pk), ..., c_n = E(m_n, pk)$ va\v zi
-$$D(F(c_1, ..., c_n)) = f(m_1, ..., m_n)$$
-\end{definition}
-
-Intuitivno, \v zelimo da postoje operacije $\oplus$ i $\odot$ takve da za sve $m_1, m_2 \in R$ va\v zi
-    $$D(E(m_1, pk) \oplus E(m_2, pk), sk) = m_1 + m_2$$
-    $$D(E(m_1, pk) \odot E(m_2, pk), sk) = m_1 \cdot m_2$$
-\v Zelimo da proizvoljnu aritmeti\v cku funkciju $f$ prevodimo u $F$ tako \v sto svaki $+$ zamenimo za $\oplus$, i svako $\cdot$ za $\odot$.
-
-Ukratko, da bi server klijentu izra\v cunao $f(m_1, ..., m_n)$, potrebno je da klijent po\v salje \v sifrate $c_1, ..., c_n$. Server ra\v cuna $F(c1, ..., c_n)$, nazovimo taj broj $C$, i \v alje ga nazad klijentu. Klijent de\v sifruje $C$ i dobija $f(m_1, ..., m_n)$. 
-
-\begin{definition}
-    Enkripciona \v sema je \textit{delimi\v cno homomorfna} ako postoji $N\in \mathbb{N}$ takvo da za proizvoljnu aritmeti\v cku funkciju $f$ dubine $N$ ili manje, proizvoljnog reda $n$, postoji metod da se prevede u funkciju $F$ tako\dj e reda $n$ takvu da za proizvoljne $m_1, ..., m_n\in R $ i njihove \v sifrate $c_1 = E(m_1, pk), ..., c_n = E(m_n, pk)$ va\v zi
-    $$D(F(c_1, ..., c_n)) = f(m_1, ..., m_n)$$
-    
-\end{definition}
-
-%todo fix
-Za\v sto nam je potrebno da uvodimo pojam delimi\v cno homomorfne enkripcije (u literaturi \textit{somewhat homomorphic encription} ili \textit{SHE}?
-Svaka poznata \v shema se zasniva na LWE, koji se zasniva na propabilisti\v ckim algoritmima. LWE po definiciji dodaje \v sum, a vr\v senjem aritmeti\v ckih operacija \v sum raste, i nakon dovoljnog broja operacija, \v sifrat se vi\v se ne mo\v ze de\v sifrovati.
-Gentri je 2009. smislio na\v cin da nakon odre\dj enog broja operacija "osve\v zi" \v sum, da ga smanji. Ovo se zove \textit{bootstraping}. 
-
-FHE se, u svim poznatim \v semama, vr\v si u dva koraka:
-1) Kreira delimi\v cno homomorfnu enkripcionu shemu
-2) Pomo\' cu bootstrapinga smanjuje \v sum 
-% dovde
-
-ilustracija kako to LWE na ocigledan nacin daje delimi\v cno homomorfnu enkripciju
-
-Uglavnom ljudi za homomorfnu enkripciju prave sheme javnim klju\v cem, mada ima i sistema sa simetri\v cnim klju\v cevima.
-
+Ideju homomorfne enkripcije kao ne\v sto \v sto bi bilo dobro da postoji su predlo\v zili  Rivest, Adleman i Dertouzos jo\v s 1978. Tek preko 30 godina kasnije, 2009. godine, Gentry je u svojoj doktorskoj disertaciji predlo\v zio prvu prakti\v cno mogu\' cu \v semu potpuno homomorfne enkripcije. Nakon toga je koncipirano i implementirano jo\v s puno \v sema, i ra\v cunski efikasnijih i lak\v sih za razumevanje \cite{marcolla2022survey} \footnote{Strana 1, pasus 1}.
 
 
 \section{Multiplikativno homomorfna enkripcija}
 
-Enkripcione \v seme koje omogu\' cavaju vr\v senje \textit{nekih} aritmeti\v ckih operacija nad \v sifrovanim tekstom su nam ve\' c odavno sa ovog kursa poznate - RSA i ElGamal! Obe ove enkripcione \v seme su multiplikativno homomorfne.
+Enkripcione \v seme koje omogu\' cavaju vr\v senje samo mno\v zenja ili samo sabiranja nad \v sifrovanim tekstom su nam ve\' c odavno sa ovog kursa poznate - RSA i ElGamal! Obe ove enkripcione \v seme su multiplikativno homomorfne. Postoje i aditivno homomorfne, jedan primer je Pailierov kriptosistem, ali njega nismo radili na ovom kursu.
 
 U RSA, \v sifrat poruke $m$ je $c=m^e\pmod{N}$. Recimo da su poruke $m_1$ i $m_2$ \v sifrovane sa $c_1 = m_1^e\pmod{N}$ i $c_2 = m_2^e\pmod{N}$. Mno\v zenjem ova dva \v sifrata dobijamo $m_1\cdot m_2 = m_1^e\cdot m_2^e = (m_1\cdot m_2)^e \pmod{N}$. Ovo jeste \v sifrat poruke $m_1\cdot m_2$.
 
@@ -87,112 +27,151 @@ Upravo se dobije ElGamal enkripcija poruke $m_1\cdot m_2$ sa slu\v cajnim parame
 Ipak, za potpuno homomorfnu enkripciju \v zelimo da mo\v zemo da predstavimo bilo koju aritmeti\v cku funkciju, a za to je dovoljno da imamo homomorfizme za sabiranje i za mno\v zenje.
 
 
+\section{Notacija i pojmovi} 
+Notacija preuzeta iz \cite{marcolla2022survey} \footnote{Strana 6, sekcija Definitions and Basic Notions}.
+\begin{definition}
+    Neka je $R(+, \cdot)$ prsten. Funkcija $f$ je \textit{aritmeti\v cka} ako se mo\v ze zapisati kao kompozicija sabiranja i mno\v zenja. 
+\end{definition}
+
+Kao i do sad, enkripciona \v sema sa javnim klju\v cem radi nad porukama $m \in R$, neka su $\mathrm{E}$ i $\mathrm{D}$ operacije za \v sifrovanje i de\v sifrovanje, neka je $pk$ javni klju\v c, a $sk$ tajni. Ukratko, imamo
+$$\mathrm{D}(\mathrm{E}(m, pk), sk) = m $$
+
+Ovde kao novost imamo \textit{evaluacioni algoritam}. Neka su $m_1, ..., m_n\in R$, neka su im \v sifrati $c_i = \mathrm{E}(m_i, pk)$, $i\in \{1, ..., n\}$ i neka je $f:R^n\rightarrow R$. Evaluacioni algoritam $\mathrm{Eval}$ kao argumente prima \textit{evaluacioni} klju\v c $ek$, funkciju $f$, \v sifrate $c_1, ..., c_n$, a kao rezultat daje \v sifrat $c_f$, takav da se de\v sifrovanjem dobija $f(m_1, ..., m_n)$. Drugim re\v cima, za $\mathrm{Eval}$ va\v zi
+$$c_f = \mathrm{Eval}(f, (c_1, ..., c_n), ek)$$
+$$\mathrm{D}(c_f, sk) = f(m_1, ..., m_n)$$
+Primetimo da se $c = \mathrm{E}(f(m_1, ..., m_n), pk)$ i $c_f$ de\v sifruju u isti broj, ali su druga\v ciji u konstrukciji i u op\v stem slu\v caju $c\neq c_f$. Potpuno homomorfna enkripcija kakva je poznata danas koristi probabilisti\v cku enkripciju, koja se oslanja na slu\v cajan \v sum. $c$ i $c_f$ imaju razli\v cite \v sumove.
+
+\begin{definition}
+    \label{dfn_fhe}
+Enkripciona \v sema je \textit{potpuno homomorfna} ili FHE ako za proizvoljno $n$, proizvoljnu aritmeti\v cku funkciju $f:R^n\rightarrow R$, proizvoljne poruke $m_1, ..., m_n\in R$ i njihove \v sifrate $c_i = \mathrm{E}(m_i, pk)$, $i\in \{1, ..., n\}$ va\v zi
+$$\mathrm{D}(\mathrm{Eval}(f, (c_1, ..., c_n), ek)) = f(m_1, ..., m_n)$$
+\end{definition}
+
+Intuitivno, \v zelimo da postoje operacije $\oplus$ i $\odot$ takve da za sve $m_1, m_2 \in R$ va\v zi
+    $$\mathrm{D}(\mathrm{E}(m_1, pk) \oplus \mathrm{E}(m_2, pk), sk) = m_1 + m_2$$
+    $$\mathrm{D}(\mathrm{E}(m_1, pk) \odot \mathrm{E}(m_2, pk), sk) = m_1 \cdot m_2$$
+Algoritam $\mathrm{Eval}(f, (c_1, ..., c_n), ek)$ vr\v simo tako \v sto svaki $+$ iz $f$ zamenimo za $\oplus$, i svako $\cdot$ za $\odot$.
+
+Ukoliko enkripciona \v sema ima ovakav homomorfizam iz $(+, \cdot)$ u $(\oplus, \odot)$, ali algoritam $\mathrm{D}$ uspe\v sno de\v sifruje samo ako je primenjeno dovoljno malo ovih operacija, u pitanju je \textit{delimi\v cno homomorfna} enkripciona \v sema, ili SHE.
+
+\begin{definition}
+    Enkripciona \v sema je \textit{delimi\v cno homomorfna} ako postoji ograni\v cena klasa „dovoljno jednostavnih” aritmeti\v ckih funkcija $\mathcal{F}$ takva da za proizvoljnu $f\in \mathcal{F}$ proizvoljnog reda $n$, proizvoljne poruke $m_1, ..., m_n\in R$ i njihove \v sifrate $c_i = E(m_i, pk)$, $i\in \{1, ..., n\}$ va\v zi
+$$\mathrm{D}(\mathrm{Eval}(f, (c_1, ..., c_n), ek)) = f(m_1, ..., m_n)$$
+\end{definition}
+
+Svaka poznata homomorfna \v sema enkripcije se zasniva propabilisti\v ckom algoritmu koji pri \v sifrovanju dodaje slu\v cajan \v sum. Vr\v senjem aritmeti\v ckih operacija \v sum raste, i nakon dovoljnog broja operacija, \v sifrat se vi\v se ne mo\v ze de\v sifrovati. Zna\v ci, svaka \v sema se zapravo zasniva na delimi\v cno homomorfnoj enkripciji.
+Potpuno homomorfna enkripcija je nastala kada je Gentri 2009. na\v sao na\v cin da SHE \v semu pretvori u FHE.
+Gentri je smislio na\v cin da smanji \v sum \v sifrovanoj poruci, i ovo naziva \textit{bootstraping}. 
+
+Dakle, FHE se, u svim poznatim \v semama, vr\v si ponavljanjem slede\' ca dva koraka:
+\begin{enumerate}
+\item  Izvr\v siti dozvoljen broj operacija polaznom SHE \v semom
+\item  Pomo\' cu butstrepinga smanjiti \v sum 
+\end{enumerate}
+
 \section{DGHV}
-Defini\v simo najpre jednu simetri\v cnu enkripcionu \v semu.
+Rad koji opisuje DGHV je iza\v sao 2010. godine, godinu dana nakon Gentrijeve revolucionarne doktorske disertacije, a napisali su ga Dijk, Gentry, Halevi i Vaikuntanatha (otuda naziv \v semi DGHV).
+Ova enkripciona \v sema je ra\v cunski vrlo skupa i nije nigde u upotrebi, ali je razumljiva, i navodi se iz pedago\v skih razloga. O DGHV se mo\v ze \v citati u \cite{marcolla2022survey} \footnote{Strana 9, sekcija First Generation: FHE based on the AGCD problem}, ali blog \cite{paliares2024dghv} daje \v citkiji opis. Pre uvo\dj enja DGHV, posmatramo jedan uvodni primer.
+
+\subsection{Uvodni primer}
+Defini\v simo najpre jednu simetri\v cnu enkripcionu \v semu koja radi sa porukama $m\in \mathbb{F}_2$
 
 \textbf{Generisanje klju\v ca}: klju\v c je slu\v cajan neparan broj $p$.
 
-\textbf{Enkripcija}: Poruka $m$ se enkriptuje sa $c=m + 2\cdot r + p\cdot q$, gde je $r$ "dovoljno mali" \v sum, a $q$ veliki slu\v cajan ceo broj.
+\textbf{Enkripcija}: Poruka $m$ se enkriptuje sa $c=m + 2\cdot r + p\cdot q$, gde je $r$ dovoljno mali \v sum, a $q$ veliki slu\v cajan ceo broj.
 
-\textbf{Dekripcija}: \v Sifrat $c$ se dekriptuje sa $(c \pmod{p})\pmod{2}$. Zaista, 
-$$(c \pmod{p})\pmod{2} = (m + 2\cdot r + p\cdot q \pmod{p})\pmod{2}$$
-$$= (m + 2\cdot r \pmod{p})\pmod{2}$$
-$$= m + 2\cdot r \pmod{2}$$
-$$= m $$
+\textbf{Dekripcija}: \v Sifrat $c$ se dekriptuje sa $(c \pmod{p})\pmod{2}$. Uverimo se da ovo radi:
+\begin{align}
+    (c \pmod{p})\pmod{2} &= (m + 2\cdot r + p\cdot q \pmod{p})\pmod{2}\\
+    &= (m + 2\cdot r \pmod{p})\pmod{2}\\
+    &= m + 2\cdot r \pmod{2}\\
+    &= m 
+\end{align}
 
-Zbog tre\' ceg reda smo tra\v zili da $r$ bude dovoljno malo. Ako je $2\cdot r < p$ tre\' ci red zaista sledi iz drugog.
+Zbog (10.3) smo tra\v zili da $r$ bude dovoljno malo. Ako je $2\cdot r < p$ (10.3) zaista sledi iz (10.2).
 
 Dakle, enkripcija i dekripcija rade. Kako se pona\v saju aritmeti\v cke operacije? Neka je $m_1$ \v sifrovano sa $c_1=m_1 + 2\cdot r_1 + p\cdot q_1$ i $m_2$ sa $c_2=m_2 + 2\cdot r_2 + p\cdot q_2$.
 
 \textbf{Sabiranje}:  Lako se vidi da va\v zi $c_1 + c_2 = (m_1 + m_2) + 2\cdot (r_1 + r_2) + p\cdot (q_1 + q_2)$.
 Dakle, ako su $r_1$ i $r_2$ bili dovoljno mali na po\v cetku poruka se i dalje mo\v ze de\v sifrovati, ali ve\' c sad se vidi da, koliko god mali bili, imamo samo kona\v cno mnogo sabiranja pre nego \v sto \v sum postane preveliki.
 
-\textbf{Mno\v zenje} $c_1\cdot c_2 = m_1\cdot m_2 + 2\cdot (r_2\cdot m_1 + r_1\cdot m_2 + 2\cdot r_1\cdot r_2) + p(q_1m_2 + 2q_1r_2 + 2q_1q_2 + 2q_2r_1 + q_2m_1)$. Velika zagrada koja stoji pomno\v zena sa $p$ mo\v ze biti novo veliko slu\v cajno $q$, tu nema problema. \v Sum je sada pribli\v zno velik kao $(r_1+r_2)^2$ (podsetnik da je $m$ je samo jedan bit).
+\textbf{Mno\v zenje} $c_1\cdot c_2 = m_1\cdot m_2 + 2\cdot (r_2\cdot m_1 + r_1\cdot m_2 + 2\cdot r_1\cdot r_2) + p(q_1m_2 + 2q_1r_2 + 2q_1q_2 + 2q_2r_1 + q_2m_1)$. Velika zagrada koja stoji pomno\v zena sa $p$ mo\v ze biti novo veliko slu\v cajno $q$, tu nema problema. \v Sum je sada pribli\v zno velik kao $r_1\cdot r_2$ (podsetnik da je $m$ je samo jedan bit).
 
-Ovo je sve lepo, ali koja je poenta homomorfne enkripcije ako server ima klju\v c kojim je mogao samo da de\v sifruje podatke, izvr\v si operacije, i opet \v sifruje? Upravo je poenta homomorfne enkripcije da server nema pristup podacima kojima ra\v cuna. Ovo je bio samo uvod u pri\v cu, klijent ne\' ce dati svoj tajni klju\v c $p$ serveru.
+Ovo je lepo, ali koja je poenta homomorfne enkripcije ako server ima klju\v c kojim je mogao samo da de\v sifruje podatke i izvr\v si operacije? Su\v stina homomorfne enkripcije da server nema pristup podacima kojima ra\v cuna, tako da je davanje tajnog klju\v ca serveru nedopustivo. Ovo je bio samo uvod za enkripcionu \v semu sa javnim klju\v cem DGHV, u kojoj klijent ne\' ce dati svoj tajni klju\v c $p$ serveru, ali je sr\v z matematike koja stoji iza ove \v seme ilustrovana ovim uvodnim primerom.
 
-U nastavku izla\v zem DGHV kakav su ga autori smislili. DGHV je asimetri\v cna \v sema.
+\subsection{DGHV}
 
 \textbf{Generisanje klju\v ca} Tajni klju\v c je slu\v cajno izabran veliki neparan broj $p$. Javni klju\v c je niz $(x_0, ..., x_n)$ takav da je $x_0$ najve\' ci i neparan, i za sve $i\in {1, ..., n}$ va\v zi $x_i = p\cdot q_i + r_i $ gde su 
-$q_i, r_i$ slu\v cajni celi brojevi.
+$q_i, r_i$ slu\v cajni celi brojevi, s tim \v sto $r_0$ mora da bude paran.
 
 
 \textbf{Enkripcija} Poruka $m \in \{0, 1\}$ se \v sifruje u \[c = m + 2r + 2\sum_{i\in S}x_i \pmod{x_0}\] gde je $r$ slu\v cajan ceo broj, a  $S$ slu\v cajan podskup od $\{1, ..., n\}$. Deo $\pmod{x_0}$ se tu nalazi da \v sifrat ne bi bio besmisleno veliki.
-Hajde da sredimo sabirke da vidimo da \v sifrovanje ima smisla i da li\v ci na primer gore:
+Hajde da sredimo sabirke da vidimo da \v sifrovanje ima smisla i da li\v ci na uvodni primer:
 
 \begin{align*}
 m + 2r + 2\sum_{i\in S}x_i \pmod{x_0} &= m + 2 r + 2\sum_{i\in S}(p\cdot q_i + r_i) \pmod{x_0}\\
 &= m + 2(r + \sum_{i\in S} r_i) + p\cdot 2\sum_{i\in S}q_i \pmod{x_0}\\
 &= m + 2R + pQ \pmod{x_0}
 \end{align*}
-Zaista, ovo mnogo li\v ci na oblik enkripcije u primeru gore! Jedino je potrebno pokazati da $\pmod{x_0}$ ne smeta. Ako je $c = m + 2R + pQ \pmod{x_0}$ mo\v zemo na\' ci $k$ takvo da $m + 2R + pQ = c + kx_0$. Kako je $x_0 = pq_0 + r_0$, imamo
+Sad je jasno \v sta \' ce nam onaj primer. 
+
+
+\textbf{Dekripcija} \v Sifrat c se de\v sifruje sa \[(c \pmod{p}) \pmod{2}\]
+Jedino je potrebno pokazati da $\pmod{x_0}$ ne smeta. Ako je $c = m + 2R + pQ \pmod{x_0}$ mo\v zemo na\' ci $k$ takvo da $m + 2R + pQ = c + kx_0$. Kako je $x_0 = pq_0 + r_0$, imamo
 \begin{align*}
     c &= m + 2R + pQ - k(pq_0 + r_0)\\
     &= m + 2(r + \sum_{i\in S} r_i) + p\cdot 2\sum_{i\in S}q_i - k(pq_0 + r_0)\\
     &= m + (2r + 2\sum_{i\in S} r_i - kr_0) + p\cdot (2\sum_{i\in S}q_i - kq_0)
-    &= m + 
 \end{align*} 
+Kako smo $r_0$ odabrali tako da bude paran, vidimo da je $c$ opet oblika $m + 2R' + pQ'$, i dekripcija radi identi\v cno kao u primeru gore.
+
+Sabiranje i mno\v zenje se pona\v saju identi\v cno kao u primeru gore.
+
+\section{bootstraping}
+Tehnika butstrepinga \footnote{Bele\v ske sa predavanja \cite{MITHenzingerHE2} odli\v cno obja\v snjavaju bootstraping} omogu\' cava da se od \v sifrata koji šifruje poruku $m$ uz veliku količinu šuma (nastalu kao posledica izvođenja homomorfnih računanja) dobije novi \v sifrat koji šifruje istu poruku $m$, ali sa malom količinom šuma. Tako, kada \v sum dobijen kao posledica aritmeti\v ckih operacija postane preveliki, \v sifrati se osve\v ze, i nad njima server nastavi da vr\v si homomorfna izra\v cunavanja. Tako se povremenim osve\v zavanjem od delimi\v cno homomorfne enkripcije dobija potpuno homomorfna. 
+
+\textbf{Intuicija} Po definiciji, algoritam za de\v sifrovanje $\mathrm{D}(c, sk)$ uklanja \v sum iz \v sifrata $c$. Ako bi server imao tajni klju\v c $sk$, mogao bi da izvr\v si algoritam $\mathrm{D}(c, sk)$ koji uklanja \v sum, i da ponovo \v sifruje i dobije \v sifrat $c'$ sa malim, sve\v zim \v sumom. Jasno je da je nedopustivo serveru otkriti tajni klju\v c $sk$, jer je osnovni zahtev sakrivanje podataka serveru.
+Ovde dolazimo do Gentrijeve revolucionarne ideje: i algoritam $\mathrm{D}(c, sk)$ za de\v sifrovanje i uklanjanje \v suma je samo aritmeti\v cka funkcija koja se mo\v ze izvr\v siti homomorfno u \v sifrovanom domenu! Klijent serveru \v salje tajni klju\v c $sk$ \v sifrovano. Ovo je zapravo evaluacioni klju\v c $ek$. Evaluacioni klju\v c je zapravo \v sifrat tajnog klju\v ca $ek = \mathrm{E}(sk, sk)$.
+Ako server izvr\v si $\mathrm{D}(c, sk)$ homomorfno u \v sifrovanom domenu, rezultat je enkripcija iste polazne poruke, ali drugi \v sifrat $c'$ sa manjim \v sumom.
+
+Algoritam $\mathrm{D}$ po definiciji uklanja \v sum, tako da \' ce jedini \v sum prisutan u $c'$ biti onaj koji proizilazi od osnovnog \v suma potrebnog za \v sifrovanje, i operacija koje \v cine $\mathrm{D}$.
+
+Tako se od delimi\v cno homomorfne enkripcione \v seme dobija potpuno homomorfna. $c$ je \v sifrat poruke $m$ u polaznoj delimi\v cno homomorfnoj enkripcionoj \v semi, a $c'$ u potpuno homomorfnoj enkripcionoj \v semi koju smo od polazne \v seme dobili procesom butstrepinga.
+
+Da bi ova konstrukcija bila mogu\' ca, funkcija $\mathrm{D}$ mora biti „dovoljno jednostavna” , odnosno mora pripadati familiji funkcija  kojima polazna delimi\v cno homomorfna enkripciona \v sema barata.
+
+Primetimo da se bootstraping oslanja na jo\v s jednu pretpostavku o bezbednosti. Nju nazivamo \textit{kru\v zna bezbednost} - server dobija \v sifrat tajnog klju\v ca. Ovo nije bezbedno u svakoj enkripcionoj \v semi. Za neke \v seme se zna da nisu kru\v zno bezbedne i one se, naravno, ne koriste za FHE. Za \v seme koje se koriste (npr. GSW) se ne zna da li su kru\v zno bezbedne. Pretpostavlja se da jesu, jer nijedan napad nije objavljen, ali trenutno ne postoji dokaz da jesu bezbedne.
+Sve FHE \v seme koje trenutno postoje se oslanjaju na pretpostavku o kru\v znoj bezbednosti. Na\' ci neku koja se ne oslanja predstavlja jedno otvoreno pitanje za dalji razvoj.
 
 
-\textbf{Dekripcija} \v Sifrat c se de\v sifruje sa \[(c \pmod{p}) \pmod{2}\]
+\section{Primene}
 
-Proverimo da dekripcija ima smisla: 
+\subsection{Podaci u oblaku}
+
+Ovo je sveobuhvatna primena, glavni razlog za\v sto je FHE koncipiran: korisnik \v zeli da delegira izra\v cunavanje neke funkcije mo\' cnom ali nepoverljivom serveru.
+U\v cestvovanje u oblaku tradicionalno podrazumeva da server u oblaku ima pristup podacima jer je potreban za vr\v senje izra\v cunavanja.
+Nedovoljno pravne regulacije kao i kr\v senje postoje\' ce regulacije daje vlasniku servera mo\' c da proda korisni\v cke podatke tre\' coj strani. Osim toga, serveri su ranjivi na zlonamerne napade \cite{ieee2026homomorphicusecases}.
+
+\subsection{Ma\v sinsko u\v cenje}
+
+Homomorfna enkripcija nalazi primene u ma\v sinskom u\v cenju - veoma prirodno sa obzirom na to da se svaki model ma\v sinskog u\v cenja svodi na kompoziciju aritmeti\v ckih operacija, i da je mnoge modele potrebno trenirati na osetljivim podacima \cite{marcolla2022survey} \footnote{Strana 22, sekcija FHE FOR MACHINE LEARNING}.
+Od zna\v caja su i \v sifrovanj podataka pri upotrebi gotovog modela, i treniranje modela na \v sifrovanim podacima. Koristiti model sa \v sifrovanim podacima mo\v ze biti korisno za sakrivanje osetljivih upita postavljenih velikom jezi\v ckom modelu. Treniranje modela na \v sifrovanim podacima izme\dj u ostalog omogu\' cava bezbednu kolaboraciju. Recimo, nekoliko bolnica \v zeli zajedno da u\v cestvuju u treniranju modela, ali svaka bolnica je du\v zna da sakrije osetljive medicinske podatke svojih pacijenata. Uz FHE, svaka bolnica doprinosi enkriptovanim podacima, a model se trenira tako da nijedna institucija nije videla podatke druge.
+
+Isti princip bezbedne kolaboracije primenjuje se \v sire od ma\v sinskog u\v cenja — na primer, banka mo\v ze da organizuje aukciju u kojoj \v cak ni ona kao organizator ne saznaje pojedina\v cne ponude u\v cesnika i cene prodavaca \cite{MITHenzingerHE2}.
+
+\subsection{Internet stvari}
+
+Ure\dj aji povezani u internet stvari kontinuirano prikupljaju li\v cne podatke — o zdravlju, lokaciji, svakodnevnim navikama — koji se tipi\c no \v salju na server radi obrade. FHE omogu\' cava da ta obrada ostane u potpunosti u \v sifrovanom domenu, i time korisnicima pru\v za nivo privatnosti koji tradicionalne arhitekture ne garantuju \cite{marcolla2022survey} \footnote{Strana 23, sekcija HE IN FOG COMPUTING FOR IOT}.
+
+\section{Otvorena pitanja}
+
+Iako implementacije FHE postoje (HElib, Microsoft SEAL, OpenFHE i druge), upotreba je trenutno ograni\v cena zbog ekonomisanja ra\v cunarskim resursima. 
+Sve implementacije se oslanjaju na vr\v senje operacija uz gomilanje \v suma i redovno butstrepovanje \cite{gentry2010computing}. Ovaj proces je ra\v cunarski zahtevan.
+Bilo bi revolucionarno na\' ci \v semu koja ne zahteva bootstraping, ali svaki pronalazak \v seme sa ra\v cunski manje zahtevnim butstrepingom je zna\v cajan pomak.
 
 
-
-
-Recimo da imamo Ring-LWE enkriocionu shemu. Sve \v sto sad treba da znamo je da je \v sifrat predstavljen sa $c = (c_0, c_1)$, tako da va\v zi $$c_0 - c_1\cdot s = m + p\cdot \eta _c \pmod{q}$$ gde je $\eta _c  $ \v sum a $m$ poruka.
-
-\subsection{Sabiranje}
-
-Za dve \v sifrovane poruke $c = (c_0, c_1)$ i $c' = (c_0', c_1')$ jasno va\v zi
-$$(c_0 + c_0') - (c_1 + c_1')\cdot s = (c_0 - c_1\cdot s) + (c_0' - c_1'\cdot s)$$
-$$= (m + p \cdot \eta _c) + (m' + p \cdot \eta _c') \pmod{q}$$
-$$ = (m + m') + p\cdot (\eta _c + \eta _c') \pmod{q}$$
-
-Zna\v ci, ako imamo samo dva \v sifrata i saberemo ih kao u prvoj jedna\v cini, dobijemo broj koji, ukoliko je \v sum $\eta _c + \eta _c'$ dovoljno mali, kad se de\v sifruje zaista daje zbir originalnih poruka.
-
-Ovako opisano vr\v senje operacija \v cini delimi\v cno aditivnu homomorfnu shemu. Kada smislimo kako da smanjimo \v sum, ima\' cemo aditivno homomorfnu shemu. Ali pre toga, hajde da vidimo \v sta \' cemo da mno\v zenjem.
-
-\subsection{Mno\v zenje}
-
-Da bismo omogu\' cili mno\v zenje, moramo da izmenimo malo javni klju\v c. U originalnoj enkripcionoj \v semi, javni klju\v c je $(a, b)$, a sada dodajemo jo\v s $\lceil \log _p q\rceil$ parova brojeva. O ovim brojevima korisno je razmi\v sljati kao o \v sifratima $p^i\cdot s^2$ za $i\in 0, ..., \lceil \log _p q\rceil$. Naime, uz javni klju\v c dodajemo $(a_i', b_i')$ dobijene na slede\' ci na\v cin: $a_i'$ biramo iz $R_q$, $e_i'$ biramo iz $D_{R, \sigma}$, a $b_i'$ ra\v cunamo sa $b_i' := a_i'\cdot s + p\cdot e_i' + p^i\cdot s_i^2 \pmod{q}$
-
-Operacija mno\v zenja se u ovoj \v semi slika u tenzorsko mno\v zenje \v sifrata.
-
-Neka su $c = (c_0, c_1)$ i $c' = (c_0', c_1')$ \v sifrati poruka $m$ i $m'$.
-Posmatrajmo tenzorski proizvod ovih \v sifrata: $c\otimes c' = (c_0\cdot c_0', c_0\cdot c_1', c_1\cdot c_0', c_1\cdot c_1') = (d_0, d_1, d_2, d_3)$.
-
-Sada je ovaj \v cetvorodimenzioni \v sifrat mogu\' ce de\v sifrovati tajnim klju\v cem $(1, -s)\otimes (1, -s) = (1, -s, -s, s^2)$ skalarnim mno\v zenjem ova dva vektora. Primetimo da va\v zi
-$$d_0 - d_1\cdot s - d_2\cdot s + d_3\cdot s^2 = c_0\cdot c_0' - c_0\cdot c_1'\cdot s - c_1\cdot c_0'\cdot s + c_1\cdot c_1'\cdot s^2 \pmod{q}$$
-$$= (c_0 - c_1\cdot s)\cdot (c_0' - c_1'\cdot s) \pmod{q}$$
-$$= (m + p\cdot \eta_c)\cdot (m'+p\cdot \eta_c') \pmod{q}$$
-$$= m\cdot m' + p\cdot (m\cdot \eta_c'+m'\cdot\eta_c+p\cdot\eta_c\cdot\eta_c')\pmod{q}$$
-
-\section{Bootstrapping}
-
-Gentrijeva genijalna ideja o bootstrappingu: i dekriptovanje poruke je samo vr\v senje aritmeti\v cke funkcije! $$D(c, sk) = m$$
-
-Ako mi koji vr\v simo operacije nad \v sifrovanim podacima, osim \v sto imamo \v sifre i homomorfizme izme\dj u operacija, znamo kako izgleda algoritam odnosno funkcija D, i ako imamo \textbf{enkriptovan} tajni klju\v c, mi mo\v zemo da dekriptujemo rezultat funkcije koju smo primenili.
-Zna\v ci, u \v sifrovanom domenu primenimo funkciju $D$ na $c$ (koje je enkodovano $m$ dobijeno kao rezultat neke komplikovane aritmeti\v cke funkcije, samim tim ima velik \v sum) sa tajnim klju\v cem $E(sk)$, mi dobijemo $c'$, koje je tako\dj e enkodovanje poruke $m$, ali ovaj put znamo ta\v cno koliki je maksimalan \v sum! Ovo je \v sum koji je proizvela funkcija $D$, a ona ima fiksnu dubinu, pa smo ovime resetovali \v sum na dovoljno mali.
-
-Nekoliko stvari ovde deluje paradoksalno. Prvo, server vr\v si dekripciju klijentovim tajnim klju\v cem. Ali, tajni klju\v c je \v sifrovan, i samo ova verzija je dostupa serveru, tako da bezbednost nije naru\v sena.
-
-Drugo, zar nismo od \v sifrata poruke $m$ dodatnim ra\v cunanjem opet do\v sli do \v sifrata $m$? Podsetimo se da se FHE oslanja na probabilisti\v cke algoritme. Poruka $m$ mo\v ze biti \v sifrovana na razne na\v cine.
-Opet, kako to da \v sum nije samo jo\v s porastao dodatnom primenom aritmeti\v ckih operacija? Funkcija de\v sifrovanja $D$ uklanja \v sum. Jedini \v sum koji ostaje nakon homomorfnog dekriptovanja je \v sum koji proizvedu operacije koje sastavljaju $D$. Operacija $D$ je dovoljno jednostavna i ovaj \v sum dovoljno mali.
-Dakle, mi smo od \v sifrata poruke $m$ sa velikim \v sumom do\v sli do \v sifrata poruke $m$ sa malim \v sumom.
-
-Tako smo od delimi\v cno homomorfne enkripcione \v seme dobili potpuno homomorfnu! $c$ je \v sifrat poruke $m$ u delimi\v cno homomorfnoj enkripcionoj \v semi, a $c'$ u potpuno homomorfnoj enkripcionoj \v semi koja se od originalne \v seme dobije procesom bootstrapinga.
-
-Primetimo da se bootstraping oslanja na dodatnu pretpostavku o bezbednosti: u literaturi se zove "circular hardness assumption".
-Pretpostavljamo da je bezbedno objaviti enkripciju samog tajnog klju\v ca. Ova pretpostavka nije dovoljno istra\v zena.
-Ima kritike i sumnje, ali jo\v s uvek niko nije objavio mogu\' c napad odnosno na\v cin da se enkriptovan tajni klju\v c zloupotrebi, ali koliko znam nemamo ni na\v cin da doka\v zemo da je nemogu\' ce.
-(https://hal.science/hal-03676650v1/document str 3)
-
-\section{Zaklju\v cak}
-Glavna mana i prepreka da se FHE vi\v se koristi (iako postoje implementacije) je computational overhead.
-Dalji napredak o\v cekujemo u smeru kreiranja ra\v cunski efikasnijih algoritama.
-
+Osim ovoga, postji prostor za napredak u nala\v zenju FHE \v sema koje se ne oslanjaju na re\v setke. Sve moderne implementacije se oslanjaju na LWE ili prstenasti LWE \cite{MITHenzingerHE2}.
+U kriptografiji je uvek dobro konstruisati primitive na razne na\v cine, tako da se oslanjanju na razne nezavisne pretpostavke o te\v zini. Ako bi pretpostavke o te\v zini LWE i prstenastog LWE bile sru\v sene, najbolje poznate konstrukcije FHE tako\dj e padaju sa njima. 
 $$$$
 
 
