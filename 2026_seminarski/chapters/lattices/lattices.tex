@@ -209,3 +209,12 @@ Dešifrovanje šifrata $c$ započinje računanjem izraza:
 Dobijeni vektor ima elemente koji su između $-\frac{q}{2}$ i $\frac{q}{2}$, pa je dovoljno da se redukuje po modulu $p$ kako bi se dobila originalna poruka:
 \[[L \ast f ]m + [L \ast g]r \equiv I \ast m + 0\ast r \equiv m \pmod p \]
 
+\section{Zaključak}
+
+Savremeni kriptografski sistemi svoju bezbednost zasnivaju na problemima za koje se smatra da su teški za rešavanje na klasičnim računarima. Međutim, razvoj kvantnog računarstva je doveo u pitanje tu bezbednost. Kvantni algoritmi koje je Šor pokazao omogućavaju efikasno rešavanje pojedinih problema na kojima se zasnivaju najrasprostranjeniji asimetrični kriptosistemi.
+
+Jedan od najznačajnijih pravaca razvoja postkvantne kriptografije predstavljaju kriptosistemi zasnovani na rešetkama. Njihova bezbednost se oslanja na probleme kao što su problem najkraćeg vektora, problem najbližeg vektora i problem dekodiranja na ograničenoj udaljenosti, za koje trenutno nisu poznati efikasni algoritmi ni na klasičnim ni na kvantnim računarima.
+
+U ovom radu su predstavljeni osnovni pojmovi vezani za rešetke, kao i najvažniji problemi na njima. Takođe je analiziran NTRU, jedan od najpoznatijih kriptosistema zasnovanih na rešetkama, kroz opis generisanja ključeva, procesa šifrovanja i dešifrovanja, kao i kroz njegovu interpretaciju pomoću rešetki. Ovakvi sistemi predstavljaju značajan korak ka obezbeđivanju dugoročne bezbednosti komunikacija u eri kvantnog računarstva.
+
+Iako je oblast postkvantne kriptografije i dalje predmet intenzivnih istraživanja, dosadašnji rezultati ukazuju da kriptografski sistemi zasnovani na rešetkama predstavljaju jedno od najperspektivnijih rešenja za zaštitu podataka u budućnosti.
