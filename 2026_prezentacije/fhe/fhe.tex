@@ -1,0 +1,191 @@
+\documentclass[aspectratio=1610]{beamer}
+
+\title{Potpuno homomorfna enkripcija}
+\author{Tijana Jak\v si\' c}
+\date{\today}
+
+\usetheme[sectionpage=none]{wildcat}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+\begin{frame}{Sadržaj}
+\begingroup
+\setbeamertemplate{sections/subsections in toc}[square]
+\tableofcontents
+\endgroup
+\end{frame}
+
+\section{Uvod}
+% ---------------- MOTIVACIJA ----------------
+\begin{frame}{\v Sta \v zelimo od homomorfne enkripcije?}
+    \begin{itemize}
+        \item Delegiranje vršenja operacija nad podacima, bez kompromitovanja privatnosti samih podataka
+        \item Klijent delegira izračunavanje nad privatnim podacima serveru kome ne veruje
+        \item Podatke šalje enkriptovane, server homomorfno vrši operacije nad enkriptovanim podacima, i šalje rezultat klijentu, koji klijent treba samo da dešifruje.
+        \item Ideju za\v zeleli Rivest, Adleman i Dertouzos 1978, prvi predlog implementacije Gentri 2009.
+    \end{itemize}
+\end{frame}
+
+\subsection{Multiplikativni homomorfizam}
+% ---------------- MULTIPLIKATIVNI HOMOMORFIZAM RSA I ELGAMAL ----------------
+\begin{frame}{Multiplikativni homomorfizam RSA}
+    \begin{itemize}
+        \item poruke $m_1$ i $m_2$ \v sifrovane sa $c_1 = m_1^e\pmod{N}$ i $c_2 = m_2^e\pmod{N}$
+        \item $c_1\cdot c_2 = m_1^e\cdot m_2^e = (m_1\cdot m_2)^e \pmod{N}$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Multiplikativni homomorfizam ElGamal}
+    \begin{itemize}
+        \item poruke $m_1$ i $m_2$ \v sifrovane sa $c_1 = (g^{r_1},m_1\cdot h^{r_1})$ i $c_2 = (g^{r_2},m_2\cdot h^{r_2})$
+        \item $c_1\odot c_2 = (g^{r_1}\cdot g^{r_2}, m_1\cdot h^{r_1}\cdot m_2\cdot h^{r_2}) = (g^{r_1 + r_2}, m_1\cdot m_2\cdot h^{r_1+r_2})$
+    \end{itemize}
+\end{frame}
+
+\section{Notacija i definicije}
+% ---------------- DEFINICIJA ----------------
+\begin{frame}{Osnovni pojmovi}
+    \begin{itemize}
+        \item prsten $R(+, \cdot)$
+        \item Aritmeti\v cka funkcija je kompozicija $+$ i $\cdot$
+    \end{itemize}
+    $$\mathrm{D}(\mathrm{E}(m, pk), sk) = m $$
+    \begin{pblock}{Evaluacioni algoritam}
+        Poruke $m_1, ..., m_n\in R$, njihovi \v sifrati $c_i = \mathrm{E}(m_i, pk)$, $i\in \{1, ..., n\}$ i aritmeti\v cka $f:R^n\rightarrow R$. \textit{Evaluacioni algoritam} je $\mathrm{Eval}$ takav da
+        $$c_f = \mathrm{Eval}(f, (c_1, ..., c_n), ek)$$
+        $$\mathrm{D}(c_f, sk) = f(m_1, ..., m_n)$$
+    \end{pblock}
+    \begin{itemize}
+        \item $c = \mathrm{E}(f (m_1 , ..., m_n ), pk)$ i $c_f$ dešifruju u isti broj, ali su drugačiji u konstrukciji i u opštem slučaju $c \neq c_f$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    $$\mathrm{D}(\mathrm{E}(m_1, pk) \oplus \mathrm{E}(m_2, pk), sk) = m_1 + m_2$$
+    $$\mathrm{D}(\mathrm{E}(m_1, pk) \odot \mathrm{E}(m_2, pk), sk) = m_1 \cdot m_2$$
+    \begin{pblock}{SHE}
+        Enkripciona \v sema je \textit{delimi\v cno homomorfna} ako postoji ograni\v cena klasa „dovoljno jednostavnih” aritmeti\v ckih funkcija $\mathcal{F}$ takva da za proizvoljnu $f\in \mathcal{F}$ proizvoljnog reda $n$, proizvoljne poruke $m_1, ..., m_n\in R$ i njihove \v sifrate $c_i = E(m_i, pk)$, $i\in \{1, ..., n\}$ va\v zi
+    $$\mathrm{D}(\mathrm{Eval}(f, (c_1, ..., c_n), ek)) = f(m_1, ..., m_n)$$
+    \end{pblock}
+\end{frame}
+
+\begin{frame}
+    \begin{pblock}{FHE}
+        Enkripciona \v sema je \textit{potpuno homomorfna} ako za proizvoljnu $f\in \mathcal{F}$ proizvoljnog reda $n$, proizvoljne poruke $m_1, ..., m_n\in R$ i njihove \v sifrate $c_i = E(m_i, pk)$, $i\in \{1, ..., n\}$ va\v zi
+        $$\mathrm{D}(\mathrm{Eval}(f, (c_1, ..., c_n), ek)) = f(m_1, ..., m_n)$$
+    \end{pblock}
+\end{frame}
+
+\subsection{Od SHE do FHE}
+% ---------------- OD SHE DO FHE ----------------
+\begin{frame}{Od SHE do FHE}
+\begin{itemize}
+    \item Bootstraping, proces smanjivanja \v suma
+    \item Evaluacija u FHE se, u svim poznatim \v semama, vr\v si ponavljanjem slede\' ca dva koraka:
+    \begin{enumerate}
+        \item  Izvr\v siti dozvoljen broj operacija polaznom SHE \v semom
+        \item  Pomo\' cu butstrepinga smanjiti \v sum 
+    \end{enumerate}
+\end{itemize}
+\end{frame}
+
+\section{Primer homomorfne enkripcije: DGHV}
+% ---------------- UVODNI PRIMER ----------------
+\begin{frame}{Uvodni primer}
+\begin{itemize}
+    \item Simetri\v cna enkripciona \v sema 
+    \item \textbf{Generisanje ključa}: ključ je slučajan neparan broj $p$.
+    \item \textbf{\v Sifrovanje}: $m \in \{0, 1\}$ se enkriptuje sa $$c=m + 2\cdot r + p\cdot q$$ gde je $r$ „mali” \v sum, a $q$ „veliki” slu\v cajan ceo broj
+    \item \textbf{De\v sifrovanje}: $c$ se dekriptuje sa $$(c \pmod{p})\pmod{2}$$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Aritmeti\v cke operacije}
+\begin{itemize}
+    \item Neka je $m_1$ \v sifrovano sa $c_1=m_1 + 2\cdot r_1 + p\cdot q_1$ i $m_2$ sa $c_2=m_2 + 2\cdot r_2 + p\cdot q_2$
+    \item \textbf{Sabiranje}: $c_1 + c_2 = (m_1 + m_2) + 2\cdot (r_1 + r_2) + p\cdot (q_1 + q_2)$
+    \item \textbf{Mno\v zenje}: $c_1\cdot c_2 = m_1\cdot m_2 + 2\cdot (r_2\cdot m_1 + r_1\cdot m_2 + 2\cdot r_1\cdot r_2) + p(q_1m_2 + 2q_1r_2 + 2q_1q_2 + 2q_2r_1 + q_2m_1)$
+\end{itemize}
+\end{frame}
+
+% ---------------- DGHV ----------------
+\begin{frame}{DGHV}
+\begin{itemize}
+    \item Javnim klju\v cem sakrivamo $p$
+    \item \textbf{Generisanje ključa}: Tajni ključ je slučajan neparan $p$, javni je niz $(x_0, ..., x_n)$ td. $x_0$ najve\' ci i neparan, i za sve $i\in {1, ..., n}$ va\v zi $x_i = p\cdot q_i + r_i $ gde su 
+$q_i, r_i$ slu\v cajni celi brojevi, s tim \v sto $r_0$ mora da bude paran.
+    \item \textbf{\v Sifrovanje}: $m \in \{0, 1\}$ se \v sifruje u \[c = m + 2r + 2\sum_{i\in S}x_i \pmod{x_0}\] gde je $r$ slu\v cajan ceo broj, a  $S$ slu\v cajan podskup od $\{1, ..., n\}$.
+    \item \textbf{De\v sifrovanje}: $c$ se de\v sifruje sa \[(c \pmod{p}) \pmod{2}\]
+\end{itemize}
+\end{frame}
+
+\begin{frame}{De\v sifrovanje radi}
+\begin{itemize}
+    \item Od $c = m + 2r + 2\sum_{i\in S}x_i \pmod{x_0}$ se sre\dj ivanjem operacija do\dj e do oblika $c = m + 2R + pQ \pmod{x_0}$
+    \item Da li smeta $\pmod{x_0}$?
+    \item Postoji $k$ td. $m + 2R + pQ = c + kx_0$
+    \item Uvo\dj enjem ovoga i sre\dj ivanjem operacija opet dolazimo do oblika $c = m + 2R' + pQ'$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Aritmeti\v cke operacije}
+\begin{itemize}
+    \item Neka je $m_1$ \v sifrovano sa $c_1=m_1 + 2\cdot r_1 + p\cdot q_1$ i $m_2$ sa $c_2=m_2 + 2\cdot r_2 + p\cdot q_2$
+    \item \textbf{Sabiranje}: $c_1 + c_2 = (m_1 + m_2) + 2\cdot (r_1 + r_2) + p\cdot (q_1 + q_2)$
+    \item \textbf{Mno\v zenje}: $c_1\cdot c_2 = m_1\cdot m_2 + 2\cdot (r_2\cdot m_1 + r_1\cdot m_2 + 2\cdot r_1\cdot r_2) + p(q_1m_2 + 2q_1r_2 + 2q_1q_2 + 2q_2r_1 + q_2m_1)$
+\end{itemize}
+\end{frame}
+
+\section{Bootstraping}
+% ---------------- BOOTSTRAPING ----------------
+\begin{frame}{Bootstraping}
+    \begin{itemize}
+        \item Od \v sifrata sa puno \v suma do \v sifrata iste poruke sa malo \v suma
+        \item Algoritam de\v sifrovanja $\mathrm{D}(c, sk)$ uklanja \v sum
+        \item I to je samo algoritam koji se mo\v ze sprovesti homomorfno u \v sifrovanom domenu
+        \item Evaluacioni klju\v c je \v sifrat tajnog klju\v ca
+        \item Pretostavka o kru\v znoj bezbednosti
+    \end{itemize}
+\end{frame}
+
+\section{Primene homomorfne enkripcije}
+% ---------------- PRIMENE ----------------
+\begin{frame}{Primene}
+    \begin{itemize}
+        \item Cloud computing
+        \item Bezbedna kolaboracija
+        \item Ma\v sinsko u\v cenje
+        \item Internet stvari
+    \end{itemize}
+\end{frame}
+
+\section{Otvorena pitanja}
+% ---------------- POLJA ZA NAPREDAK ----------------
+\begin{frame}{Otvorena pitanja}
+\begin{itemize}
+    \item Kreirati efikasniji kriptosistem (\v sto manje overhead-a za bootstraping)
+    \item FHE zasnovan na jo\v s nekoj primitivi osim re\v setki?
+\end{itemize}
+\end{frame}
+
+\section{Zaklju\v cak}
+\begin{frame}{Zaklju\v cak}
+\begin{itemize}
+    \item Homomorfna enkripcija omogu\' cava izra\v cunavanje u enkriptovanom domenu
+    \item Poznate FHE \v seme se dobijaju od SHE \v sema procesom bootstrapinga
+    \item Uveli smo \v semu DGHV kao SHE
+    \item Klju\v cna ideja bootstrapinga je vr\v senje algoritma dekripcije homomorfno u \v sifrovanom domenu
+    \item Naveli smo primene i otvorena pitanja
+\end{itemize}
+\end{frame}
+
+\standout{Pitanja?}
+
+\standout{Hvala na pažnji!}
+
+\end{document}
