@@ -28,8 +28,7 @@ ranijem otisku.
 
 Ovaj obrazac formalizovao je Manuel Blum 1981.\ godine kroz problem bacanja novčića
 telefonom~\cite{blum1981coin}: dve strane žele da se dogovore oko slučajnog ishoda bez
-međusobnog poverenja. Jedna strana se najpre obavezuje na svoju vrednost, a tek potom obe
-otkrivaju. Rešenje je identično - šema posvete. Faze se nazivaju faza posvećivanja
+međusobnog poverenja. Jedna strana se najpre obavezuje na svoju vrednost, a tek potom otkriva. Rešenje je identično - šema posvete. Faze se nazivaju faza posvećivanja
 (engl.\ \textit{commit phase}) i faza otkrivanja (engl.\ \textit{reveal phase}),
 a obe garancije formalizujemo u narednoj sekciji.
 
@@ -106,8 +105,7 @@ narušava savršeno obavezivanje.
 Iz ove propozicije sledi da svaka šema mora da napravi kompromis. U narednoj sekciji videćemo dva tipa:
 \begin{itemize}
   \item Heš-zasnovana šema - računski sakrivajuća i računski obavezujuća jer heš funkcija daje pseudoslučajne
-    raspodele koje ne garantuju savršena svojstva (iako se u
-    praksi može smatrati savršeno obavezujućom)
+    raspodele koje ne garantuju savršena svojstva.
   \item Pedersenova šema je savršeno sakrivajuća i računski obavezujuća.
 \end{itemize}
 
@@ -141,8 +139,8 @@ Obavezujuće svojstvo neposredno sledi iz otpornosti heš funkcije na nalaženje
 pronalaženje $m \neq m'$ i $r, r'$ takvih da $H(m \,\|\, r) = H(m' \,\|\, r')$ direktno
 je sudar funkcije $H$. Formalno, ovo je računsko obavezivanje - sudari između različitih
 otvaranja postoje u teoriji, jer heš funkcija slika beskonačan skup ulaza u konačan skup
-izlaza. Međutim, pošto nijedan poznati algoritam ne može da ih pronađe za kriptografski
-jake heš funkcije, šema se u praksi može smatrati savršeno obavezujućom.
+izlaza. Međutim, u praksi, nijedan poznati algoritam ne može da ih pronađe za kriptografski
+jake heš funkcije.
 
 Svojstvo skrivanja je samo računsko. Raspodela posvete $c = H(m \,\|\, r)$ pri uniformnom
 $r$ nije savršeno identična za sve poruke, jer heš funkcija daje pseudoslučajne a ne
@@ -160,8 +158,8 @@ a bez oslepljivača bi svaka posveta odmah otkrivala glas.
 \subsection{Pedersenova šema posvete}
 \label{subsec:pedersen-commitment}
 
-Heš-zasnovana šema je skoro savršeno obavezujuća, ali samo računski sakrivajuća.
-Pedersenova šema~\cite{pedersen1991non} postiže suprotan kompromis: savršeno skrivanje uz
+Heš-zasnovana šema je računski obavezujuća i računski sakrivajuća.
+Pedersenova šema~\cite{pedersen1991non} postiže kompromis: savršeno skrivanje uz
 računsko obavezivanje, oslanjajući se na algebarsku strukturu grupe umesto na heš funkciju.
 
 \begin{definition}[Pedersenova šema posvete]
