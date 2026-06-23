@@ -1,7 +1,7 @@
 % Poglavlje: ZK-snark (teorijska osnova i prakticna upotreba, prednosti, mane)
 % Autor: Matija Stanković (207/2021)
 
-Dokazi nultog znanja (\textit{Zero-Knowledge Proofs}, ZKP) predstavljaju kriptografske protokole koji omogućavaju da dokazivač (engl. \textit{prover}) ubedi verifikatora (engl. \textit{verifier}) u istinitost određene tvrdnje bez otkrivanja dodatnih informacija o samoj tvrdnji. U prethodnom poglavlju predstavljeni su osnovni koncepti dokaza nultog znanja i svojstva koja ovakvi protokoli moraju da zadovolje. Iako su prvobitno razvijeni kao teorijski koncept, potreba za pojačanom zaštitom privatnosti u distribuiranim sistemima dovela je do razvoja efikasnijih i praktičnijih rešenja. Poseban izazov predstavljala je činjenica da su klasični protokoli dokaza nultog znanja uglavnom interaktivni i zahtevaju višestruku razmenu poruka između učesnika. Kao odgovor na ovo ograničenje razvijeni su zk-SNARK sistemi, koji omogućavaju neinteraktivno dokazivanje uz kratke dokaze i brzu verifikaciju..
+Dokazi nultog znanja (\textit{Zero-Knowledge Proofs}, ZKP) predstavljaju kriptografske protokole koji omogućavaju da dokazivač (engl. \textit{prover}) ubedi verifikatora (engl. \textit{verifier}) u istinitost određene tvrdnje bez otkrivanja dodatnih informacija o samoj tvrdnji. U prethodnom poglavlju predstavljeni su osnovni koncepti dokaza nultog znanja i svojstva koja ovakvi protokoli moraju da zadovolje. Iako su prvobitno razvijeni kao teorijski koncept, potreba za pojačanom zaštitom privatnosti u distribuiranim sistemima dovela je do razvoja efikasnijih i praktičnijih rešenja. Poseban izazov predstavljala je činjenica da su klasični protokoli dokaza nultog znanja uglavnom interaktivni i zahtevaju višestruku razmenu poruka između učesnika. Kao odgovor na ovo ograničenje razvijeni su \textit{zk-SNARK} sistemi, koji omogućavaju neinteraktivno dokazivanje uz kratke dokaze i brzu verifikaciju.
 
 \section{Uvod u zk-SNARK}
 
@@ -11,46 +11,44 @@ Jedan od najznačajnijih koraka ka praktičnoj primeni dokaza nultog znanja pred
 
 \begin{definition}
 
-\textbf{Zk-SNARK} predstavlja neinteraktivni dokaz nultog znanja kojim \textbf{dokazivač} može da ubedi \textbf{verifikatora} da poseduje određeno znanje ili da je izvršio određeni proračun na ispravan način, bez otkrivanja samog znanja ili međurezultata korišćenih tokom izračunavanja.
+\textit{zk-SNARK} predstavlja neinteraktivni dokaz nultog znanja kojim \textbf{dokazivač} može da ubedi \textbf{verifikatora} da poseduje određeno znanje ili da je izvršio određeni proračun na ispravan način, bez otkrivanja samog znanja ili međurezultata korišćenih tokom izračunavanja.
 
 \end{definition}
 
-U formalnom modelu zk-SNARK sistema razlikuju se \textbf{javna tvrdnja} (engl. \textit{statement}) i \textbf{svedok} (engl. \textit{witness}). Javna tvrdnja predstavlja informaciju koja je dostupna verifikatoru, dok svedok predstavlja dodatne podatke poznate samo dokazivaču. Cilj dokazivača jeste da pokaže da poseduje svedoka koji potvrđuje ispravnost javne tvrdnje, bez njegovog otkrivanja \cite{nitulescu2023snarks}.
+U formalnom modelu zk-SNARK sistema razlikuju se \textbf{javna tvrdnja} (engl. \textit{statement}) i \textbf{svedok} (engl. \textit{witness}). Javna tvrdnja predstavlja informaciju koja je dostupna verifikatoru, dok svedok predstavlja dodatne podatke poznate samo dokazivaču. Cilj dokazivača jeste da pokaže da poseduje svedoka koji potvrđuje ispravnost javne tvrdnje, bez njegovog otkrivanja~\cite{nitulescu2023snarks}.
 
-Ovakav odnos može se formalno predstaviti pomoću \textbf{relacije}
+Ovakav odnos može se formalno predstaviti pomoću \textbf{jednakosti}
 
 \[
-R(x,w)=1
+R(x, w)=1
 \]
 
-gde je:
+gde je \(x\) javna tvrdnja, \(w\) svedok, a \(R\) relacija koja proverava da li dati par zadovoljava zadate uslove. Formalnije, relacija \(R\) određuje jezik
 
-\begin{itemize}
-    \item (x) javna tvrdnja,
-    \item (w) svedok,
-    \item (R) relacija koja proverava da li dati par zadovoljava zadate uslove.
-\end{itemize}
+\[
+L_R=\{x \mid \exists w \text{ takvo da } R(x,w)=1\}.
+\]
 
-Intuitivno, dokazivač pokazuje da poznaje vrednost (w) za koju relacija važi, pri čemu sama vrednost ostaje skrivena od verifikatora \cite{nitulescu2023snarks}.
+Drugim rečima, dokazivač želi da ubedi verifikatora da za javnu tvrdnju \(x\) postoji odgovarajući svedok \(w\), pri čemu se vrednost \(w\) ne otkriva.~\cite{nitulescu2023snarks}.
 
-Osnovna ideja zk-SNARK sistema jeste da se složen računarski problem predstavi u obliku skupa matematičkih ograničenja. Na osnovu javne tvrdnje i svedoka generiše se kriptografski dokaz kojim se potvrđava da su sva ograničenja zadovoljena. Verifikator zatim proverava samo validnost dokaza, bez pristupa podacima korišćenim tokom izračunavanja.
+Osnovna ideja zk-SNARK sistema jeste da se složen računarski problem predstavi u obliku skupa matematičkih ograničenja. Na osnovu javne tvrdnje i svedoka generiše se kriptografski dokaz kojim se potvrđuje da su sva ograničenja zadovoljena. Verifikator zatim proverava samo validnost dokaza, bez pristupa podacima korišćenim tokom izračunavanja.
 
-Posebna prednost ovakvog pristupa ogleda se u činjenici da veličina dokaza ostaje veoma mala čak i kada je problem koji se dokazuje izuzetno složen. Zbog toga su zk-SNARK sistemi postali jedno od najznačajnijih rešenja za praktičnu primenu dokaza nultog znanja u savremenim distribuiranim sistemima i blokčejn mrežama \cite{ganesh2020demystifying}.
+Jedna od ključnih osobina zk-SNARK sistema jeste zahtev da dokaz bude kratak i da se može proveriti znatno efikasnije nego što bi bilo ponovno izvršavanje celog proračuna~\cite{nitulescu2023snarks}
 
 
 \subsection{Od interaktivnih ka neinteraktivnim dokazima}
 
-Klasični protokoli dokaza nultog znanja zasnivaju se na interakciji između dokazivača i verifikatora. Tokom izvršavanja protokola verifikator šalje izazove na koje dokazivač odgovara, pri čemu se kroz više koraka proverava istinitost određene tvrdnje. Takav pristup predstavlja osnovu velikog broja ranih sistema dokaza nultog znanja.
+Za dokaz kažemo da je interaktivan ukoliko se njegova provera odvija kroz više uzastopnih razmena poruka između dokazivača i verifikatora. Verifikator u takvom protokolu šalje izazove, a dokazivač na njih odgovara, pri čemu se kroz tok komunikacije proverava istinitost tvrdnje.Takav pristup predstavlja osnovu velikog broja ranih sistema dokaza nultog znanja.
 
 Iako interaktivni protokoli pružaju visok nivo bezbednosti, njihova primena u distribuiranim sistemima može biti otežana. Potreba za višestrukom razmenom poruka povećava komunikacione troškove i zahteva da obe strane učestvuju u protokolu u isto vreme. Ovakva ograničenja posebno dolaze do izražaja u blokčejn mrežama, gde veliki broj učesnika mora efikasno da proverava validnost transakcija.
 
-Razvoj \textbf{neinteraktivnih dokaza nultog znanja} omogućio je prevazilaženje ovog problema. Umesto višestruke komunikacije između učesnika, dokazivač generiše jedinstven dokaz koji se dostavlja verifikatoru. Nakon prijema dokaza, verifikator može samostalno da proveri njegovu validnost bez dodatne interakcije \cite{nitulescu2023snarks}.
+Razvoj \textbf{neinteraktivnih dokaza nultog znanja} omogućio je prevazilaženje ovog problema. Umesto višestruke komunikacije između učesnika, dokazivač generiše jedinstven dokaz koji se dostavlja verifikatoru. Nakon prijema dokaza, verifikator može samostalno da proveri njegovu validnost bez dodatne interakcije~\cite{nitulescu2023snarks}.
 
-Zk-SNARK predstavlja jednu od najuspešnijih realizacija ovog koncepta. Mogućnost generisanja kratkog dokaza koji se proverava bez dodatne komunikacije čini ovakve sisteme pogodnim za primenu u distribuiranim okruženjima sa velikim brojem korisnika, kao što su blokčejn mreže i sistemi za zaštitu privatnosti.
+Zk-SNARK predstavlja jednu od najuspešnijih realizacija ovog koncepta. Zbog neinteraktivnog načina rada, ovakvi sistemi su posebno pogodni za okruženja u kojima veliki broj učesnika mora samostalno da proverava dokaze.
 
 \subsection{Trusted setup}
 
-Većina tradicionalnih zk-SNARK sistema zahteva inicijalnu fazu poznatu kao \textbf{trusted setup}. Tokom ove faze generišu se javni parametri koji će kasnije biti korišćeni za kreiranje i proveru dokaza. Ovi parametri predstavljaju osnovu na kojoj počiva bezbednost celog sistema \cite{nitulescu2023snarks}.
+Većina tradicionalnih zk-SNARK sistema zahteva inicijalnu fazu poznatu kao \textbf{trusted setup}. Tokom ove faze generišu se javni parametri koji će kasnije biti korišćeni za kreiranje i proveru dokaza. Ovi parametri predstavljaju osnovu na kojoj počiva bezbednost celog sistema~\cite{nitulescu2023snarks}.
 
 Prilikom generisanja parametara koriste se određene tajne vrednosti koje se moraju ukloniti po završetku postupka. Ukoliko bi napadač došao u posed ovih podataka, mogao bi da generiše lažne dokaze koji bi bili prihvaćeni kao validni, čime bi bezbednost sistema bila ozbiljno ugrožena.
 
@@ -60,7 +58,7 @@ Potreba za trusted setup procedurom predstavlja jedan od najčešće navođenih 
 
 \subsection{Setup, Prove i Verify algoritmi}
 
-Rad zk-SNARK sistema može se opisati kroz tri osnovne faze: \textbf{generisanje parametara} (engl. \textit{Setup}), \textbf{kreiranje dokaza} (engl. \textit{Prove}) i \textbf{verifikaciju dokaza} (engl. \textit{Verify}) \cite{nitulescu2023snarks}.
+Rad zk-SNARK sistema može se opisati kroz tri osnovne faze: \textbf{generisanje parametara} (engl. \textit{Setup}), \textbf{kreiranje dokaza} (engl. \textit{Prove}) i \textbf{verifikaciju dokaza} (engl. \textit{Verify})~\cite{nitulescu2023snarks}.
 
 Tokom prve faze generišu se javni parametri koji će kasnije biti korišćeni za kreiranje i proveru dokaza. Rezultat ove faze predstavlja par ključeva
 
@@ -73,13 +71,13 @@ gde \(pk\) označava ključ za generisanje dokaza (engl. \textit{proving key}), 
 Nakon toga dokazivač koristi javnu tvrdnju \(x\), svedoka \(w\) i ključ \(pk\) kako bi generisao dokaz
 
 \[
-\pi \leftarrow Prove(pk,x,w)
+\pi \leftarrow Prove(pk, x, w)
 \]
 
 Generisani dokaz \(\pi\) zatim se dostavlja verifikatoru, koji proverava njegovu ispravnost primenom algoritma
 
 \[
-Verify(vk,x,\pi)=1
+Verify(vk, x, \pi)=1
 \]
 
 Vrednost \(1\) označava da je dokaz prihvaćen kao validan, odnosno da dokazivač poseduje odgovarajućeg svedoka za datu javnu tvrdnju. Pri tome verifikator ne dobija nikakve informacije o samom svedoku niti o podacima korišćenim tokom generisanja dokaza.
@@ -99,15 +97,17 @@ Jedan od najpoznatijih primera upotrebe zk-SNARK tehnologije predstavlja kriptov
 
 \subsection{Problem privatnosti javnih blokčejn mreža}
 
+Blokčejn se može posmatrati kao distribuirana i hronološki uređena evidencija transakcija. Transakcije se grupišu u blokove, a svaki novi blok se povezuje sa prethodnim pomoću kriptografskih heš vrednosti. Na taj način nastaje lanac blokova koji je teško naknadno menjati, jer bi promena jednog bloka zahtevala promenu svih narednih blokova i prihvatanje takve izmene od strane mreže.
+
 Jedna od najvažnijih karakteristika javnih blokčejn mreža jeste \textbf{transparentnost}. Svi učesnici mreže imaju pristup istoj evidenciji transakcija, što omogućava nezavisnu proveru ispravnosti sistema bez potrebe za centralnim autoritetom. Upravo ova osobina predstavlja osnovu poverenja u mreže poput Bitcoina.
 
-Međutim, potpuna transparentnost sa sobom donosi i određene probleme. Iako se identitet korisnika u Bitcoin mreži ne predstavlja direktno imenom i prezimenom, već \textbf{kriptografskim adresama}, sve transakcije ostaju trajno javno dostupne. Zbog toga se Bitcoin često opisuje kao \textbf{pseudoniman} (engl. \textit{pseudonymous}), a ne kao anoniman sistem.
+Međutim, potpuna transparentnost sa sobom donosi i određene probleme. Iako se identitet korisnika u Bitcoin mreži ne predstavlja direktno imenom i prezimenom, već \textbf{kriptografskim adresama}, sve transakcije ostaju trajno javno dostupne. Zbog toga se Bitcoin često opisuje kao \textbf{pseudoanoniman} (engl. \textit{pseudonymous}), a ne kao anoniman sistem.
 
 Svaka transakcija sadrži informacije o adresi pošiljaoca, adresi primaoca i iznosu koji se prenosi. Budući da su svi ovi podaci javno dostupni, moguće je analizirati tokove novca i pratiti kretanje sredstava između različitih adresa. Vremenom se na osnovu obrazaca ponašanja, javno objavljenih adresa ili podataka prikupljenih sa menjačnica kriptovaluta pojedine adrese mogu povezati sa stvarnim identitetima korisnika.
 
 Nakon uspostavljanja takve veze moguće je rekonstruisati značajan deo finansijske aktivnosti korisnika, uključujući podatke o primljenim i poslatim sredstvima, učestalosti transakcija i povezanosti sa drugim učesnicima mreže. Iako ovakva transparentnost doprinosi \textbf{proverljivosti sistema}, ona istovremeno može predstavljati \textbf{ozbiljno narušavanje privatnosti}.
 
-Potreba za očuvanjem privatnosti uz zadržavanje mogućnosti javne verifikacije transakcija predstavlja jedan od ključnih izazova savremenih blokčejn sistema. Upravo iz tog razloga razvijena su rešenja koja omogućavaju sakrivanje osetljivih podataka, pri čemu se i dalje može proveriti da li su pravila sistema ispoštovana \cite{ganesh2020demystifying}.
+Potreba za očuvanjem privatnosti uz zadržavanje mogućnosti javne verifikacije transakcija predstavlja jedan od ključnih izazova savremenih blokčejn sistema. Upravo iz tog razloga razvijena su rešenja koja omogućavaju sakrivanje osetljivih podataka, pri čemu se i dalje može proveriti da li su pravila sistema ispoštovana~\cite{ganesh2020demystifying}.
 
 \subsection{Kako izgleda jedna transakcija u blokčejn mreži}
 
@@ -115,12 +115,12 @@ Da bi blokčejn mreža prihvatila transakciju, neophodno je proveriti nekoliko o
 
 \begin{itemize}
     \item da li pošiljalac poseduje sredstva koja želi da prenese;
-    \item ista sredstva nisu već iskorišćena u nekoj prethodnoj transakciji (\textbf{dvostruko trošenje});
+    \item \item da ista sredstva nisu već iskorišćena u nekoj prethodnoj transakciji (\textbf{dvostruko trošenje});
     \item ukupna količina sredstava u sistemu ostaje nepromenjena.
 \end{itemize}
 
 \begin{example}
-Posmatrajmo jednostavan primer u kome Ivana(pošiljalac) želi da pošalje \(1\) BTC Matiji(primalac).
+Posmatrajmo jednostavan primer u kome Ivana (pošiljalac) želi da pošalje Matiji (primalac) \(1\,\mathrm{BTC}\).
 
 Ivana kreira transakciju i šalje je mreži na proveru. Nakon toga čvorovi mreže proveravaju da li su ispunjeni svi uslovi potrebni za njeno prihvatanje. Ukoliko je transakcija validna, ona se uključuje u novi blok i postaje deo javne evidencije transakcija.
 
@@ -161,14 +161,6 @@ Kada se sredstva prenose između zaštićenih adresa, nastaju \textbf{zaštićen
     \hline
     Zaštita privatnosti & Ograničena & Visoka \\
     \hline
-    Korišćenje ZK dokaza & Ne & Da (zk-SNARK) \\
-    \hline
-    Trusted setup & Nije potreban & Potreban \\
-    \hline
-    Veličina dokaza & Nije primenljivo & Mala i konstantna \\
-    \hline
-    Vreme verifikacije & Standardna provera & Veoma brzo \\
-    \hline
     \end{tabular}
     \caption{Poređenje privatnosti i verifikacije u Bitcoin i Zcash mrežama}
     \label{tab:bitcoin-zcash}
@@ -182,19 +174,21 @@ Na prvi pogled ovakav pristup deluje paradoksalno. Ukoliko su podaci o transakci
 
 Kod klasičnih blokčejn mreža validnost transakcije proverava se direktnim uvidom u podatke o transakciji. Pošto su adrese učesnika i iznos koji se prenosi javno dostupni, svaki čvor može samostalno da proveri da li su ispunjena pravila sistema.
 
-Kod zaštićenih Zcash transakcija ovakav pristup nije moguć jer su ključni podaci skriveni. Zbog toga se validacija ne zasniva na proveri samih podataka, već na proveri kriptografskog dokaza koji potvrđuje da su sva pravila sistema ispoštovana \cite{ganesh2020demystifying}.
+Kod zaštićenih Zcash transakcija ovakav pristup nije moguć jer su ključni podaci skriveni. Zbog toga se validacija ne zasniva na proveri samih podataka, već na proveri kriptografskog dokaza koji potvrđuje da su sva pravila sistema ispoštovana~\cite{ganesh2020demystifying}.
 
-Jedno od najvažnijih pravila koje mreža mora da proveri jeste \textbf{očuvanje ukupne vrednosti}. To znači da zbir ulaznih sredstava mora biti jednak zbiru izlaznih sredstava:
+Uslovi koje zaštićena transakcija mora da zadovolji mogu se opisati jednakošću \(R(x,w)\), gde javna tvrdnja \(x\) sadrži podatke potrebne mreži za proveru dokaza, dok svedok \(w\) obuhvata privatne podatke transakcije, kao što su tajni ključevi, informacije o ulaznim sredstvima i vrednosti koje ne treba javno otkriti.
 
-\[
-\sum v_{\text{ulaz}} = \sum v_{\text{izlaz}}
-\]
+U pojednostavljenom modelu, skup ograničenja može se posmatrati kroz sledeće uslove:
 
-Na taj način sprečava se stvaranje novih jedinica valute tokom izvršavanja transakcije.
-
-Pored očuvanja vrednosti, potrebno je proveriti i to da li pošiljalac zaista poseduje sredstva koja želi da prenese, kao i da li ta sredstva nisu već iskorišćena u nekoj prethodnoj transakciji. U Zcash mreži ova pravila i njihova ispravnost potvrđuju se zk-SNARK dokazom.
-
-Kao što je prikazano u prethodnom poglavlju, uslovi koje transakcija mora da zadovolji mogu se predstaviti odgovarajućom \textbf{relacijom} \(\mathbf{R(x,w)}\). Zk-SNARK dokaz omogućava dokazivaču da pokaže da poseduje odgovarajućeg svedoka za datu relaciju, bez otkrivanja samog svedoka ili podataka sadržanih u transakciji \cite{nitulescu2023snarks}.
+\begin{itemize}
+    \item pošiljalac poseduje odgovarajuće privatne podatke kojima dokazuje pravo da potroši ulazna sredstva;
+    \item za svako ulazno sredstvo proverava se da nije prethodno potrošeno;
+    \item ukupna vrednost ulaza jednaka je ukupnoj vrednosti izlaza, odnosno
+    \[
+    \sum v_{\text{ulaz}} = \sum v_{\text{izlaz}};
+    \]
+    \item podaci koji se javno objavljuju moraju biti konzistentni sa privatnim podacima korišćenim u dokazu.
+\end{itemize}
 
 Pre generisanja dokaza transakcija se prevodi u skup matematičkih ograničenja koja opisuju pravila sistema. Ta ograničenja proveravaju da li pošiljalac poseduje sredstva koja želi da prenese, da li ista sredstva nisu prethodno potrošena i da li je očuvana ukupna vrednost transakcije. Na osnovu privatnih podataka i javnih parametara sistema korisnik zatim konstruiše zk-SNARK dokaz kojim pokazuje da su sva navedena ograničenja zadovoljena.
 
@@ -205,7 +199,7 @@ Pre generisanja dokaza transakcija se prevodi u skup matematičkih ograničenja 
 Proces izvršavanja zaštićene transakcije u mreži Zcash može se predstaviti kroz nekoliko uzastopnih koraka.
 
 \begin{example}
-Posmatrajmo isti scenario kao u prethodnom primeru. Ivana želi da pošalje 1 ZEC Matiji.
+Posmatrajmo isti scenario kao u prethodnom primeru. Ivana želi da pošalje \(1\,\mathrm{ZEC}\) Matiji.
 
 Za razliku od klasične blokčejn transakcije, podaci o pošiljaocu, primaocu i iznosu transakcije ne moraju biti javno dostupni. Ivana najpre formira transakciju i na osnovu privatnih podataka generiše zk-SNARK dokaz kojim pokazuje da poseduje sredstva koja želi da prenese i da su zadovoljena sva pravila sistema.
 
@@ -230,7 +224,7 @@ Tok transakcije prikazan na slici \ref{fig:zcash-zksnark} može se posmatrati kr
 \item Nakon uspešne verifikacije transakcija se prihvata i uključuje u blok, a primalac postaje vlasnik sredstava.
 \end{enumerate}
 
-Važno je naglasiti da tokom čitavog procesa verifikatori \textbf{ne znaju identitet pošiljaoca, identitet primaoca niti iznos koji se prenosi}. Jedina informacija koju dobijaju jeste da su \textbf{sva pravila sistema ispoštovana i da je transakcija validna} \cite{ganesh2020demystifying}.
+Važno je naglasiti da tokom čitavog procesa verifikatori \textbf{ne znaju identitet pošiljaoca, identitet primaoca niti iznos koji se prenosi}. Jedina informacija koju dobijaju jeste da su \textbf{sva pravila sistema ispoštovana i da je transakcija validna}~\cite{ganesh2020demystifying}.
 
 
 \section{Prednosti i nedostaci zk-SNARK sistema}
@@ -241,15 +235,15 @@ Važno je naglasiti da tokom čitavog procesa verifikatori \textbf{ne znaju iden
 
 \item \textbf{Kompaktnost dokaza}
 
-Jedna od najvažnijih karakteristika zk-SNARK sistema jeste mogućnost generisanja veoma kratkih dokaza. Veličina dokaza ostaje mala čak i kada se dokazuje ispravnost veoma složenih proračuna. Ova osobina omogućava efikasno skladištenje i prenos dokaza u distribuiranim sistemima \cite{nitulescu2023snarks}.
+Jedna od najvažnijih karakteristika zk-SNARK sistema jeste mogućnost generisanja veoma kratkih dokaza. Veličina dokaza ostaje mala čak i kada se dokazuje ispravnost veoma složenih proračuna. Ova osobina omogućava efikasno skladištenje i prenos dokaza u distribuiranim sistemima~\cite{nitulescu2023snarks}.
 
 \item \textbf{Brza verifikacija}
 
-Provera validnosti zk-SNARK dokaza zahteva relativno malu količinu računarskih resursa. Zbog toga veliki broj korisnika može nezavisno da proverava dokaze bez značajnog opterećenja sistema. Ovakva osobina posebno je značajna u blokčejn mrežama, gde veliki broj čvorova mora da proverava validnost transakcija \cite{nitulescu2023snarks}.
+Provera validnosti zk-SNARK dokaza zahteva relativno malu količinu računarskih resursa. Zbog toga veliki broj korisnika može nezavisno da proverava dokaze bez značajnog opterećenja sistema. Ovakva osobina posebno je značajna u blokčejn mrežama, gde veliki broj čvorova mora da proverava validnost transakcija~\cite{nitulescu2023snarks}.
 
 \item \textbf{Visok nivo privatnosti}
 
-Dokazi nultog znanja omogućavaju proveru ispravnosti određene tvrdnje bez otkrivanja podataka na kojima se dokaz zasniva. Na taj način moguće je očuvati privatnost korisnika uz istovremeno zadržavanje javne proverljivosti sistema. Upravo ova osobina predstavlja osnovu primene zk-SNARK tehnologije u mreži Zcash \cite{ganesh2020demystifying}.
+Dokazi nultog znanja omogućavaju proveru ispravnosti određene tvrdnje bez otkrivanja podataka na kojima se dokaz zasniva. Na taj način moguće je očuvati privatnost korisnika uz istovremeno zadržavanje javne proverljivosti sistema. Upravo ova osobina predstavlja osnovu primene zk-SNARK tehnologije u mreži Zcash~\cite{ganesh2020demystifying}.
 
 \item \textbf{Pogodnost za blokčejn mreže}
 
@@ -263,11 +257,11 @@ Kombinacija kratkih dokaza i brze verifikacije čini zk-SNARK sisteme posebno po
 
 \item \textbf{Potreba za trusted setup procedurom}
 
-Većina tradicionalnih zk-SNARK sistema zahteva inicijalnu fazu generisanja javnih parametara poznatu kao trusted setup. Ukoliko bi tajni podaci korišćeni tokom ovog procesa bili kompromitovani, bilo bi moguće generisati lažne dokaze koji prolaze verifikaciju. Zbog toga se trusted setup smatra jednim od najznačajnijih ograničenja tradicionalnih zk-SNARK sistema \cite{nitulescu2023snarks}.
+Većina tradicionalnih zk-SNARK sistema zahteva inicijalnu fazu generisanja javnih parametara poznatu kao trusted setup. Ukoliko bi tajni podaci korišćeni tokom ovog procesa bili kompromitovani, bilo bi moguće generisati lažne dokaze koji prolaze verifikaciju. Zbog toga se trusted setup smatra jednim od najznačajnijih ograničenja tradicionalnih zk-SNARK sistema~\cite{nitulescu2023snarks}.
 
 \item \textbf{Visoka cena generisanja dokaza}
 
-Iako je verifikacija dokaza veoma brza, njihovo generisanje može zahtevati značajne računske resurse. Kod složenih proračuna vreme potrebno za konstrukciju dokaza često je znatno veće od vremena potrebnog za njegovu proveru \cite{nitulescu2023snarks}.
+Iako je verifikacija dokaza veoma brza, njihovo generisanje može zahtevati značajne računske resurse.
 
 \item \textbf{Složena implementacija}
 
@@ -278,10 +272,10 @@ Praktična realizacija zk-SNARK sistema zahteva poznavanje naprednih oblasti mod
 
 \section{Zaključak}
 
-Dokazi nultog znanja predstavljaju jednu od najznačajnijih oblasti savremene kriptografije jer omogućavaju dokazivanje ispravnosti određene tvrdnje \textbf{bez otkrivanja informacija} na kojima se dokaz zasniva. Razvoj \textbf{zk-SNARK} sistema omogućio je da se ovaj koncept primeni u praksi kroz generisanje kompaktnih dokaza koji se mogu brzo proveravati i koristiti u sistemima sa velikim brojem učesnika.
+Dokazi nultog znanja predstavljaju jednu od najznačajnijih oblasti savremene kriptografije jer omogućavaju dokazivanje ispravnosti određene tvrdnje \textbf{bez otkrivanja informacija} na kojima se dokaz zasniva. Razvoj zk-SNARK sistema omogućio je da se ovaj koncept primeni u praksi kroz generisanje kompaktnih dokaza koji se mogu brzo proveravati i koristiti u sistemima sa velikim brojem učesnika.
 
-Poseban značaj zk-SNARK tehnologije ogleda se u njenoj primeni u mreži \textbf{Zcash}. Korišćenjem dokaza nultog znanja moguće je ostvariti \textbf{privatne transakcije} pri čemu se istovremeno zadržava mogućnost javne verifikacije njihove ispravnosti. Na taj način postiže se ravnoteža između \textbf{zaštite privatnosti korisnika} i \textbf{očuvanja bezbednosti blokčejn mreže}.
+Poseban značaj zk-SNARK tehnologije ogleda se u njenoj primeni u mreži \textbf{Zcash}. Korišćenjem dokaza nultog znanja moguće je ostvariti privatne transakcije pri čemu se istovremeno zadržava mogućnost javne verifikacije njihove ispravnosti. Na taj način postiže se ravnoteža između \textbf{zaštite privatnosti korisnika} i \textbf{očuvanja bezbednosti blokčejn mreže}.
 
-Analizom prednosti i nedostataka može se zaključiti da zk-SNARK sistemi nude \textbf{visok nivo privatnosti}, \textbf{kompaktne dokaze} i \textbf{brzu verifikaciju}, ali da istovremeno donose određena ograničenja, među kojima se posebno izdvajaju potreba za \textbf{trusted setup} procedurom i \textbf{složenost implementacije}.
+Analizom prednosti i nedostataka može se zaključiti da zk-SNARK sistemi nude visok nivo privatnosti, kompaktne dokaze i brzu verifikaciju, ali da istovremeno donose određena ograničenja, među kojima se posebno izdvajaju potreba za trusted setup procedurom i složenost implementacije.
 
 Dalji razvoj ove oblasti doveo je do pojave novih pristupa, među kojima se posebno izdvajaju zk-STARK sistemi. Za razliku od tradicionalnih zk-SNARK rešenja, \textbf{zk-STARK} ne zahteva trusted setup proceduru i zasniva se na drugačijim kriptografskim pretpostavkama. Ipak, ova prednost dolazi uz određene kompromise, poput veće veličine dokaza i većih komunikacionih zahteva. Zbog toga se danas obe tehnologije aktivno razvijaju i pronalaze primenu u različitim oblastima savremene kriptografije.
