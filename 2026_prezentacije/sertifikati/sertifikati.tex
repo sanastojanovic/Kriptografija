@@ -1,0 +1,964 @@
+\documentclass[aspectratio=1610]{beamer}
+
+% Prezentacija pripremljena za wildcat beamer temu.
+% Kompajliranje: xelatex sertifikati_prezentacija_sa_vise_teksta.tex
+
+\usepackage{fontspec}
+\usepackage[serbian]{babel}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,shapes.misc}
+
+\title{Digitalni sertifikati i protokoli za uspostavljanje ključa}
+\author{Ana Knežević}
+\date{\today}
+
+\usetheme[sectionpage=none]{wildcat}
+
+% -----------------------------------------------------------------------------
+% Podešavanja izgleda
+% -----------------------------------------------------------------------------
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize items}[circle]
+\setbeamertemplate{enumerate items}[default]
+\setlength{\abovedisplayskip}{0.30em}
+\setlength{\belowdisplayskip}{0.30em}
+\setbeamersize{text margin left=0.45cm,text margin right=0.45cm}
+
+\newcommand{\enc}[2]{\{#1\}_{#2}}
+\newcommand{\sig}[2]{\mathsf{Sig}_{#1}(#2)}
+\newcommand{\Enc}[2]{\mathsf{Enc}_{#1}(#2)}
+\newcommand{\Hash}[1]{H(#1)}
+\newcommand{\pk}{\mathsf{pk}}
+\newcommand{\sk}{\mathsf{sk}}
+\newcommand{\Cert}{\mathsf{Cert}}
+\newcommand{\CRL}{\mathsf{CRL}}
+\newcommand{\serial}{\mathsf{serial}}
+
+\tikzset{
+    entity/.style={draw, rounded corners, thick, minimum width=1.35cm, minimum height=0.75cm, align=center},
+    bigentity/.style={draw, rounded corners, thick, minimum width=2.7cm, minimum height=0.8cm, align=center},
+    attacker/.style={draw, circle, thick, minimum size=0.75cm},
+    msg/.style={-Latex, thick},
+    trust/.style={-Latex, thick, dashed}
+}
+
+\begin{document}
+
+% -----------------------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\begin{frame}[t]{Pregled}
+    \tableofcontents
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\section{Uvod}
+
+\begin{frame}[t]{Problem uspostavljanja ključa}
+\small
+
+\begin{block}{Polazni problem}
+U simetričnoj kriptografiji obe strane moraju da imaju isti tajni ključ. 
+Ako strane komuniciraju preko nesigurne mreže, postavlja se pitanje kako da bezbedno uspostave taj ključ.
+\[
+A, B \leadsto K_{AB}
+\]
+\end{block}
+
+\vspace{0.35em}
+
+\begin{columns}[T,onlytextwidth]
+\column{0.50\textwidth}
+\begin{alertblock}{Glavni rizik}
+Javni ključ je dostupan svima. Napadač može objaviti svoj javni ključ kao da pripada strani $B$.
+\end{alertblock}
+
+\column{0.46\textwidth}
+\centering
+\begin{tikzpicture}[node distance=1.9cm,scale=0.9,transform shape]
+    \node[entity] (A) {$A$};
+    \node[entity,right=of A] (B) {$B$};
+    \node[attacker,below=0.75cm of $(A)!0.5!(B)$] (E) {$E$};
+    \draw[msg] (A) -- node[above] {poruke} (B);
+    \draw[trust] (E) -- node[right] {prisluškuje} ($(A)!0.5!(B)$);
+\end{tikzpicture}
+\end{columns}
+
+\vspace{0.45em}
+
+\begin{block}{Zato je potreban sertifikat}
+Javni ključ mora biti pouzdano povezan sa identitetom subjekta. 
+Nije dovoljno dobiti tajni ključ; učesnik mora znati \textbf{sa kim} ga deli.
+\end{block}
+
+\end{frame}
+
+\begin{frame}[t]{Dugoročni i kratkoročni ključevi}
+\small
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\begin{block}{Dugoročni ključevi}
+\begin{itemize}
+    \item koriste se duže vreme;
+    \item povezani su sa identitetom učesnika;
+    \item primer: privatni ključ subjekta čiji se javni ključ nalazi u sertifikatu;
+    \item kompromitovanje narušava poverenje u identitet.
+\end{itemize}
+\end{block}
+
+\column{0.48\textwidth}
+\begin{block}{Kratkoročni ključevi}
+\begin{itemize}
+    \item sesijski ili efemerni ključevi;
+    \item koriste se za jednu sesiju ili ograničeno vreme;
+    \item ograničavaju posledice napada;
+    \item cilj je da se bezbedno uspostave pomoću dugoročnih ključeva.
+\end{itemize}
+\end{block}
+\end{columns}
+
+\vspace{0.5em}
+\begin{alertblock}{Bezbednosni zahtevi}
+\centering
+\textbf{tajnost} \quad + \quad \textbf{autentifikacija} \quad + \quad \textbf{svežina} \quad + \quad \textbf{ispravno vezivanje}
+\end{alertblock}
+
+\vspace{0.2em}
+\centering
+\footnotesize
+Ključ treba da bude tajan, nov, vezan za prave učesnike i za konkretnu sesiju.
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\section{Sertifikati i sertifikaciona tela}
+
+\begin{frame}[t]{Digitalni sertifikat}
+\small
+\begin{columns}[T,onlytextwidth]
+\column{0.52\textwidth}
+\begin{block}{Definicija}
+Digitalni sertifikat je potpisana struktura koja povezuje javni ključ sa identitetom subjekta.
+\end{block}
+
+\begin{itemize}
+    \item subjekt može biti osoba, server, organizacija ili proces;
+    \item CA proverava identitet i potvrđuje vezu sa javnim ključem;
+    \item korisnik proverava potpis sertifikacionog tela.
+\end{itemize}
+
+\begin{block}{Ideja}
+\[
+\Cert_A \;:\; A \longleftrightarrow \pk_A
+\]
+\centering
+sertifikat kaže: „ovaj javni ključ pripada subjektu $A$”
+\end{block}
+
+\column{0.44\textwidth}
+\centering
+\begin{tikzpicture}
+    \node[draw, rounded corners, thick, minimum width=4.25cm, minimum height=3.1cm, align=left] (cert) {};
+    \node[anchor=north west] at ([xshift=0.18cm,yshift=-0.15cm]cert.north west) {\textbf{Sertifikat}};
+    \node[anchor=west] at ([xshift=0.25cm,yshift=0.45cm]cert.west) {Subject: $A$};
+    \node[anchor=west] at ([xshift=0.25cm,yshift=0.00cm]cert.west) {Public key: $\pk_A$};
+    \node[anchor=west] at ([xshift=0.25cm,yshift=-0.45cm]cert.west) {Issuer: $CA$};
+    \node[anchor=west] at ([xshift=0.25cm,yshift=-0.90cm]cert.west) {Signature: $\sig{\sk_{CA}}{\cdots}$};
+\end{tikzpicture}
+
+\vspace{0.6em}
+\begin{alertblock}{Zašto je CA potreban?}
+Bez CA svako bi mogao da tvrdi da neki javni ključ pripada nekom subjektu.
+\end{alertblock}
+\end{columns}
+\end{frame}
+
+\begin{frame}[t]{Provera sertifikata}
+\small
+\begin{columns}[T,onlytextwidth]
+\column{0.50\textwidth}
+\begin{block}{Korisnik proverava}
+\begin{itemize}
+    \item potpis izdavaoca;
+    \item period važenja;
+    \item namenu javnog ključa;
+    \item ograničenja sertifikata;
+    \item status opoziva.
+\end{itemize}
+\end{block}
+
+\column{0.46\textwidth}
+\begin{block}{Provera u praksi}
+\begin{itemize}
+    \item da li je sertifikat zaista izdao navedeni CA;
+    \item da li sertifikat trenutno važi;
+    \item da li se ključ sme koristiti za tu namenu;
+    \item da li je sertifikat opozvan.
+\end{itemize}
+\end{block}
+\end{columns}
+
+\vspace{0.3em}
+\begin{alertblock}{Važno}
+Sertifikat potvrđuje javni ključ, ali ne štiti privatni ključ subjekta. Ako privatni ključ procuri, sertifikat može biti zloupotrebljen.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}[t]{Lanac poverenja}
+\small
+\centering
+\begin{tikzpicture}[node distance=1.45cm]
+    \node[bigentity] (root) {Root CA};
+    \node[bigentity,right=of root] (inter) {Intermediate CA};
+    \node[bigentity,right=of inter] (end) {Krajnji subjekt};
+    \draw[msg] (root) -- node[above] {potpisuje} (inter);
+    \draw[msg] (inter) -- node[above] {potpisuje} (end);
+\end{tikzpicture}
+
+\vspace{0.6em}
+\begin{columns}[T,onlytextwidth]
+\column{0.49\textwidth}
+\begin{block}{Certification path}
+\[
+CA_0 \rightarrow CA_1 \rightarrow \cdots \rightarrow A
+\]
+Poverenje se prenosi od poznatog CA do krajnjeg subjekta.
+\end{block}
+
+\column{0.47\textwidth}
+\begin{block}{Sidro poverenja}
+Korisnik unapred veruje javnom ključu korenskog CA. Od tog javnog ključa počinje provera lanca.
+\end{block}
+\end{columns}
+
+\vspace{0.25em}
+\begin{alertblock}{Validnost lanca}
+Svi potpisi, periodi važenja, opozivi i ograničenja moraju biti ispravni. U većim sistemima poverenje se može proširiti i unakrsnom sertifikacijom.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}[t]{X.509 i opoziv sertifikata}
+\small
+\begin{columns}[T,onlytextwidth]
+\column{0.49\textwidth}
+\begin{block}{Tipična polja X.509 sertifikata}
+\begin{itemize}
+    \item Subject: kome sertifikat pripada;
+    \item Issuer: ko ga je izdao;
+    \item javni ključ subjekta;
+    \item serijski broj;
+    \item period važenja;
+    \item digitalni potpis;
+    \item v3 ekstenzije.
+\end{itemize}
+\end{block}
+
+\column{0.47\textwidth}
+\begin{block}{CRL}
+CRL je potpisana lista opozvanih sertifikata.
+
+\medskip
+Sertifikat može biti opozvan i pre isteka važenja.
+
+\medskip
+Svaki opozvani sertifikat se u listi prepoznaje po svom serijskom broju.
+\end{block}
+
+\begin{alertblock}{Razlog opoziva}
+Kompromitovan ključ, promenjeni podaci ili narušeno poverenje.
+\end{alertblock}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\section{Sesijski ključevi iz statičkih simetričnih ključeva}
+
+\begin{frame}[t]{Model sa poverljivom trećom stranom}
+\small
+\begin{columns}[T,onlytextwidth]
+\column{0.50\textwidth}
+\begin{block}{Pretpostavke}
+\begin{itemize}
+    \item $S$ je server za distribuciju ključeva;
+    \item $A$ i $S$ dele dugoročni ključ $K_{AS}$;
+    \item $B$ i $S$ dele dugoročni ključ $K_{BS}$;
+    \item cilj je novi sesijski ključ $K_{AB}$.
+\end{itemize}
+\end{block}
+
+\begin{block}{Oznaka}
+\[
+\enc{M}{K}
+\]
+\centering
+poruka $M$ šifrovana ključem $K$
+\end{block}
+
+\column{0.46\textwidth}
+\centering
+\begin{tikzpicture}[node distance=1.55cm]
+    \node[entity] (A) {$A$};
+    \node[entity,right=2.7cm of A] (B) {$B$};
+    \node[entity,below=1.15cm of $(A)!0.5!(B)$] (S) {$S$};
+    \draw[msg,<->] (A) -- node[left] {$K_{AS}$} (S);
+    \draw[msg,<->] (B) -- node[right] {$K_{BS}$} (S);
+    \draw[trust,<->] (A) -- node[above] {$K_{AB}$} (B);
+\end{tikzpicture}
+
+\vspace{0.7em}
+\begin{alertblock}{Uloga servera}
+$S$ pomaže da $A$ i $B$ dobiju novi ključ, ali ne učestvuje u kasnijoj komunikaciji.
+\end{alertblock}
+\end{columns}
+\end{frame}
+
+\begin{frame}[t]{Wide-Mouth Frog protokol}
+\small
+\begin{block}{Ideja}
+Strana $A$ sama bira sesijski ključ $K_{AB}$ i preko servera $S$ ga dostavlja strani $B$.
+\end{block}
+
+\begin{block}{Tok poruka}
+\[
+\begin{aligned}
+1.\quad A &\rightarrow S : A,\ \enc{T_A, B, K_{AB}}{K_{AS}} \\
+2.\quad S &\rightarrow B : \enc{T_S, A, K_{AB}}{K_{BS}}
+\end{aligned}
+\]
+\end{block}
+
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\begin{block}{Značenje poruka}
+\begin{itemize}
+    \item $T_A$ i $T_S$ služe za proveru svežine;
+    \item $B$ dobija ključ preko servera $S$;
+    \item server samo prosleđuje ključ koji bira $A$.
+\end{itemize}
+\end{block}
+
+\column{0.48\textwidth}
+\begin{alertblock}{Ograničenje}
+Protokol zavisi od sinhronizacije satova i od kvaliteta ključa koji bira $A$.
+\end{alertblock}
+\end{columns}
+\end{frame}
+
+\begin{frame}[t]{Needham--Schroeder protokol}
+\scriptsize
+\begin{block}{Ideja}
+Sesijski ključ ne bira $A$, već ga generiše server $S$. Nonce $N_A$ povezuje zahtev i odgovor servera.
+\end{block}
+
+\begin{block}{Tok poruka}
+\[
+\begin{aligned}
+1.\quad A &\rightarrow S : A, B, N_A \\
+2.\quad S &\rightarrow A : \enc{N_A, B, K_{AB}, \enc{K_{AB}, A}{K_{BS}}}{K_{AS}} \\
+3.\quad A &\rightarrow B : \enc{K_{AB}, A}{K_{BS}} \\
+4.\quad B &\rightarrow A : \enc{N_B}{K_{AB}} \\
+5.\quad A &\rightarrow B : \enc{N_B - 1}{K_{AB}}
+\end{aligned}
+\]
+\end{block}
+
+\end{frame}
+
+\begin{frame}[t]{Needham--Schroeder: značenje poruka}
+\small
+\begin{columns}[T,onlytextwidth]
+\column{0.49\textwidth}
+\begin{block}{Od servera do učesnika}
+\begin{itemize}
+    \item $A$ šalje $N_A$ da bi kasnije prepoznala odgovor.
+    \item Server $S$ generiše novi $K_{AB}$.
+    \item Deo šifrovan ključem $K_{BS}$ namenjen je strani $B$.
+\end{itemize}
+\end{block}
+
+\column{0.47\textwidth}
+\begin{block}{Potvrda posedovanja ključa}
+\begin{itemize}
+    \item $B$ šalje $N_B$ šifrovan ključem $K_{AB}$.
+    \item $A$ vraća $N_B-1$.
+    \item Time $A$ pokazuje da poseduje isti sesijski ključ.
+\end{itemize}
+\end{block}
+\end{columns}
+
+\vspace{0.3em}
+\begin{alertblock}{Slabost}
+$B$ nema direktan dokaz da je $K_{AB}$ nov, pa je svežina ključna slabost protokola. Ako se kasnije otkrije stari sesijski ključ, napadač može ponoviti staru poruku namenjenu strani $B$.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}[t]{Kerberos}
+\scriptsize
+\begin{block}{Ideja}
+Kerberos koristi tikete i vremenske oznake. Tiket je deo poruke namenjen strani $B$, koji $A$ samo prosleđuje.
+\end{block}
+
+\begin{block}{Tok poruka}
+\[
+\begin{aligned}
+1.\quad A &\rightarrow S : A, B \\
+2.\quad S &\rightarrow A : \enc{T_S, L, K_{AB}, B, \enc{T_S, L, K_{AB}, A}{K_{BS}}}{K_{AS}} \\
+3.\quad A &\rightarrow B : \enc{T_S, L, K_{AB}, A}{K_{BS}},\ \enc{A,T_A}{K_{AB}} \\
+4.\quad B &\rightarrow A : \enc{T_A+1}{K_{AB}}
+\end{aligned}
+\]
+\end{block}
+
+
+\end{frame}
+
+\begin{frame}[t]{Kerberos: tiket i potvrda}
+\small
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\begin{block}{Tiket za $B$}
+\[
+\enc{T_S,L,K_{AB},A}{K_{BS}}
+\]
+$A$ ne može da menja tiket, već ga samo pokazuje strani $B$.
+\end{block}
+
+\column{0.48\textwidth}
+\begin{block}{Potvrda učesnika}
+\[
+\enc{A,T_A}{K_{AB}}
+\]
+Ova poruka pokazuje da $A$ zna sesijski ključ i da trenutno učestvuje u komunikaciji.
+\end{block}
+\end{columns}
+
+\begin{alertblock}{Prednost i ograničenje}
+Koristi tikete sa ograničenim vremenom važenja $L$. Time se smanjuje mogućnost ponavljanja starih poruka. 
+Zahteva sinhronizaciju kljuceva. Ako vremenska oznaka nije sveža, poruka se odbacuje.
+\end{alertblock}
+
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\section{Sesijski ključevi iz statičkih javnih ključeva}
+
+\begin{frame}[t]{Prenos ključa pomoću javnog ključa}
+\small
+\begin{columns}[T,onlytextwidth]
+\column{0.50\textwidth}
+\begin{block}{Oznake}
+\begin{itemize}
+    \item $\pk_B$ je javni ključ strane $B$;
+    \item $\sk_B$ je privatni ključ strane $B$;
+    \item $K_{AB}$ je sesijski ključ koji bira $A$.
+\end{itemize}
+\end{block}
+
+\begin{block}{Osnovna ideja}
+\[
+A \rightarrow B : \Enc{\pk_B}{K_{AB}}
+\]
+Samo $B$ može da dešifruje poruku, jer samo $B$ ima privatni ključ $\sk_B$.
+\end{block}
+
+\column{0.46\textwidth}
+\begin{alertblock}{Problem}
+$B$ može da dešifruje poruku, ali ne zna ko ju je poslao. Napadač takođe može poslati ključ šifrovan javnim ključem $\pk_B$.
+\end{alertblock}
+
+\begin{block}{Zaključak}
+Prenos ključa mora dodatno da obezbedi autentifikaciju pošiljaoca.
+\end{block}
+\end{columns}
+\end{frame}
+
+\begin{frame}[t]{Prenos ključa: potpis i identitet}
+\small
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\begin{block}{Sa potpisom i identitetom}
+\[
+c = \Enc{\pk_B}{A\parallel K_{AB}}
+\]
+Identitet $A$ se uključuje u šifrovani deo da bi ključ bio vezan za pošiljaoca.
+\[
+A \rightarrow B : c,\ \sig{\sk_A}{c}
+\]
+Potpis pokazuje da je poruku potpisala strana koja poseduje privatni ključ $\sk_A$.
+\end{block}
+
+
+\end{columns}
+
+\vspace{0.3em}
+\begin{alertblock}{Ograničenje}
+Ključ bira samo jedna strana i nema forward secrecy.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}[t]{Forward secrecy}
+\small
+\begin{block}{Definicija}
+Forward secrecy znači da kompromitovanje dugoročnog privatnog ključa ne otkriva ranije uspostavljene sesijske ključeve.
+\end{block}
+
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\begin{alertblock}{Prenos ključa}
+\centering
+\[
+\begin{array}{c}
+\sk_B\ \text{kompromitovan} \\
+\Downarrow \\
+K_{AB}\ \text{može biti otkriven}
+\end{array}
+\]
+\smallskip
+\small Snimljeni šifrat može se kasnije dešifrovati.
+\end{alertblock}
+
+\column{0.48\textwidth}
+\begin{block}{Efemerni Diffie--Hellman}
+\centering
+\[
+\begin{array}{c}
+a,b\ \text{obrisani} \\
+\Downarrow \\
+g^{ab}\ \text{ostaje zaštićen}
+\end{array}
+\]
+\smallskip
+\small Prošle sesije ostaju zaštićene ako su efemerne tajne obrisane.
+\end{block}
+\end{columns}
+\end{frame}
+
+\begin{frame}[t]{Diffie--Hellman protokol}
+\small
+\begin{columns}[T,onlytextwidth]
+\column{0.50\textwidth}
+Diffie--Hellman je osnovni primer dogovora ključa.
+\begin{block}{1. Javne vrednosti i tajne}
+\begin{itemize}
+    \item $G$ je grupa reda $q$;
+    \item $g$ je generator;
+    \item $A$ bira tajnu $a$;
+    \item $B$ bira tajnu $b$.
+\end{itemize}
+\end{block}
+
+\begin{block}{2. Razmena}
+\[
+A \rightarrow B : g^a
+\]
+\[
+B \rightarrow A : g^b
+\]
+\end{block}
+
+\column{0.46\textwidth}
+\begin{block}{3. Računanje zajedničke tajne}
+\[
+A: (g^b)^a=g^{ab}
+\]
+\[
+B: (g^a)^b=g^{ab}
+\]
+\[
+K_{AB}=\Hash{g^{ab}}
+\]
+\end{block}
+
+\begin{alertblock}{Napomena}
+Osnovni DH ne obezbeđuje autentifikaciju. Strane dobijaju ključ, ali ne znaju pouzdano sa kim su ga dobile.
+\end{alertblock}
+\end{columns}
+\end{frame}
+
+\begin{frame}[t]{Napad čoveka u sredini}
+\small
+\begin{columns}[T,onlytextwidth]
+\column{0.52\textwidth}
+\begin{block}{Zamena efemernih vrednosti}
+\[
+\begin{aligned}
+1.\quad A &\rightarrow E : g^a \\
+2.\quad E &\rightarrow A : g^m \\
+3.\quad E &\rightarrow B : g^n \\
+4.\quad B &\rightarrow E : g^b
+\end{aligned}
+\]
+\end{block}
+
+\begin{itemize}
+    \item $A$ misli da dobija vrednost od $B$;
+    \item $B$ misli da dobija vrednost od $A$;
+    \item zapravo oba učesnika računaju ključ sa napadačem.
+\end{itemize}
+
+\column{0.44\textwidth}
+\begin{alertblock}{Posledica}
+\[
+K_{AE}=\Hash{g^{am}}
+\]
+\[
+K_{BE}=\Hash{g^{bn}}
+\]
+Osnovni Diffie--Hellman rešava problem tajnog dogovora ključa, ali ne rešava problem autentifikacije.
+\end{alertblock}
+\end{columns}
+\end{frame}
+
+\begin{frame}[t]{Potpisani Diffie--Hellman}
+\small
+\begin{block}{Oznake}
+$a$ i $b$ su efemerne tajne, a $\sk_A$ i $\sk_B$ su dugoročni privatni ključevi za potpis.
+\end{block}
+
+\begin{block}{Poruke}
+\[
+\begin{aligned}
+A &\rightarrow B : g^a,\ \sig{\sk_A}{g^a} \\
+B &\rightarrow A : g^b,\ \sig{\sk_B}{g^b}
+\end{aligned}
+\]
+\end{block}
+
+\begin{alertblock}{Suština}
+Potpis autentifikuje poslatu Diffie--Hellman vrednost. Još bolje je da potpis obuhvati ceo kontekst sesije: obe efemerne vrednosti i uloge učesnika.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}[t]{STS protokol}
+\scriptsize
+\begin{block}{Oznake}
+$et_A=g^a$ i $et_B=g^b$ su efemerne javne vrednosti. Ključ $k$ se izvodi iz zajedničke Diffie--Hellman tajne.
+\end{block}
+
+\begin{block}{Tok poruka}
+\[
+\begin{aligned}
+1.\quad A &\rightarrow B : et_A=g^a \\
+2.\quad B &\rightarrow A : et_B=g^b,\ \enc{\sig{\sk_B}{et_B,\,et_A}}{k} \\
+3.\quad A &\rightarrow B : \enc{\sig{\sk_A}{et_A,\,et_B}}{k}
+\end{aligned}
+\]
+\[
+k=\Hash{g^{ab}}
+\]
+\end{block}
+
+\begin{alertblock}{Suština}
+Potpisi obuhvataju obe efemerne vrednosti, pa napadač ne može jednostavno da ih zameni i zadrži ispravan potpis.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}[t]{Blake--Wilson--Menezes protokol}
+\small
+\begin{block}{Ideja}
+Tok poruka je kao kod Diffie--Hellmana, ali se ključ izvodi i iz statičkih i iz efemernih vrednosti.
+\end{block}
+
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\begin{block}{Statički ključevi}
+\[
+\pk_A=g^a,\qquad \pk_B=g^b
+\]
+$a$ i $b$ su statički privatni ključevi.
+\end{block}
+
+\column{0.48\textwidth}
+\begin{block}{Efemerni ključevi}
+$x$ i $y$ su nove tajne za konkretnu sesiju.
+\[
+A\rightarrow B: ek_A=g^x
+\]
+\[
+B\rightarrow A: ek_B=g^y
+\]
+\end{block}
+\end{columns}
+
+\vspace{0.3em}
+\begin{alertblock}{Suština}
+Statički ključevi vezuju rezultat za identitete, a efemerni ključevi za konkretnu sesiju.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}[t]{Blake--Wilson--Menezes: računanje ključa}
+\small
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\begin{block}{Računa $A$}
+\[
+k=H(\pk_B^x,\ ek_B^a)
+\]
+\end{block}
+
+\begin{block}{Računa $B$}
+\[
+k=H(ek_A^b,\ \pk_A^y)
+\]
+\end{block}
+
+\column{0.48\textwidth}
+\begin{block}{Zašto je isti ključ?}
+\[
+\pk_B^x=(g^b)^x=g^{bx}=ek_A^b
+\]
+\[
+ek_B^a=(g^y)^a=g^{ay}=\pk_A^y
+\]
+\end{block}
+\end{columns}
+
+\vspace{0.3em}
+\begin{alertblock}{Zaključak}
+Obe strane dobijaju iste ulaze za funkciju $H$, pa dobijaju isti ključ.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}[t]{MQV protokol}
+\small
+\begin{block}{Ideja}
+MQV kombinuje efemerne i statičke ključeve bez dodatnih potpisa i bez treće poruke.
+\end{block}
+
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\begin{block}{Statički ključevi}
+\[
+\pk_A=g^a,\qquad \pk_B=g^b
+\]
+$a$ i $b$ su statički privatni ključevi.
+\end{block}
+
+\column{0.48\textwidth}
+\begin{block}{Efemerni ključevi}
+$x$ i $y$ su efemerne tajne, a $ek_A$ i $ek_B$ efemerne javne vrednosti.
+\[
+A\rightarrow B: ek_A=g^x,\qquad B\rightarrow A: ek_B=g^y
+\]
+\end{block}
+\end{columns}
+
+\begin{alertblock}{Pomoćne vrednosti}
+$s_A,t_A,s_B,t_B$ izvode se iz efemernih javnih ključeva i koriste se pri računanju konačne zajedničke vrednosti.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}[t]{MQV: računanje ključa}
+\small
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\begin{block}{Strana $A$}
+\[
+\begin{aligned}
+h_A &= x+s_Aa \pmod q,\\
+K_A &= (ek_B\cdot \pk_B^{t_A})^{h_A}
+\end{aligned}
+\]
+\end{block}
+
+\column{0.48\textwidth}
+\begin{block}{Strana $B$}
+\[
+\begin{aligned}
+h_B &= y+s_Bb \pmod q,\\
+K_B &= (ek_A\cdot \pk_A^{t_B})^{h_B}
+\end{aligned}
+\]
+\end{block}
+\end{columns}
+
+\vspace{0.3em}
+\begin{alertblock}{Suština}
+Efemerni ključevi daju svežinu, a statički ključevi vezuju rezultat za identitete učesnika.
+\end{alertblock}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+
+\section{Simbolička analiza protokola}
+
+\begin{frame}[t]{Zašto simbolička analiza?}
+\small
+
+\begin{block}{Polazna ideja}
+Protokol može koristiti jake algoritme, a ipak biti nebezbedan zbog pogrešnog toka poruka.
+\end{block}
+
+\vspace{0.25em}
+
+\begin{block}{Gde nastaje problem?}
+\begin{itemize}
+    \item poruka može biti ispravno šifrovana, ali stara;
+    \item poruka može biti validna, ali namenjena drugoj sesiji;
+    \item učesnik može pogrešno zaključiti šta poruka dokazuje.
+\end{itemize}
+\end{block}
+
+\vspace{0.25em}
+
+\begin{alertblock}{Zaključak}
+Zato nije dovoljno proveriti samo da li je poruka pravilno šifrovana. Važno je proveriti šta ta poruka zaista znači u toku protokola.
+\end{alertblock}
+
+\end{frame}
+
+\begin{frame}[t]{Model napadača i cilj analize}
+\small
+
+\begin{block}{Model napadača}
+Napadač se posmatra kao jak protivnik koji kontroliše mrežu. On može da presreće, menja, ponavlja, zaustavlja i šalje poruke.
+\end{block}
+
+\vspace{0.25em}
+
+\begin{block}{Šta se analizira?}
+Analizira se logika protokola:
+\begin{itemize}
+    \item šta učesnik vidi;
+    \item u šta učesnik veruje;
+    \item šta sme da zaključi nakon prijema poruke.
+\end{itemize}
+\end{block}
+
+\vspace{0.25em}
+
+\begin{alertblock}{Cilj}
+Kod protokola za uspostavljanje ključa cilj je da učesnici na kraju veruju da dele isti svež sesijski ključ.
+\end{alertblock}
+
+\end{frame}
+
+
+
+
+
+\begin{frame}[t]{BAN logika: osnovne oznake}
+\small
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+Formalni pristup za analizu autentifikacionih protokola.
+\begin{block}{Verovanja i poruke}
+\[
+P\mid\equiv X \quad \text{$P$ veruje u $X$}
+\]
+\[
+P\triangleleft X \quad \text{$P$ vidi $X$}
+\]
+\[
+P\mid\sim X \quad \text{$P$ je nekada rekao $X$}
+\]
+\end{block}
+
+\column{0.48\textwidth}
+\begin{block}{Svežina i ključevi}
+\[
+\#(X) \quad \text{$X$ je sveže}
+\]
+\[
+P\Rightarrow X \quad \text{$P$ je nadležan za $X$}
+\]
+\[
+P \xleftrightarrow{K} Q \quad \text{$P$ i $Q$ dele tajni ključ $K$}
+\]
+\end{block}
+\end{columns}
+
+\vspace{0.3em}
+\begin{alertblock}{Upotreba oznaka}
+Oznake služe da formalno opišemo šta učesnik vidi, u šta veruje i šta sme da zaključi nakon prijema poruke.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}[t]{BAN logika: cilj protokola}
+\small
+\begin{block}{Cilj protokola za ključ}
+\[
+A\mid\equiv A\xleftrightarrow{K_{AB}}B,
+\qquad
+B\mid\equiv A\xleftrightarrow{K_{AB}}B
+\]
+Obe strane treba da veruju da dele isti sesijski ključ.
+\end{block}
+
+\begin{alertblock}{Ideja analize}
+Ako se cilj ne može izvesti iz poruka i pretpostavki, protokol ima slabost ili nije dovoljno precizno definisan.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}[t]{BAN logika: pravila zaključivanja}
+\scriptsize
+\begin{columns}[T,onlytextwidth]
+\column{0.48\textwidth}
+\begin{block}{Značenje poruke}
+\[
+\frac{A\mid\equiv A\xleftrightarrow{K}B,\quad A\triangleleft \enc{X}{K}}
+{A\mid\equiv B\mid\sim X}
+\]
+Ako $A$ veruje da deli ključ $K$ sa $B$, onda iz poruke šifrovane tim ključem zaključuje da je $B$ nekada rekao $X$.
+\end{block}
+
+\begin{block}{Svežina}
+\[
+\frac{A\mid\equiv \#(X),\quad A\mid\equiv B\mid\sim X}
+{A\mid\equiv B\mid\equiv X}
+\]
+Ako je $X$ sveže, poruka nije samo ponovljena iz stare sesije.
+\end{block}
+
+\column{0.48\textwidth}
+\begin{block}{Nadležnost}
+\[
+\frac{A\mid\equiv B\Rightarrow X,\quad A\mid\equiv B\mid\equiv X}
+{A\mid\equiv X}
+\]
+Ako je $B$ nadležan za $X$ i veruje u $X$, onda $A$ može prihvatiti $X$.
+\end{block}
+
+\begin{alertblock}{Zaključak}
+Pravila povezuju poruke, svežinu i poverenje u autoritet učesnika.
+\end{alertblock}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\section{Zaključak}
+
+\begin{frame}[t]{Zaključak}
+\small
+\begin{columns}[T,onlytextwidth]
+\column{0.52\textwidth}
+\begin{itemize}
+    \item Uspostavljanje ključa nije samo izbor algoritma.
+    \item Sertifikati povezuju javni ključ sa identitetom.
+    \item CA svojim potpisom potvrđuje tu vezu.
+    \item Autentifikovani protokoli sprečavaju napad čoveka u sredini.
+    \item Formalna analiza otkriva greške u toku poruka i zaključivanju.
+\end{itemize}
+
+\column{0.44\textwidth}
+\begin{alertblock}{Suština}
+Učesnici ne treba samo da dobiju tajni ključ, već da budu sigurni sa kim ga dele, da je ključ svež i da je namenjen baš toj sesiji.
+\end{alertblock}
+\end{columns}
+\end{frame}
+
+\begin{frame}[t]{Literatura}
+\small
+\begin{itemize}
+    \item Nigel P. Smart, \emph{Cryptography Made Simple}, Springer, 2016.
+    \item William Stallings, \emph{Cryptography and Network Security}, 2011.
+    \item RFC 5280, \emph{Internet X.509 Public Key Infrastructure Certificate and CRL Profile}.
+    \item M. Burrows, M. Abadi, R. Needham, \emph{A Logic of Authentication}, 1990.
+    \item IBM Documentation, \emph{Digital certificates}.
+\end{itemize}
+\end{frame}
+
+\end{document}
