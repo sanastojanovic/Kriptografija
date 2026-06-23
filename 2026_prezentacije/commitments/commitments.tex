@@ -1,0 +1,575 @@
+\documentclass[aspectratio=1610]{beamer}
+
+\usepackage{fontspec}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb}
+
+\title{Šeme posvete}
+\author{Vukašin Marković \textbullet{} Matematički fakultet \textbullet{} Univerzitet u Beogradu}
+\date{jun 2026}
+
+\usetheme[numbering=progressbar,sectionpage=none]{wildcat}
+
+\setbeamerfont{normal text}{size=\fontsize{10}{13}\selectfont}
+\setbeamerfont{frametitle}{size=\fontsize{18}{22}\selectfont}
+\setbeamerfont{title}{size=\fontsize{22}{28}\selectfont}
+\setbeamerfont{subtitle}{size=\fontsize{10}{13}\selectfont}
+\AtBeginEnvironment{frame}{\fontsize{10}{13}\selectfont}
+
+\newcommand{\keyword}[1]{\textcolor{wcprimary}{\textbf{#1}}}
+\newcommand{\bigsentence}[1]{{\fontsize{32}{38}\selectfont #1}}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+%% ============================================================
+%% MOTIVACIJA
+%% ============================================================
+
+\begin{frame}{Zašto nam trebaju šeme posvete?}
+\begin{block}{Situacija}
+  Više učesnika treba istovremeno da predaju odgovore, a ne sme da postoji mogućnost kopiranja.
+\end{block}
+
+\begin{alertblock}{Problem u digitalnom svetu}
+  Nema fizičkih koverti — poruke se mogu videti čim budu poslate.
+\end{alertblock}
+
+\begin{exampleblock}{Rešenje}
+  Pošalji \keyword{kriptografski otisak} vrednosti — sakrij sadržaj, ali se obaveži na njega.
+\end{exampleblock}
+\vspace{4pt}
+{\footnotesize * Iz otiska nije moguće rekonstruisati vrednost, ali kada se vrednost otkrije može se utvrditi da li ona odgovara prethodnom otisku.}
+\end{frame}
+
+\begin{frame}{Istorija: bacanje novčića telefonom}
+\begin{columns}
+  \begin{column}{0.6\textwidth}
+    \begin{itemize}
+      
+      \item Manuel Blum, 1981.
+      \item Dve strane žele da se dogovore oko \keyword{slučajnog ishoda} bez međusobnog poverenja
+      \item Prva strana se obavezuje na ishod bacanja, a otkriva ga tek nakon što druga strana završi pogadjanje
+      \item Rešenje: \keyword{šema posvete}
+      \item Faze su: \keyword{faza posvećivanja (commit phase)} i \keyword{faza otkrivanja (reveal phase)}
+    \end{itemize}
+  \end{column}
+  \begin{column}{0.45\textwidth}
+    \begin{center}
+    \begin{tikzpicture}[scale=0.9]
+      % vertikalne linije (lifeline)
+      \draw[wcprimary!40, dashed] (-1.8,3.5) -- (-1.8,-3.2);
+      \draw[wcprimary!40, dashed] (1.8,3.5) -- (1.8,-3.2);
+      % naslovi
+      \node[font=\small\bfseries, wcprimary] at (-1.8,3.8) {Alisa};
+      \node[font=\small\bfseries, wcprimary] at (1.8,3.8) {Bob};
+      % strelica 1: Alisa -> Bob
+      \draw[->, wcprimary, line width=1.2pt] (-1.6,2.5) -- (1.6,2.5);
+      \node[font=\scriptsize, align=center] at (0,2.85) {$c = \mathsf{Posveti}(1;\,r)$};
+      % strelica 2: Bob -> Alisa
+      \draw[->, wcprimary, line width=1.2pt] (1.6,0.8) -- (-1.6,0.8);
+      \node[font=\scriptsize, align=center] at (0,1.15) {pretpostavka $b' = 0$};
+      % strelica 3: Alisa -> Bob
+      \draw[->, wcprimary, line width=1.2pt] (-1.6,-1.0) -- (1.6,-1.0);
+      \node[font=\scriptsize, align=center] at (0,-0.65) {otkrij $(1,\, r)$};
+      % rezultat
+      \node[font=\scriptsize, align=center, wcprimary] at (1.8,-2.2) {proveri:\\$c \stackrel{?}{=} \mathsf{Posveti}(1;r)$\\$1 \neq 0$ → izgubio};
+    \end{tikzpicture}
+    \end{center}
+  \end{column}
+\end{columns}
+\end{frame}
+
+%% ============================================================
+%% FORMALNA DEFINICIJA
+%% ============================================================
+
+\begin{frame}{Šema posvete — formalna definicija}
+
+Par algoritama $(\mathsf{Posveti}, \mathsf{Otvori})$ nad prostorom poruka $\mathcal{M}$ i slučajnosti $\mathcal{R}$:
+
+\begin{block}{$\mathsf{Posveti}(m;\, r) \to c$}
+  Prima poruku $m \in \mathcal{M}$ i slučajnost $r \xleftarrow{\$} \mathcal{R}$, vraća posvetu $c$.
+\end{block}
+
+\begin{block}{$\mathsf{Otvori}(c,\, m,\, r) \to \{0,1\}$}
+  Proverava da li je $c$ ispravna posveta na poruku $m$ sa slučajnošću $r$.
+\end{block}
+
+\begin{exampleblock}{Ispravnost}
+  Za sve $m \in \mathcal{M}$ i $r \in \mathcal{R}$ važi:
+  $\mathsf{Otvori}(\mathsf{Posveti}(m;\, r),\, m,\, r) = 1$
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Tok protokola}
+
+\begin{enumerate}
+  
+  \item \keyword{Faza posvećivanja.}
+    Pošiljalac bira $r \xleftarrow{\$} \mathcal{R}$, izračunava $c = \mathsf{Posveti}(m;\, r)$
+    i šalje $c$ primaocu. Par $(m, r)$ čuva za sebe.
+
+  \item \keyword{Faza otkrivanja.}
+    Pošiljalac objavljuje $(m, r)$.
+    Primalac prihvata samo ako $\mathsf{Otvori}(c,\, m,\, r) = 1$.
+\end{enumerate}
+
+\begin{alertblock}{Zašto je $r$ neophodan?}
+  Bez slučajnog \keyword{oslepljivača} $r$  (blinding factor), napadač može izračunati posvetu za svaku
+  moguću poruku i porediti sa $c$. Time tajnost poruka nestaje - bez obzira na snagu hash funkcije.
+\end{alertblock}
+\end{frame}
+
+%% ============================================================
+%% BEZBEDNOSNA SVOJSTVA
+%% ============================================================
+
+\begin{frame}{Bezbednosna svojstva}
+\begin{block}{Skrivanje \textnormal{(engl.\ \textit{hiding})}}
+  Posmatrač koji vidi samo $c$ ne može saznati ništa o poruci $m$.\\
+  Varijante: \keyword{savršeno} (matematički nemoguće) ili \keyword{računsko} (računski neizvodljivo).
+\end{block}
+\begin{alertblock}{Obavezivanje \textnormal{(engl.\ \textit{binding})}}
+  Pošiljalac ne može pronaći drugu poruku $m'$ koja daje istu posvetu $c$.\\
+  Varijante: \keyword{savršeno} (matematički nemoguće) ili \keyword{računsko} (računski neizvodljivo).
+\end{alertblock}
+\vspace{4pt}
+{\footnotesize * Ova dva svojstva su razlog postojanja šema posvete — bez skrivanja napadač čita poruku pre otkrivanja, bez obavezivanja pošiljalac može da laže nakon što pošalje posvetu.}
+\end{frame}
+
+\begin{frame}{Skrivanje \textnormal{(engl.\ \textit{hiding})}}
+\begin{block}{Definicija}
+  \textbf{Savršeno:} $\mathsf{Posveti}(m_0;\, r) \overset{d}{=} \mathsf{Posveti}(m_1;\, r)$ — raspodele identične za sve poruke.\\[4pt]
+  \textbf{Računsko:} raspodele nisu nužno identične, ali nijedan efikasan algoritam ne može razlikovati.
+\end{block}
+
+\begin{exampleblock}{Primer — posveta uzima vrednosti A ili B}
+\begin{center}
+\begin{tabular}{lcc}
+  \toprule
+  & vrednost A & vrednost B \\
+  \midrule
+  Raspodela za $m_0$ & 70\% & 30\% \\
+  Raspodela za $m_1$ & 20\% & 80\% \\
+  \midrule
+  \textbf{Savršeno skrivanje} & \textbf{50\%} & \textbf{50\%} \\
+  \bottomrule
+\end{tabular}
+\end{center}
+{\footnotesize * Ako raspodele nisu identične, napadač vidi $c = A$ i zaključuje da je verovatniji $m_0$ — skrivanje je pokvareno. Kod savršenog skrivanja obe poruke daju istu raspodelu, pa $c$ ne otkriva ništa.}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Obavezivanje \textnormal{(engl.\ \textit{binding})}}
+\begin{alertblock}{Definicija}
+  \textbf{Savršeno:} ne postoje $m \neq m'$ i $r, r'$ takvi da
+  $\mathsf{Posveti}(m;\, r) = \mathsf{Posveti}(m';\, r')$.\\[4pt]
+  \textbf{Računsko:} pronalazak takvog para je računski neizvodljiv.
+\end{alertblock}
+
+\begin{block}{Intuicija}
+  Kada pošiljalac objavi posvetu $c$, ne sme biti u mogućnosti da kasnije
+  tvrdi da se $c$ odnosi na neku drugu vrednost. Jednom objavljena posveta
+  ga \keyword{vezuje} za originalnu poruku.
+\end{block}
+\end{frame}
+
+\begin{frame}{Fundamentalno ograničenje}
+\begin{block}{Propozicija}
+  Nijedna šema posvete ne može biti istovremeno \keyword{savršeno sakrivajuća} i \keyword{savršeno obavezujuća}.
+\end{block}
+
+\textbf{Dokaz.} Pretpostavimo da je šema savršeno sakrivajuća. Fiksiramo $m_0 \neq m_1$.
+
+Savršeno skrivanje $\Rightarrow$ raspodele posveta za $m_0$ i $m_1$ su identične $\Rightarrow$ imaju isti nosač.
+
+Dakle, za svako $c$ iz nosača postoji $r_0$ takvo da $c = \mathsf{Posveti}(m_0;\, r_0)$,
+i $r_1$ takvo da $c = \mathsf{Posveti}(m_1;\, r_1)$.
+
+Ista posveta ima \keyword{dva različita otvaranja} $\Rightarrow$ savršeno obavezivanje je narušeno. \hfill$\square$
+
+
+\begin{exampleblock}{Posledica}
+  Šema može da bira samo kompromis: savršeno skrivanje + računsko obavezivanje, ili obrnuto.
+\end{exampleblock}
+\end{frame}
+
+%% ============================================================
+%% HEŠ ŠEMA
+%% ============================================================
+
+\begin{frame}{Heš-zasnovana šema posvete}
+
+Neka je $H \colon \{0,1\}^* \to \{0,1\}^\ell$ kriptografska heš funkcija otporna na nalaženje sudara.
+Prostor poruka $\mathcal{M} = \{0,1\}^*$ — \keyword{bilo koja niska bitova}, proizvoljne dužine.
+
+\begin{block}{Konstrukcija}
+  \[
+    \mathsf{Posveti}(H,\, m;\, r) = H(m \,\|\, r)
+  \]
+  \[
+    \mathsf{Otvori}(H,\, c,\, m,\, r) = 1 \iff c = H(m \,\|\, r)
+  \]
+\end{block}
+
+\begin{columns}
+  \begin{column}{0.48\textwidth}
+    \begin{exampleblock}{Računsko skrivanje}
+      Heš daje pseudoslučajne izlaze — samo \keyword{računski sakrivajuća}.
+      Teorijski neograničen protivnik može razlikovati raspodele.
+    \end{exampleblock}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{alertblock}{Računsko obavezivanje}
+      Pronalazak $m \neq m'$ sa $H(m\|r) = H(m'\|r')$ je direktan sudar $H$.
+      Nijedan poznati algoritam ne može da ga pronađe za kriptografski
+jake heš funkcije.
+    \end{alertblock}
+  \end{column}
+\end{columns}
+\end{frame}
+
+%% ============================================================
+%% PEDERSEN
+%% ============================================================
+
+\begin{frame}{Pedersenova šema posvete}
+
+Neka je $\mathbb{G}$ ciklična grupa prostog reda $q$, generatori $g, h$ takvi da $\log_g(h)$ nije poznat.
+Prostor poruka $\mathcal{M} = \mathbb{Z}_q$ — \keyword{samo brojevi} od $0$ do $q-1$, za razliku od heš šeme.
+
+\begin{block}{Konstrukcija}
+  Prostor poruka $\mathcal{M} = \mathbb{Z}_q$, prostor slučajnosti $\mathcal{R} = \mathbb{Z}_q$.
+  \[
+    \mathsf{Posveti}(m;\, r) = g^m h^r, \quad r \xleftarrow{\$} \mathbb{Z}_q
+  \]
+  \[
+    \mathsf{Otvori}(c,\, m,\, r) = 1 \iff c = g^m h^r
+  \]
+\end{block}
+
+\begin{columns}
+  \begin{column}{0.48\textwidth}
+    \begin{exampleblock}{Savršeno skrivanje}
+      $h^r$ pri uniformnom $r$ pokriva celu $\mathbb{G}$ ravnomerno.
+      Raspodela posvete \keyword{ne zavisi od $m$}.
+    \end{exampleblock}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{alertblock}{Računsko obavezivanje}
+      Nalazak dva otvaranja $\Rightarrow$ poznavanje $\log_g(h)$.
+    \end{alertblock}
+  \end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Pedersen — dokaz računskog obavezivanja}
+
+Pretpostavimo da protivnik nađe $m \neq m'$ i $r, r'$ takve da $g^m h^r = g^{m'} h^{r'}$.
+
+
+Prenosimo na jednu stranu:
+\[
+  g^{m - m'} = h^{r' - r}
+\]
+
+
+Pošto je $h = g^x$ za neki nepoznati $x = \log_g(h)$:
+\[
+  g^{m-m'} = g^{x(r'-r)} \implies m - m' = x(r' - r) \pmod{q}
+\]
+
+
+\begin{alertblock}{Zaključak}
+  \[
+    \log_g(h) = x = \frac{m - m'}{r' - r} \pmod{q}
+  \]
+  Kada bi napadač našao dva otvaranja iste posvete, $\log_g(h)$ bi bio trivijalno izračunljiv.
+\end{alertblock}
+  {\footnotesize * Time bi se rešio problem diskretnog logaritma — a nemogućnost njegovog rešavanja nam \keyword{garantuje} da je nalazak ta dva otvaranja računski neizvodljiv.
+}
+\end{frame}
+
+\begin{frame}{Pedersen — aditivno (homomorfno) svojstvo}
+
+\begin{block}{Teorema}
+  Proizvod dve Pedersenove posvete je posveta na zbir vrednosti:
+  \[
+    g^{m_1} h^{r_1} \cdot g^{m_2} h^{r_2} = g^{m_1 + m_2}\, h^{r_1 + r_2}
+  \]
+\end{block}
+
+\begin{exampleblock}{Zašto je ovo korisno?}
+  \begin{itemize}
+    
+    \item Možemo dokazivati \keyword{relacije između skrivenih vrednosti} bez otkrivanja samih vrednosti
+  \end{itemize}
+  \begin{itemize}
+    {\footnotesize (npr.\ zbir skrivenih glasova zadovoljava neki uslov, bez da vidimo individualne glasove)}
+    \item Gradivni element ZK protokola za glasanje, zbir, rangiranje\ldots
+    \item Isti princip koriste mnogi moderni SNARK sistemi
+  \end{itemize}
+\end{exampleblock}
+\end{frame}
+
+%% ============================================================
+%% KZG
+%% ============================================================
+
+\begin{frame}{KZG polinomijalne posvete — motivacija}
+\begin{block}{Problem}
+  Heš i Pedersen obavezuju se na \keyword{skalarne vrednosti}.
+  U savremenim ZK sistemima potrebno je obavezati se na čitav \keyword{polinom}
+  i dokazivati njegove vrednosti u izabranim tačkama.
+\end{block}
+
+\begin{exampleblock}{KZG šema — Kate, Zaverucha, Goldberg (2010)}
+  \begin{itemize}
+    
+    \item Obavežemo se na evaluaciju polinoma u tajnoj tački $\tau$
+    \item Posveta = \keyword{jedan element grupe}, bez obzira na stepen polinoma
+    \item Dokaz otvaranja = \keyword{jedan element grupe}, konstantne veličine
+  \end{itemize}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{KZG — poverljivo podešavanje (Trusted Setup)}
+
+Jednokratna faza: bira se tajna $\tau \xleftarrow{\$} \mathbb{Z}_q$, objavljuje se SRS:
+\[
+  \mathbf{SRS} = \bigl(g,\; \tau \cdot g,\; \tau^2 \cdot g,\; \ldots,\; \tau^d \cdot g\bigr)
+\]
+$g$ je generator grupe eliptičke krive — fiksirani javni element koji svi dele.
+
+
+\begin{alertblock}{Ključno!}
+  $\tau$ mora biti \keyword{bezbedno uništena} — ko god je zna može da falsifikuje
+  dokaze za proizvoljne vrednosti polinoma.
+\end{alertblock}
+
+\begin{exampleblock}{Šta SRS omogućava?}
+  Pošiljalac(dokazivač) može izračunati posvetu $p(\tau) \cdot g$ za svoj polinom p(x) \keyword{bez poznavanja $\tau$},
+  jer SRS sadrži enkodovane stepene $\tau^i \cdot g$.
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{KZG — posveta na polinom}
+
+Neka je polinom $p(X) = \sum_{i=0}^{d} p_i X^i$.
+
+
+\begin{block}{Posveta}
+  \[
+    C = \sum_{i=0}^{d} p_i \cdot (\tau^i \cdot g) = p(\tau) \cdot g
+  \]
+\end{block}
+
+
+\begin{itemize}
+  
+  \item Svaki $\tau^i \cdot g$ se čita iz SRS-a — $\tau$ nikad nije direktno poznata
+  \item $C$ je \keyword{jedan element grupe (tačka eliptičke krive)} — bez obzira da li je polinom stepena 5 ili 1000
+\end{itemize}
+\end{frame}
+
+\begin{frame}{KZG — dokaz otvaranja}
+Primalac može da nas pita da mu pokažemo vrednost u tački $x_0$.
+Obzirom da je $p(x_0) = y_0$, tada $(X - x_0)$ deli $p(X) - y_0$:
+\[
+  q(X) = \frac{p(X) - y_0}{X - x_0}
+\]
+\begin{block}{Svedok}
+  $q$ provlačimo kroz isti SRS postupak kao $p$, samo je manjeg stepena:
+  \[
+     \pi = q(\tau) \cdot g
+  \] 
+\end{block}
+\begin{exampleblock}{Ključna osobina}
+  Svedok $\pi$ (evaluation proof) je \keyword{takodje jedan element grupe (tačka eliptičke krive)} — konstantna veličina bez obzira na stepen.
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{KZG — verifikacija}
+
+Koristimo bilinearno preslikavanje $e$ koje nam omogućava da proverimo relaciju između eksponenata bez njihovog otkrivanja: $e(a \cdot g,\, b \cdot g) = e(g,g)^{ab}$
+
+
+\begin{block}{Jednačina verifikacije}
+  \[
+    e(C - y_0 \cdot g,\; g) \stackrel{?}{=} e(\pi,\; \tau \cdot g - x_0 \cdot g)
+  \]
+\end{block}
+
+
+Raspisivanjem obe strane:
+\begin{itemize}
+  
+  \item Leva: $e(g,g)^{p(\tau) - y_0}$
+  \item Desna: $e(g,g)^{q(\tau) \cdot (\tau - x_0)}$
+\end{itemize}
+
+
+\begin{exampleblock}{Zašto ovo dokazuje $p(x_0) = y_0$?}
+Jednakost važi $\iff$ $p(\tau) - y_0 = q(\tau)(\tau - x_0)$.
+Pošto je $\tau$ tajna i nepoznata dokazivаču, ovo može važiti samo ako
+$(X - x_0)$ deli $p(X) - y_0$ kao polinome, što važi $\iff$ $p(x_0) = y_0$.
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Pregled: poređenje šema}
+
+\begin{center}
+\begin{tabular}{lccc}
+  \toprule
+  & \textbf{Heš} & \textbf{Pedersen} & \textbf{KZG} \\
+  \midrule
+  Skrivanje        & računsko            & \keyword{savršeno} & nije hiding \\
+  Obavezivanje     & računsko            & računsko           & računsko \\
+  Prostor poruka   & $\{0,1\}^*$         & $\mathbb{Z}_q$     & polinomi \\
+  Trusted setup    & ne                  & ne                 & \keyword{da} \\
+  
+  \bottomrule
+\end{tabular}
+\end{center}
+\end{frame}
+
+%% ============================================================
+%% BLOCKCHAIN PRIMENE
+%% ============================================================
+
+\begin{frame}{ENS — registracija domena i front-running}
+\begin{alertblock}{Problem}
+  Transakcije čekaju u javnom \textit{mempool}-u.
+  Napadač vidi zahtev i registruje isti domen pre korisnika (\keyword{front-running}).
+\end{alertblock}
+
+\begin{block}{ENS rešenje: commit-reveal}
+  \begin{enumerate}
+    
+    \item \textbf{Posveti}: korisnik računa $c = H(\text{ime} \,\|\, r)$ i objavljuje samo $c$
+    \item \textbf{Čekaj}: obavezno čekanje $\geq 60$ sekundi
+    \item \textbf{Otkrij}: korisnik objavljuje ime i $r$; pametni ugovor proverava poklapanje
+  \end{enumerate}
+\end{block}
+
+\begin{exampleblock}{Garancije}
+  \keyword{Skrivanje} — napadač ne može saznati ime iz heša.\\
+  \keyword{Obavezivanje} — korisnik ne može promeniti zahtev.
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}{Merkle stabla kao vektorske posvete}
+
+Heš šema obavezuje na \emph{jednu} poruku. Kako se obavezati na \emph{skup} vrednosti?
+
+
+\begin{block}{Merkle stablo}
+  \begin{itemize}
+    
+    \item Listovi: $\ell_i = H(d_i)$
+    \item Unutrašnji čvorovi: $v = H(\text{levo} \,\|\, \text{desno})$
+    \item Koren $R$ = posveta na čitav skup
+  \end{itemize}
+\end{block}
+
+
+\begin{exampleblock}{Merkle proof}
+  Dokaz da $d_i$ pripada skupu = put od $\ell_i$ do $R$ = samo $\lceil\log_2 n\rceil$ heš vrednosti.
+\end{exampleblock}
+
+
+U Ethereum protokolu: svako zaglavlje bloka sadrži 3 Merkle korena
+(transakcije, stanje, priznanice).
+Stanje celog protokola posvedočeno \keyword{jednim hešem od 32 bajta}.
+\end{frame}
+
+%% ============================================================
+%% ZK VEZA
+%% ============================================================
+
+\begin{frame}{Šeme posvete u ZK sistemima}
+
+\begin{columns}
+  \begin{column}{0.48\textwidth}
+    \begin{block}{zk-STARK}
+      \begin{itemize}
+        
+        \item Koristi \keyword{Merkle stablo} interno
+        \item Listovi = heševi evaluacija polinoma
+        \item Svaki zahtev verifikatora dobija Merkle proof
+        \item Veličina dokaza raste \keyword{logaritamski}
+      \end{itemize}
+    \end{block}
+  \end{column}
+  \begin{column}{0.48\textwidth}
+    \begin{exampleblock}{zk-SNARK (npr.\ Plonk, Groth16)}
+      \begin{itemize}
+
+        \item Koristi \keyword{KZG posvete}
+        \item Posveta = 1 element grupe
+        \item Dokaz otvaranja = 1 element grupe
+        \item Veličina dokaza \keyword{konstantna}
+      \end{itemize}
+    \end{exampleblock}
+  \end{column}
+\end{columns}
+
+
+\begin{alertblock}{Posledica}
+  zk-SNARK dokazi: svega nekoliko stotina bajtova.
+  zk-STARK dokazi: znatno veći zbog Merkle putanja.
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{Ethereum: prelaz na validaciju bez čuvanja stanja}
+
+\begin{alertblock}{Trenutni problem}
+  Ethereum čuva stanje u stablu arnosti 16.
+  Svaki pristup stanju zahteva 15 pratećih čvorova po nivou.
+  Svedok za tipičan blok je u \keyword{megabajtima} — ne može se efikasno preneti u 12s slotu.
+  Zato validator mora imati lokalno celo stanje (biti full node) da bi mogao da verifikuje blok.
+\end{alertblock}
+
+
+\begin{block}{Rešenje: Verkle stabla}
+  Zamena heš-zasnovane posvete u čvorovima stabla
+  \keyword{vektorskom posvetom sa dokazima konstantne veličine}.
+  \begin{itemize}
+    
+    \item Dokaz otvaranja ne zavisi od broja elemenata u čvoru
+    \item Stablo može imati znatno veću arnost bez kazne na veličinu svedoka
+    \item Svedok za tipičan blok: $\approx 380\,\text{KB}$ (medijana)
+  \end{itemize}
+\end{block}
+\end{frame}
+
+%% ============================================================
+%% ZAKLJUČAK
+%% ============================================================
+
+\begin{frame}{Zaključak}
+
+\begin{itemize}
+  
+  \item Šeme posvete garantuju \keyword{skrivanje} i \keyword{obavezivanje} —
+    ne mogu biti oba savršena istovremeno
+  \item \keyword{Heš šema}: računski obavezujuća, računski sakrivajuća
+  \item \keyword{Pedersen}: savršeno sakrivajuća, računski obavezujuća, homomorfna
+  \item \keyword{KZG}: konstantna veličina dokaza za polinome — osnova modernih SNARK-ova
+  \item Primene: ENS registracija, Merkle stabla u Ethereumu, ZK sistemi, stateless validacija
+\end{itemize}
+\end{frame}
+
+\begin{frame}{}
+\begin{center}
+  \Huge Hvala na pažnji!
+\end{center}
+\end{frame}
+
+\end{document}
