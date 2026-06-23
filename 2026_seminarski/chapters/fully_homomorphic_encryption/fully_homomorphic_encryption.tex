@@ -78,7 +78,7 @@ Defini\v simo najpre jednu simetri\v cnu enkripcionu \v semu koja radi sa poruka
 
 \textbf{Generisanje klju\v ca}: klju\v c je slu\v cajan neparan broj $p$.
 
-\textbf{Enkripcija}: Poruka $m$ se enkriptuje sa $c=m + 2\cdot r + p\cdot q$, gde je $r$ dovoljno mali \v sum, a $q$ veliki slu\v cajan ceo broj.
+\textbf{Enkripcija}: Poruka $m\in \{0, 1\}$ se enkriptuje sa $c=m + 2\cdot r + p\cdot q$, gde je $r$ dovoljno mali \v sum, a $q$ veliki slu\v cajan ceo broj.
 
 \textbf{Dekripcija}: \v Sifrat $c$ se dekriptuje sa $(c \pmod{p})\pmod{2}$. Uverimo se da ovo radi:
 \begin{align}
@@ -174,7 +174,13 @@ Bilo bi revolucionarno na\' ci \v semu koja ne zahteva bootstraping, ali svaki p
 
 Osim ovoga, postji prostor za napredak u nala\v zenju FHE \v sema koje se ne oslanjaju na re\v setke \cite{MITHenzingerHE2}. Sve moderne implementacije se oslanjaju na LWE ili prstenasti LWE.
 U kriptografiji je uvek dobro konstruisati primitive na razne na\v cine, tako da se oslanjanju na razne nezavisne pretpostavke o te\v zini. Ako bi pretpostavke o te\v zini LWE i prstenastog LWE bile sru\v sene, najbolje poznate konstrukcije FHE tako\dj e padaju sa njima. 
-$$$$
+
+\section{Pitanja}
+\begin{itemize}
+    \item \v Sta je homomorfna enkripcija?
+    \item \v Sta je bootstraping u homomorfnoj enkripciji?
+    \item Navesti neku primenu homomorfne enkripcije.
+\end{itemize}
 
 
 
