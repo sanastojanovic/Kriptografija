@@ -3,7 +3,7 @@
 % Autor: Aleksandra Labović (mi241025)
 
 Dokazi nultog znanja (engl. \textit{zero-knowledge proofs}, ZKP) predstavljaju jednu od ključnih kriptografskih primitiva,
-koja omogućava jednoj strani da dokaže istinitost neke tvrdnje drugoj strani, a
+koje omogućavaju jednoj strani da dokaže istinitost neke tvrdnje drugoj strani, a
 da pri tome ne otkrije ništa osim same istinitosti. Ovaj pojam uveli su Šefi
 Goldvoser (engl.\ \textit{Shafi Goldwasser}) i Silvio Mikali (engl.\
 \textit{Silvio Micali}) sa Tehnološkog instituta Masačusets (engl.\
@@ -16,7 +16,7 @@ Computing}) jedna je od najuglednijih godišnjih konferencija iz oblasti teorije
 računarstva.} 1985.\ godine. U tom radu autori su pokazali da se istinitost tvrdnje može dokazati tako
 da dokazivač (engl.\ \textit{prover}), strana koja dokazuje tvrdnju,
 uveri verifikatora (engl.\ \textit{verifier}), stranu koja proverava dokaz,
-u njenu tačnost, a da pri tome ne otkrije ništa osim same činjenice da je
+u njenu istinitost, a da pri tome ne otkrije ništa osim same činjenice da je
 tvrdnja tačna.
 
 Značaj dokaza nultog znanja proizilazi upravo iz ove prividno paradoksalne mogućnosti: 
@@ -144,11 +144,11 @@ Pegi šalje
   \chi=\psi\circ\varphi=(1,2)\circ(1,2,4,3)=(2,4,3).
 \]
 
-Ako Pegi ne zna izomorfizam $\varphi$, mora unapred da pogodi koji će 
+U slučaju da Pegi ne zna izomorfizam $\varphi$, mora unapred da pogodi koji će 
 izazov Viktor postaviti. Verovatnoća ispravnog pogađanja u jednoj rundi 
 iznosi $1/2$, a ponavljanjem protokola $n$ puta verovatnoća da nepošteni 
-dokazivač prođe sve runde opada na $(1/2)^n$ — vrednost koja 
-eksponencijalno brzo postaje zanemarljiva.
+dokazivač prođe sve runde opada na $(1/2)^n$ — vrednost 
+koja eksponencijalno brzo opada i postaje zanemarljiva.
 
 Važan uslov bezbednosti jeste da Pegi u svakoj rundi koristi novu slučajnu
 permutaciju i novi graf $H$. Ako bi isti graf $H$ bio upotrebljen više puta, Viktor
@@ -227,7 +227,7 @@ Neka je $V$ skup stvarnih transkripata, a $S$ skup simuliranih.
   
   \item \textbf{Statističko nulto znanje} ($V\approx_s S$): raspodele se 
   razlikuju za statistički zanemarljivu vrednost, što ih čini nerazlučivim 
-  čak i za neograničenog protivnika.
+  čak i za računski neograničenog protivnika.
   
   \item \textbf{Računsko nulto znanje} ($V\approx_c S$): raspodele su 
   nerazlučive za računski ograničenog protivnika. Većina praktičnih 
@@ -259,9 +259,9 @@ razmene poruka.
 Ako se dozvoli interakcija između računski neograničenog dokazivača i 
 računski ograničenog verifikatora, dobija se klasa interaktivnih dokaza 
 $\mathbf{IP}$. Za razliku od klase $\mathbf{NP}$, gde dokazivač 
-jednostavno dostavlja svedoka bez ikakve razmene poruka, ovde 
-dokazivač i verifikator aktivno komuniciraju u više rundi. Pokazano 
-je da važi
+jednostavno dostavlja svedoka bez ikakve razmene poruka, u okviru ovog modela, 
+dokazivač i verifikator aktivno razmenjuju poruke kroz veći broj rundi
+
 \[
   \mathbf{IP} = \mathbf{PSPACE},
 \]
@@ -303,16 +303,17 @@ ima snažne posledice po kriptografiju. Praktično svaka tvrdnja koja se
 javlja u kriptografskim protokolima može se dokazati uz nulto znanje, 
 bez obzira na njenu strukturu.
 
-Uz pretpostavku postojanja jednosmernih funkcija\marginpar{Jednosmerna 
-funkcija je funkcija koju je lako izračunati, ali je računski 
-neizvodljivo invertovati. Tipičan primer je množenje velikih prostih 
-brojeva: lako je izračunati $n=p\cdot q$, ali je faktorizacija $n$ 
-računski teška. - naknadno proveriti da li je neko definisao, ukoliko nije prebaciti u tekst} važi čak i
+Pod pretpostavkom postojanja jednosmernih funkcija, odnosno funkcija 
+koje se mogu efikasno izračunati, ali ih je računski neizvodljivo invertovati, važi jednakost
 \[
   \mathbf{CZK} = \mathbf{IP} = \mathbf{PSPACE},
 \]
-što znači da se svi problemi koji se uopšte mogu dokazati interaktivno 
-mogu dokazati i uz nulto znanje.
+
+Kao ilustracija jednosmerne funkcije često se navodi množenje velikih prostih brojeva: 
+lako je izračunati proizvod $n=p\cdot q$, dok se njegovom faktorizacijom ne može 
+efikasno odrediti početni par prostih brojeva. Iz navedene jednakosti sledi 
+da se svaki problem koji ima interaktivni dokaz može dokazati i uz 
+očuvanje svojstva nultog znanja.
 
 \section{Sigma protokoli}
 
@@ -328,7 +329,7 @@ Kod Sigma protokola uobičajeno se pretpostavlja pošten verifikator
 bira u skladu sa specifikacijom protokola, što omogućava jednostavniju 
 analizu svojstava protokola.
 
-Jedan od najpoznatijih predstavnika ove klase jeste Schnorr-ov 
+Jedan od najpoznatijih predstavnika ove klase jeste Šnorov 
 identifikacioni protokol (engl. \textit{Schnorr identification protocol}), 
 koji se zasniva na problemu rešavanja diskretnog logaritma. 
 Neka je $g$ generator konačne grupe $G$ reda $q$, gde je $q$ prost broj.
@@ -360,10 +361,10 @@ Ako Pegi ne zna $x$, mora unapred da pogodi vrednost izazova $e$ pre
 nego što ga Viktor pošalje. Pošto se $e$ bira uniformno iz skupa od 
 $q$ elemenata, verovatnoća ispravnog pogađanja iznosi $1/q$, za 
 razliku od protokola za izomorfizam grafova, gde je izazov bio binaran 
-i ta verovatnoća iznosila $1/2$. Zbog toga Schnorr-ov protokol pruža 
+i ta verovatnoća iznosila $1/2$. Zbog toga Šnorov protokol pruža 
 jaku bezbednost već u jednoj rundi.
 
-Schnorr-ov protokol može se proširiti kako bi se dokazalo ne samo 
+Šnorov protokol može se proširiti kako bi se dokazalo ne samo 
 poznavanje diskretnog logaritma, već i jednakost dva diskretna 
 logaritma. Tu ideju realizuje Chaum-Pedersen protokol (engl.\ \textit{Chaum-Pedersen protocol}), 
 koji je prvobitno razvijen za potrebe sistema elektronskog novca, ali 
@@ -372,7 +373,7 @@ $y_1 = g^{x_1}$ i $y_2 = h^{x_2}$ važi $x_1 = x_2$, pri čemu $g$
 i $h$ generišu grupu prostog reda $q$. Zajednički diskretni logaritam 
 označavamo sa $x$.
 
-Protokol se može posmatrati kao dva istovremena izvođenja Schnorr-ovog 
+Protokol se može posmatrati kao dva istovremena izvođenja Šnorovog 
 protokola nad različitim bazama, ali sa jednim zajedničkim izazovom:
 \[
   P \to V : (r_1, r_2) \leftarrow (g^k,\, h^k),
@@ -439,7 +440,7 @@ može naknadno proveriti.
 Standardan način pretvaranja interaktivnog Sigma protokola u 
 neinteraktivni dokaz jeste Fiat-Shamir heuristika (engl.\ \textit{Fiat-Shamir heuristic}). 
 Ključna ideja je da se verifikatorov nasumični izazov $e$ zameni heš-vrednošću javnih 
-podataka. Na primeru Schnorr-ovog protokola,
+podataka. Na primeru Šnorovog protokola,
 gde je $g$ generator grupe, $y=g^x$ javna vrednost čiji se diskretni
 logaritam dokazuje, a $r=g^k$ posveta koju dokazivač šalje
 verifikatoru, izazov se definiše kao
@@ -482,8 +483,8 @@ par ključeva za digitalno potpisivanje, čime se osigurava da glasaju
 samo ovlašćene osobe.
 
 Kada glasač želi da glasa, bira jednu od dve vrednosti i objavljuje 
-Pedersen-ovu posvetu\marginpar{Pedersen-ova šema posvete obrađena je 
-u poglavlju 20, referencirati kasnije na rad} svog glasa. Sama posveta ne otkriva vrednost glasa, 
+Pedersen-ovu posvetu\footnote{Pedersen-ova šema posvete obrađena je 
+u poglavlju 4.3.2} svog glasa. Sama posveta ne otkriva vrednost glasa, 
 ali glasač uz nju objavljuje i neinteraktivni dokaz nultog znanja 
 kojim dokazuje da je glas zaista iz dozvoljenog skupa vrednosti, bez 
 otkrivanja koje od dve opcije je izabrao. Time se sprečava mogućnost 
@@ -491,8 +492,8 @@ upisivanja nevalidne vrednosti, a anonimnost glasa ostaje očuvana.
 
 Da bi se omogućilo prebrojavanje bez otkrivanja pojedinačnih glasova, 
 svaki glasač svoju tajnu deli između centara koristeći Shamir-ovo 
-tajno deljenje\marginpar{Shamir-ovo tajno deljenje obrađeno je u 
-poglavlju 19, referencirati kasnije na rad} i svakom centru šalje odgovarajući šifrovani udeo. 
+tajno deljenje\footnote{Shamir-ovo tajno deljenje obrađeno je u 
+poglavlju 2.3} i svakom centru šalje odgovarajući šifrovani udeo. 
 Javno objavljuje i posvete koeficijentima, što centrima omogućava da 
 provere konzistentnost primljenih udela sa objavljenim glasom.
 
