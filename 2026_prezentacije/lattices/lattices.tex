@@ -1,0 +1,300 @@
+\documentclass[aspectratio=1610]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb}
+
+\usetheme[color=nudarkblue,numbering=progressbar]{wildcat}
+
+\newcommand{\latt}{\mathcal{L}}
+\newcommand{\conv}{\circledast}
+\newcommand{\ket}[1]{| #1 \rangle}
+
+
+\title{Kriptografija zasnovana na rešetkama}
+\author{Marijana Čupović 1018/2025}
+\date{\today}
+
+\begin{document}
+
+%Naslovna
+\begin{frame} 
+\titlepage
+\end{frame}
+
+% Sadržaj
+\begin{frame}{Sadržaj}
+\tableofcontents
+\end{frame}
+
+%Uvod
+\section{Uvod}
+\begin{frame}{Uvod}
+\begin{tabular}{p{0.46\textwidth} p{0.47\textwidth}}
+    \begin{block}{Trenutni kriptosistemi}
+        \begin{itemize}
+            \item Diffie-Hellman
+            \item RSA
+            \item AES
+            \item SHA256
+        \end{itemize}
+    \end{block}
+     &
+    \begin{block}{Algebarske osnove}
+        \begin{itemize}
+            \item problem faktorizacije
+            \item problem diskretnog logaritma
+            \item problem diskretnog logaritma na eliptičkim krivama
+        \end{itemize}
+    \end{block} 
+\end{tabular}
+
+\begin{alertblock}{Bezbednost}
+    Pojava kvantnog računarstva dovodi u pitanje bezbednost ovih sistema
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{Algoritmi za kvantni računar}
+
+    \begin{block}{Šorov algoritam}
+        Problemi faktorizacije i diskretnog logaritma su rešeni u polinomijalnom vremenu.
+    \end{block}
+
+    \begin{exampleblock}{Napomena}
+        Faktorizacija broja sa $2048$ bita zahteva $2048$ logičkih kubita.
+    \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Algoritmi za kvantni računar}
+    \begin{block}{Groverov algoritam}
+        Za funkciju $f$ koja vraća odgovore "da" ili "ne" u zavisnosti od ulaza, postoji algoritam koji u $O(\sqrt{2^n})$ nalazi ulaz od maksimalno $n$ bitova za koji funkcija vraća odgovor "da".
+    \end{block}
+
+    \begin{exampleblock}{Napomena}
+        AES sa ključem od $128$ bita će biti razbijen u $2^{64}$ koraka, ali AES sa ključem od $256$ bita će biti razbijen u $2^{128}$ koraka.
+    \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Uvod}
+    \begin{exampleblock}{Kvantnorezistentni kriptografski sistemi}
+        \begin{itemize}
+            \item simetrični kriptositemi
+            \item heš funkcije
+            \item kriptosistemi zasnovani na kodovima
+            \item kriptosistemi zasnovani na jednačinama sa više promenljivih
+            \item kriptosistemi zasnovani na rešetkama
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+% Kvantni računari
+\section{Kvantni računari}
+\begin{frame}{Kvantni računari}
+   \begin{block}{Kubit}
+       \textbf{Kubit (eng. qubit)} je jedan bit kvantnog računara i on opisuje superpoziciju stanja 0 i 1
+   \end{block} 
+
+   \begin{exampleblock}{Bazni vektori}
+       \begin{itemize}
+           \item $(1, 0) = \ket 0$
+           \item $(0, 1) = \ket 1$
+       \end{itemize}
+   \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Kvantni računari}
+    \begin{block}{Transformacije stanja}
+        \textbf{Kvantna logička kola (eng. gates)} aproksimiraju unitarne transformacije
+    \end{block}
+
+    \begin{alertblock}{Merenje}
+        Nakon niza transformacija, očitava se stanje koje je reprezentovano nizom bitova i može se dalje tumačiti.
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}{Trenutno stanje kvantnih računara}
+
+   \begin{itemize}
+        \item trenutno je najveći procesor sa 1121 kubita (IBM, 2023)
+        \item \textbf{fizički kubiti} su osetljivi na buku i okolinu
+        \item kvantna korekcija greške zahteva unapređenje
+    \end{itemize}
+\end{frame}
+
+
+
+% Rešetke
+\section{Rešetke}
+
+\begin{frame}{Rešetke}
+    \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+        \begin{block}{Definicija}
+            \textbf{Rešetka} $\latt$ je skup celobrojnih linearnih kombinacija linearno nezavisnih vektora $\{b_1, ..., b_m\}, b_i \in \mathbb{R}^n$. Drugim rečima, rešetka $\latt = \{ \sum_{i=1}^m a_ib_i \mid a_i \in \mathbb{Z} \} = \{ B \textbf{a} \mid \textbf{a} \in \mathbb{Z}^n \}$, gde je $B = [b_1, ..., b_m]$ bazna matrica rešetke, a vektori $\{b_1, ..., b_m\}$ čine bazu rešetke.
+        \end{block}
+    \end{column}
+    
+    \begin{column}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]
+        {template/osnovna_rešetka_2d.png}
+    \end{column}
+    \end{columns}  
+\end{frame}
+
+
+\begin{frame}{Rešetke}
+
+    \begin{exampleblock}{Najkraći nenula vektor rešetke}
+        $\lambda_1(\latt) := \min \{||x|| \ | x \in \latt, x \neq 0 \} $
+    \end{exampleblock}
+    
+    \begin{block}{Q-arna rešetka}
+        Rešetka $\latt$ je \textbf{$q$-arna} ako važi $q \mathbb{Z}^n \subset \latt \subset \mathbb{Z}^n$ za neko celobrojno $q$.
+    \end{block}
+
+    \begin{exampleblock}{Primer q-arne rešetke}
+        \[ \Lambda_q (A) = \{ y \in \mathbb{Z}^m \mid y= A^T z \ \pmod q, z \in \mathbb{Z}^n\}, \]
+        \[\Lambda_q^{\bot}(A) = \{y \in \mathbb{Z}^m \mid Ay = 0 \pmod q\} \]
+    \end{exampleblock}
+\end{frame}
+
+\begin{frame}{Teški problemi na rešetkama}
+
+\begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+        \begin{block}{Shortest Vector Problem - SVP}
+            \textbf{Problem najkraćeg vektora:} Neka je $\latt$ rešetka čija je baza $B$, tada je problem najkraćeg vektora nalaženje nenula vektora $x \in \latt$ za koji važi $||x|| \leq ||y||$ za svaki nenula vektor $y \in \latt$. Drugim rečima, treba naći $x$ takav da je $||x|| = \lambda_1 (\latt)$.
+        \end{block}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{template/svp_rešenje.png}
+    \end{column}
+\end{columns}
+    
+\end{frame}
+
+\begin{frame}{Teški problemi na rešetkama}
+
+\begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+        \begin{block}{Closest Vector Problem - CVP}
+            \textbf{Problem najbližeg vektora}: Neka je $\latt$ $n$-dimenziona rešetka sa bazom $B$ i $x \in \mathbb{R}^n$ vektor koji ne pripada rešetki, problem najbližeg vektora se sastoji od nalaženja vektora $y \in \latt$ takvog da je $||x-y|| \leq ||x-z||$ za svako $z \in \latt$.
+        \end{block}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{template/cvp_rešenja.png}
+    \end{column}
+\end{columns}
+    
+\end{frame}
+
+\begin{frame}{Teški problemi na rešetkama}
+
+\begin{block}{Bounded-Distance Decoding Problem - BDD}
+    \textbf{Problem dekodiranja na ograničenoj udaljenosti:} Neka je $B$ baza rešetke $\latt$ u $n$-dimenzionalnom realnom prostoru i $x\in \mathbb{R}^n$ vektor koji ne pripada rešetki $\latt$. BDD$_\lambda$ problem se odnosi na pronalaženje vektora $y \in \latt$ takvog da je $||x-y|| \leq \lambda \cdot\lambda_1(\latt)$, za realan broj $\lambda$.
+\end{block}
+    
+\end{frame}
+
+% NTRU
+\section{NTRU}
+
+\begin{frame}{NTRU}
+    \begin{block}{NTRU}
+        \textbf{NTRU} je asimetrični kriptografski sistem koji se zasniva na rešetkama i problemu najkraćeg vektora.
+    \end{block}
+
+    \begin{alertblock}{Postavka}
+        \begin{itemize}
+            \item Neka je $L$ linearna transformacija koja ciklično pomera elemente vektora, tada je $[L \ast v] = [v, L v, L^2 v,..., L^{N-1}v]$ 
+            \item Konvoluciona modularna rešetka $\Lambda(c, q) = \{(a,b) \in \mathbb{Z}^{2N} \mid a \conv c \equiv b \pmod q\}$
+        \end{itemize}
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}{Generisanje ključa}
+    \begin{block}{Parametri}
+        Prost broj $N$, mali ceo broj $p$ i ceo broj $q$
+    \end{block}
+
+    \begin{columns}[T]
+        \begin{column}{0.49\linewidth}
+            \begin{exampleblock}{Tajni ključ}
+                kratki vektor $(f, g) = (f_0, ..., f_{N-1}, g_0,..., g_{N-1}) \in \mathbb{Z}^{2N}$ za koji važi:
+                \begin{itemize}
+                    \item $[L\ast f]$ bude invertibilna po modulu $q$
+    \item $f \in e_1 + \{-p, 0, p\}^N$,  i $g \in \{-p, 0, p\}^N$ Zbog toga važi da je $[L \ast f] \equiv I \pmod p$ i $[L \ast g] \equiv 0 \pmod p$
+                \end{itemize}
+            \end{exampleblock}
+        \end{column}
+
+        \begin{column}{0.48\linewidth}
+            \begin{exampleblock}{Javni ključ}
+                Hermitova normalna forma konvolutivne modularne rešetke $\Lambda((L \ast f, L\ast g)^T, q)$:
+                \[H = \begin{bmatrix}
+                    I & 0\\
+                    L\ast h & q \cdot I
+                    \end{bmatrix}\]
+                gde je $h \equiv [L \ast f]^{-1} \pmod q$
+            \end{exampleblock}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+
+\begin{frame}{Šifrovanje poruke}
+    \begin{block}{Kodiranje poruke}
+        Poruka se predstavlja kao vektor $m \in \{-1,0,1\}^N$
+    \end{block}
+
+    \begin{exampleblock}{Maskirni vektor}
+        Nasumično se bira vektor $r \in \{-1,0,1\}^N$
+    \end{exampleblock}
+
+    \begin{alertblock}{Šifrovanje}
+        \[
+        \begin{bmatrix}
+            r \\
+            m
+        \end{bmatrix}
+        \bmod
+        \begin{bmatrix}
+            I & 0 \\
+            L \ast h & qI
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+            0 \\
+            \bigl(m + (L \ast h)r\bigr) \bmod q
+        \end{bmatrix}
+        \]
+    Dakle, šifrat je $c \equiv (m + [L \ast h]r) \pmod q$
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}{Dešifrovanje poruke}
+    \begin{block}{Dešifrovanje}
+        \[[L\ast f]c \equiv [L\ast f]m + [L\ast g]r \pmod q\]
+
+        \[[L \ast f ]m + [L \ast g]r \equiv I \ast m + 0\ast r \equiv m \pmod p \]
+    \end{block} 
+\end{frame}
+
+% Zaključak
+\section{Zaključak}
+\begin{frame}{Zaključak}
+
+\begin{itemize}
+    \item trenutno korišćeni kriptosistemi su ugroženi
+    \item kvantni računari se razvijaju, ali sporo
+    \item postoje načini za postizanje kvantne otpornosti
+    \item rešetke i problemi na njima su jedno rešenje
+\end{itemize}
+    
+\end{frame}
+
+\standout{Hvala na pažnji!}
+\end{document}
