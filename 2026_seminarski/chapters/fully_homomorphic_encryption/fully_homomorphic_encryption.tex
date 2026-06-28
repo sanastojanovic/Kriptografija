@@ -61,7 +61,7 @@ $$\mathrm{D}(\mathrm{Eval}(f, (c_1, ..., c_n), ek)) = f(m_1, ..., m_n)$$
 
 Svaka poznata homomorfna \v sema enkripcije se zasniva propabilisti\v ckom algoritmu koji pri \v sifrovanju dodaje slu\v cajan \v sum. Vr\v senjem aritmeti\v ckih operacija \v sum raste, i nakon dovoljnog broja operacija, \v sifrat se vi\v se ne mo\v ze de\v sifrovati. Zna\v ci, svaka \v sema potpuno homomorfne enkripcije se zapravo zasniva na delimi\v cno homomorfnoj.
 Potpuno homomorfna enkripcija je nastala kada je Gentri 2009. na\v sao na\v cin da SHE \v semu pretvori u FHE.
-Gentri je smislio na\v cin da smanji \v sum \v sifrovanoj poruci, i ovo naziva \textit{bootstraping}. 
+Gentri je smislio na\v cin da smanji \v sum \v sifrovanoj poruci, i ovo naziva \textit{bootstrapping}. 
 
 Dakle, FHE se, u svim poznatim \v semama, vr\v si ponavljanjem slede\' ca dva koraka:
 \begin{enumerate}
@@ -78,7 +78,7 @@ Defini\v simo najpre jednu simetri\v cnu enkripcionu \v semu koja radi sa poruka
 
 \textbf{Generisanje klju\v ca}: klju\v c je slu\v cajan neparan broj $p$.
 
-\textbf{Enkripcija}: Poruka $m$ se enkriptuje sa $c=m + 2\cdot r + p\cdot q$, gde je $r$ dovoljno mali \v sum, a $q$ veliki slu\v cajan ceo broj.
+\textbf{Enkripcija}: Poruka $m\in \{0, 1\}$ se enkriptuje sa $c=m + 2\cdot r + p\cdot q$, gde je $r$ dovoljno mali \v sum, a $q$ veliki slu\v cajan ceo broj.
 
 \textbf{Dekripcija}: \v Sifrat $c$ se dekriptuje sa $(c \pmod{p})\pmod{2}$. Uverimo se da ovo radi:
 \begin{align}
@@ -127,8 +127,8 @@ Kako smo $r_0$ odabrali tako da bude paran, vidimo da je $c$ opet oblika $m + 2R
 
 Sabiranje i mno\v zenje se pona\v saju identi\v cno kao u uvodnom primeru.
 
-\section{Bootstraping}
-Tehnika bootstrapinga \footnote{Bele\v ske sa predavanja \cite{MITHenzingerHE2} odli\v cno obja\v snjavaju bootstraping} omogu\' cava da se od \v sifrata koji šifruje poruku $m$ uz veliku količinu šuma (nastalu kao posledica izvođenja homomorfnih računanja) dobije novi \v sifrat koji šifruje istu poruku $m$, ali sa malom količinom šuma. Tako, kada \v sum dobijen kao posledica aritmeti\v ckih operacija postane preveliki, \v sifrati se osve\v ze, i nad njima server nastavi da vr\v si homomorfna izra\v cunavanja. Tako se povremenim osve\v zavanjem od delimi\v cno homomorfne enkripcije dobija potpuno homomorfna. 
+\section{Bootstrapping}
+Tehnika bootstrappinga \footnote{Bele\v ske sa predavanja \cite{MITHenzingerHE2} odli\v cno obja\v snjavaju bootstrapping} omogu\' cava da se od \v sifrata koji šifruje poruku $m$ uz veliku količinu šuma (nastalu kao posledica izvođenja homomorfnih računanja) dobije novi \v sifrat koji šifruje istu poruku $m$, ali sa malom količinom šuma. Tako, kada \v sum dobijen kao posledica aritmeti\v ckih operacija postane preveliki, \v sifrati se osve\v ze, i nad njima server nastavi da vr\v si homomorfna izra\v cunavanja. Tako se povremenim osve\v zavanjem od delimi\v cno homomorfne enkripcije dobija potpuno homomorfna. 
 
 \textbf{Intuicija} Po definiciji, algoritam za de\v sifrovanje $\mathrm{D}(c, sk)$ uklanja \v sum iz \v sifrata $c$. Ako bi server imao tajni klju\v c $sk$, mogao bi da izvr\v si algoritam $\mathrm{D}(c, sk)$ koji uklanja \v sum, i da ponovo \v sifruje i dobije \v sifrat $c'$ sa malim, sve\v zim \v sumom. Ipak, nedopustivo je serveru otkriti tajni klju\v c $sk$.
 \\
@@ -141,7 +141,7 @@ Tako se od delimi\v cno homomorfne enkripcione \v seme dobija potpuno homomorfna
 
 Da bi ova konstrukcija bila mogu\' ca, funkcija $\mathrm{D}$ mora biti „dovoljno jednostavna”, odnosno mora pripadati familiji funkcija  kojima polazna delimi\v cno homomorfna enkripciona \v sema barata.
 
-Primetimo da se bootstraping oslanja na jo\v s jednu pretpostavku o bezbednosti. Ona se zove pretpostavka o \textit{kru\v znoj bezbednosti} i podrazumeva da je bezbedno objaviti \v sifrat tajnog klju\v ca. Ovo nije bezbedno u svakoj enkripcionoj \v semi. 
+Primetimo da se bootstrapping oslanja na jo\v s jednu pretpostavku o bezbednosti. Ona se zove pretpostavka o \textit{kru\v znoj bezbednosti} i podrazumeva da je bezbedno objaviti \v sifrat tajnog klju\v ca. Ovo nije bezbedno u svakoj enkripcionoj \v semi. 
 Za neke \v seme se zna da nisu kru\v zno bezbedne i one se, naravno, ne koriste za FHE. Za \v seme koje se koriste (npr. GSW) se ne zna da li su kru\v zno bezbedne. Pretpostavlja se da jesu, jer nijedan napad nije objavljen, ali trenutno ne postoji dokaz da jesu bezbedne.
 Sve FHE \v seme koje trenutno postoje se oslanjaju na pretpostavku o kru\v znoj bezbednosti. Na\' ci neku koja se ne oslanja predstavlja jedno otvoreno pitanje za dalji razvoj.
 
@@ -169,12 +169,18 @@ Ure\dj aji povezani u internet stvari kontinuirano prikupljaju li\v cne podatke 
 
 Iako implementacije FHE postoje (HElib, Microsoft SEAL, OpenFHE i druge), upotreba je trenutno ograni\v cena zbog ekonomisanja ra\v cunarskim resursima \cite{gentry2010computing}. 
 Sve implementacije se oslanjaju na vr\v senje operacija uz gomilanje \v suma i redovno bootstrapovanje. Ovaj proces je ra\v cunarski zahtevan.
-Bilo bi revolucionarno na\' ci \v semu koja ne zahteva bootstraping, ali svaki pronalazak \v seme sa ra\v cunski manje zahtevnim bootstrapingom je zna\v cajan pomak.
+Bilo bi revolucionarno na\' ci \v semu koja ne zahteva bootstrapping, ali svaki pronalazak \v seme sa ra\v cunski manje zahtevnim bootstrappingom je zna\v cajan pomak.
 
 
 Osim ovoga, postji prostor za napredak u nala\v zenju FHE \v sema koje se ne oslanjaju na re\v setke \cite{MITHenzingerHE2}. Sve moderne implementacije se oslanjaju na LWE ili prstenasti LWE.
 U kriptografiji je uvek dobro konstruisati primitive na razne na\v cine, tako da se oslanjanju na razne nezavisne pretpostavke o te\v zini. Ako bi pretpostavke o te\v zini LWE i prstenastog LWE bile sru\v sene, najbolje poznate konstrukcije FHE tako\dj e padaju sa njima. 
-$$$$
+
+\section{Pitanja}
+\begin{itemize}
+    \item \v Sta je homomorfna enkripcija?
+    \item \v Sta je bootstrapping u homomorfnoj enkripciji?
+    \item Navesti neku primenu homomorfne enkripcije.
+\end{itemize}
 
 
 

@@ -1,2 +1,394 @@
 % Poglavlje: Commitments
 % Autor: Vukašin Marković (mi241051)
+
+Šeme posvete (engl.\ \textit{commitment schemes}) su kriptografska primitiva koja jednoj strani
+omogućava da se obaveže na izabranu vrednost i javno objavi njen kriptografski otisak, a da
+sama vrednost ostane skrivena i da je nakon toga više nije moguće promeniti.
+Ova jednostavna ideja pojavljuje se u iznenađujuće širokom spektru kriptografskih protokola
+- od klasičnih dokaznih sistema, kroz savremene blockchain platforme, pa sve do protokola
+nultog znanja koji su tema narednih poglavlja.
+
+\section{Motivacija i intuicija}
+\label{sec:commitments-motivacija}
+
+Zamislimo takmičenje u kome više učesnika istovremeno treba da predaju svoje odgovore.
+Ako svaki učesnik vidi tuđe odgovore pre nego što preda sopstveni, može ih jednostavno
+prepisati ili prilagoditi. Da bismo to sprečili u fizičkom svetu, svako bi odgovor stavio
+u zapečaćenu kovertu i predao je organizatoru - koverte se otvaraju tek kada svi predaju
+svoje.
+
+Zapečaćena koverta obavlja dve uloge istovremeno: sakriva sadržaj do otkrivanja, i sprečava
+promenu sadržaja nakon predaje. Upravo ove dve garancije - skrivanje i nepromenjivost -
+čine suštinu šeme posvete.
+
+U digitalnom svetu ne postoji fizička koverta, ali šema posvete obezbeđuje isti efekat.
+Umesto koverte, šaljemo kriptografski otisak vrednosti. Iz otiska nije moguće rekonstruisati
+originalnu vrednost, ali kada se vrednost naknadno otkrije, svako može proveriti da odgovara
+ranijem otisku.
+
+Ovaj obrazac formalizovao je Manuel Blum 1981.\ godine kroz problem bacanja novčića
+telefonom~\cite{blum1981coin}: dve strane žele da se dogovore oko slučajnog ishoda bez
+međusobnog poverenja. Jedna strana se najpre obavezuje na svoju vrednost, a tek potom otkriva. Rešenje je identično - šema posvete. Faze se nazivaju faza posvećivanja
+(engl.\ \textit{commit phase}) i faza otkrivanja (engl.\ \textit{reveal phase}),
+a obe garancije formalizujemo u narednoj sekciji.
+
+\section{Formalna definicija}
+\label{sec:commitments-definicija}
+
+Formalna definicija šeme posvete koju koristimo prati pristup iz~\cite{smart2016cryptography}.
+
+\begin{definition}[Šema posvete]
+\label{def:commitment-scheme}
+Šema posvete je par algoritama $(\mathsf{Posveti}, \mathsf{Otvori})$
+nad prostorom poruka $\mathcal{M}$ i prostorom slučajnosti $\mathcal{R}$:
+\begin{itemize}
+  \item $\mathsf{Posveti}(m;\, r) \to c$: prima poruku $m \in \mathcal{M}$ i slučajnost
+    $r \xleftarrow{\$} \mathcal{R}$ te vraća posvetu $c$ (engl.\ \textit{commitment}).
+  \item $\mathsf{Otvori}(c,\, m,\, r) \to \{0,1\}$: proverava da li je $c$ ispravna
+    posveta na poruku $m$ sa slučajnošću $r$.
+\end{itemize}
+Zahtevamo \emph{ispravnost}: za sve $m \in \mathcal{M}$ i $r \in \mathcal{R}$ važi
+$\mathsf{Otvori}(\mathsf{Posveti}(m; r),\, m,\, r) = 1$.
+\end{definition}
+
+Protokol se odvija u dve faze. U fazi \emph{posvećivanja} pošiljalac bira
+$r \xleftarrow{\$} \mathcal{R}$, izračunava $c = \mathsf{Posveti}(m; r)$ i šalje $c$
+primaocu, zadržavajući $(m, r)$ za sebe. U fazi \emph{otkrivanja} objavljuje par $(m, r)$,
+a primalac prihvata samo ako $\mathsf{Otvori}(c, m, r) = 1$.
+
+Vrednost $r$ zove se \emph{oslepljivač} (engl.\ \textit{blinding factor}) - bez nje,
+onaj koji zna skup mogućih poruka može jednostavno izračunati posvetu za svaku
+od njih i porediti sa $c$, čime tajnost nestaje bez obzira na snagu heš funkcije.
+
+\subsection*{Bezbednosna svojstva}
+
+\begin{definition}[Skrivanje i obavezivanje]
+\label{def:hiding-binding}
+Šema posvete zadovoljava:
+\begin{itemize}
+  \item \emph{Savršeno skrivanje} (engl.\ \textit{perfectly hiding}): raspodele posveta
+    identične su za sve poruke - tj.\ za sve $m_0, m_1 \in \mathcal{M}$ važi
+    $\mathsf{Posveti}(m_0; r) \overset{d}{=} \mathsf{Posveti}(m_1; r)$ pri uniformnom $r$.
+    \emph{Računsko skrivanje} (engl.\ \textit{computationally hiding}) je slabiji zahtev:
+    raspodele nisu nužno identične, ali ih nijedan efikasan algoritam ne može razlikovati.%
+    \footnote{Precizno: za svakog napadača koji radi u polinomijalnom vremenu,
+    njegova prednost u razlikovanju posveta je manja od $1/p(\lambda)$ za svaki polinom $p$,
+    gde je $\lambda$ bezbednosni parametar - što se smatra zanemarljivim.}
+
+  \item \emph{Savršeno obavezivanje} (engl.\ \textit{perfectly binding}): ne postoje
+    $m \neq m'$ i $r, r'$ takvi da $\mathsf{Posveti}(m; r) = \mathsf{Posveti}(m'; r')$ -
+    svaka posveta ima jedinstveno otvaranje.
+    \emph{Računsko obavezivanje} (engl.\ \textit{computationally binding}) zahteva samo da
+    je pronalazak takvog para računski neizvodljiv.
+\end{itemize}
+\end{definition}
+
+\subsection*{Granica između dva svojstva}
+
+\begin{proposition}
+\label{prop:no-perfect-both}
+Nijedna šema posvete ne može biti istovremeno savršeno sakrivajuća i savršeno obavezujuća.
+\end{proposition}
+
+\begin{proof}
+Pretpostavimo da je šema savršeno sakrivajuća i fiksiramo bilo koje $m_0 \neq m_1 \in
+\mathcal{M}$. Savršeno skrivanje znači da su raspodele $\mathsf{Posveti}(m_0; r)$ i
+$\mathsf{Posveti}(m_1; r)$ pri uniformnom $r$ identične, pa imaju isti nosač. To znači da
+svaka vrednost $c$ koja se može pojaviti kao posveta poruke $m_0$ mora se moći pojaviti i
+kao posveta poruke $m_1$ - u suprotnom bi sama vrednost $c$ odala da poruka nije bila
+$m_1$, što bi narušilo savršeno skrivanje. Dakle, za svako $c$ iz nosača postoji $r_0$
+takvo da $c = \mathsf{Posveti}(m_0; r_0)$, i $r_1$ takvo da $c = \mathsf{Posveti}(m_1; r_1)$.
+Ista posveta tako ima dva različita otvaranja na dve različite poruke, što direktno
+narušava savršeno obavezivanje.
+\end{proof}
+
+Iz ove propozicije sledi da svaka šema mora da napravi kompromis. U narednoj sekciji videćemo dva tipa:
+\begin{itemize}
+  \item Heš-zasnovana šema - računski sakrivajuća i računski obavezujuća jer heš funkcija daje pseudoslučajne
+    raspodele koje ne garantuju savršena svojstva.
+  \item Pedersenova šema je savršeno sakrivajuća i računski obavezujuća.
+\end{itemize}
+
+\section{Konkretne konstrukcije}
+\label{sec:commitments-konstrukcije}
+
+\subsection{Heš-zasnovana šema posvete}
+\label{subsec:hash-commitment}
+
+Najjednostavnija šema posvete zasniva se na kriptografskim heš funkcijama.
+
+\begin{definition}[Heš-zasnovana šema posvete]
+\label{def:hash-commitment}
+Neka je $H \colon \{0,1\}^* \to \{0,1\}^\ell$ kriptografska heš funkcija otporna na
+nalaženje sudara (engl.\ \textit{collision-resistant hash function}). Šema je definisana sa:
+\begin{itemize}
+  \item $\mathsf{Postavi}$: odabira se kriptografska heš funkcija $H$, prostor poruka je
+    $\mathcal{M} = \{0,1\}^*$, a prostor slučajnosti $\mathcal{R} = \{0,1\}^\lambda$
+    gde je $\lambda$ bezbednosni parametar.%
+    \footnote{Bezbednosni parametar $\lambda$ određuje koliko operacija napadač mora da
+    izvrši da bi razbio šemu - potrebno mu je $2^\lambda$ operacija.
+    Za $\lambda = 128$ to iznosi $2^{128} \approx 3{,}4 \cdot 10^{38}$ operacija,
+    što prevazilazi računske mogućnosti svih kompjutera na svetu zajedno.
+    Svaki dodatni bit udvostručuje potreban posao.}
+  \item $\mathsf{Posveti}(H,\, m;\, r) = H(m \,\|\, r)$, gde $\|$ označava konkatenaciju.
+  \item $\mathsf{Otvori}(H,\, c,\, m,\, r) = 1$ ako i samo ako $c = H(m \,\|\, r)$.
+\end{itemize}
+\end{definition}
+
+Obavezujuće svojstvo neposredno sledi iz otpornosti heš funkcije na nalaženje sudara:
+pronalaženje $m \neq m'$ i $r, r'$ takvih da $H(m \,\|\, r) = H(m' \,\|\, r')$ direktno
+je sudar funkcije $H$. Formalno, ovo je računsko obavezivanje - sudari između različitih
+otvaranja postoje u teoriji, jer heš funkcija slika beskonačan skup ulaza u konačan skup
+izlaza. Međutim, u praksi, nijedan poznati algoritam ne može da ih pronađe za kriptografski
+jake heš funkcije.
+
+Svojstvo skrivanja je samo računsko. Raspodela posvete $c = H(m \,\|\, r)$ pri uniformnom
+$r$ nije savršeno identična za sve poruke, jer heš funkcija daje pseudoslučajne a ne
+uniformne izlaze. Nijedan efikasan algoritam ne može razlikovati raspodele, ali teorijski
+neograničen protivnik to može, pa savršeno skrivanje nije postignuto.
+
+\begin{remark}
+\label{rem:blinding-factor}
+Uključivanje slučajnog oslepljivača $r$ je neophodno. Bez njega, napadač koji zna da je
+poruka jedna od konačno mnogo mogućih vrednosti može jednostavno da izračuna heš svake od
+njih i poredi sa $c$. Ovo je naročito važno u kontekstu glasanja, gde su ishodi $\{0, 1\}$,
+a bez oslepljivača bi svaka posveta odmah otkrivala glas.
+\end{remark}
+
+\subsection{Pedersenova šema posvete}
+\label{subsec:pedersen-commitment}
+
+Heš-zasnovana šema je računski obavezujuća i računski sakrivajuća.
+Pedersenova šema~\cite{pedersen1991non} postiže kompromis: savršeno skrivanje uz
+računsko obavezivanje, oslanjajući se na algebarsku strukturu grupe umesto na heš funkciju.
+
+\begin{definition}[Pedersenova šema posvete]
+\label{def:pedersen-commitment}
+Neka je $\mathbb{G}$ ciklična grupa prostog reda $q$, i neka su $g, h \in \mathbb{G}$
+generatori takvi da $\log_g(h)$ nije poznat nijednoj strani. Šema je definisana sa:
+\begin{itemize}
+  \item $\mathsf{Postavi}$: javni parametri su $(\mathbb{G}, q, g, h)$,
+    prostor poruka $\mathcal{M} = \mathbb{Z}_q$, prostor slučajnosti $\mathcal{R} = \mathbb{Z}_q$.
+  \item $\mathsf{Posveti}(m;\, r) = g^m h^r$, gde se $r \xleftarrow{\$} \mathbb{Z}_q$ bira uniformno.
+  \item $\mathsf{Otvori}(c,\, m,\, r) = 1$ ako i samo ako $c = g^m h^r$.
+\end{itemize}
+\end{definition}
+
+\paragraph{Savršeno skrivanje.}
+Pošto se $r$ bira uniformno iz $\mathbb{Z}_q$, vrednost $h^r$ ravnomerno pokriva celu grupu
+$\mathbb{G}$. Za svaku moguću fiksiranu vrednost $m_0$, posveta $g^{m_0} h^r$ prolazi kroz sve
+elemente grupe kako $r$ varira - dakle raspodela posvete ne zavisi od $m$. Ni teorijski
+neograničen protivnik ne može iz $c$ naučiti ništa o $m$.
+
+\paragraph{Računsko obavezivanje.}
+Pretpostavimo da protivnik može da nađe $m \neq m'$ i $r, r'$ takve da
+$g^m h^r = g^{m'} h^{r'}$. Iz toga sledi $g^{m-m'} = h^{r'-r}$, odakle se može izračunati
+\[
+  \log_g(h) = \frac{m - m'}{r' - r} \pmod{q}.
+\]
+Dakle, pronalaženje dva različita otvaranja iste posvete ekvivalentno je rešavanju problema
+diskretnog logaritma u $\mathbb{G}$, koji se smatra računski neizvodljivim za pravilno
+izabrane grupe.
+
+\paragraph{Ograničenje prostora poruka.}
+Za razliku od heš-zasnovane šeme koja prima poruke proizvoljnog oblika, Pedersenova šema
+zahteva da poruka $m$ bude element $\mathbb{Z}_q$ - dakle broj, zbog toga Pedersen nije zamena za heš šemu u opštem slučaju.
+
+\paragraph{Aditivno svojstvo.}
+Pedersenove posvete imaju važnu algebarsku osobinu: proizvod dve posvete je posveta na zbir
+posvedočenih vrednosti,
+\[
+  g^{m_1} h^{r_1} \cdot g^{m_2} h^{r_2} = g^{m_1 + m_2} h^{r_1 + r_2}.
+\]
+Ovo homomorfno svojstvo čini Pedersenove posvete posebno korisnim u protokolima nultog
+znanja, gde je potrebno dokazivati relacije između skrivenih vrednosti bez njihovog otkrivanja.
+
+\subsection{KZG polinomijalne posvete}
+\label{subsec:kzg-commitment}
+
+Heš-zasnovana i Pedersenova šema obavezuju se na \emph{skalarne} vrednosti. U savremenim
+ZK sistemima često je potrebno obavezati se na čitav \emph{polinom} i naknadno dokazivati
+njegove vrednosti u izabranim tačkama, bez otkrivanja samog polinoma. Upravo to je zadatak
+polinomijalnih šema posvete, od kojih je najpoznatija KZG šema
+(Kate, Zaverucha i Goldberg)~\cite{kate2010constant}.
+
+\paragraph{Osnovna ideja.}
+Ideja KZG je jednostavna: obavežemo se na evaluaciju polinoma u jednoj \emph{tajnoj}
+tački $\tau$, i tu evaluaciju koristimo kao posvetu na čitav polinom. Tako dobijamo
+posvetu koja je jedan element grupe eliptičke krive, a koja omogućava efikasno dokazivanje
+vrednosti polinoma u proizvoljnim tačkama. Ovde $g$ označava generator te grupe - fiksirani
+javni element krive koji svi učesnici protokola dele, analogan generatoru $g$ kod Pedersena.
+
+\paragraph{Poverljivo podešavanje.}
+KZG zahteva jednokratnu fazu poverljivog podešavanja (engl.\ \textit{trusted setup}).
+Tokom te faze bira se tajna vrednost $\tau \xleftarrow{\$} \mathbb{Z}_q$, a zatim se
+objavljuje strukturisana referentna niska (engl.\ \textit{structured reference string}, SRS):
+\[
+  \mathbf{SRS} = \bigl(g,\; \tau \cdot g,\; \tau^2 \cdot g,\; \ldots,\; \tau^d \cdot g\bigr).
+\]
+Ovi javni parametri su enkodovani stepeni od $\tau$, ali ne i $\tau$ sama.
+Tajna $\tau$ mora biti bezbedno uništena nakon generisanja SRS-a - ko god je zna
+može da falsifikuje dokaze za proizvoljne vrednosti polinoma.
+
+\paragraph{Posveta na polinom.}
+Neka je polinom $p(X) = \sum_{i=0}^{d} p_i X^i$. Dokazivač izračunava posvetu kao:
+\[
+  C = \sum_{i=0}^{d} p_i \cdot (\tau^i \cdot g) = p(\tau) \cdot g.
+\]
+Iako $\tau$ nije poznata, SRS omogućava izračunavanje $p(\tau) \cdot g$ bez njenog
+eksplicitnog poznavanja. Posveta je \emph{jedan element grupe}, bez obzira na stepen polinoma.
+
+\paragraph{Dokaz otvaranja.}
+Da bi dokazao da $p(x_0) = y_0$ za neku konkretnu tačku $x_0$, dokazivač koristi činjenicu
+da polinom $p(X) - y_0$ mora biti deljiv sa $(X - x_0)$. Količnik
+\[
+  q(X) = \frac{p(X) - y_0}{X - x_0}
+\]
+je polinom stepena $d-1$. Dokazivač izračunava svedoka provlačenjem $q$ kroz isti proces
+kao pri posveti - koristeći SRS, bez poznavanja $\tau$:
+\[
+  \pi = q(\tau) \cdot g = \sum_{i=0}^{d-1} q_i \cdot (\tau^i \cdot g).
+\]
+Pošto $q$ ima manji stepen od $p$, potrebni su samo prvih $d$ elemenata SRS-a, koji su
+dostupni. Svedok $\pi$ je \emph{jedan element grupe} - konstantne veličine bez obzira
+na stepen polinoma.
+
+\paragraph{Verifikacija.}
+Bilinearno preslikavanje $e$ je funkcija koja prima dva elementa grupe i vraća broj,
+uz svojstvo $e(a \cdot g,\, b \cdot g) = e(g, g)^{ab}$ - što omogućava proveru jednakosti
+između eksponenata bez njihovog otkrivanja. Verifikator proverava:
+\[
+  e(C - y_0 \cdot g,\; g) \stackrel{?}{=} e(\pi,\; \tau \cdot g - x_0 \cdot g).
+\]
+Raspisivanjem obe strane postaje jasno šta se proverava:
+\begin{itemize}
+  \item Leva strana: $C - y_0 \cdot g = p(\tau)\cdot g - y_0 \cdot g = (p(\tau) - y_0)\cdot g$,
+    pa je $e(C - y_0 \cdot g,\, g) = e(g,g)^{p(\tau) - y_0}$.
+  \item Desna strana: $\pi = q(\tau)\cdot g$ i $\tau \cdot g - x_0 \cdot g = (\tau - x_0)\cdot g$,
+    pa je $e(\pi,\, \tau \cdot g - x_0 \cdot g) = e(g,g)^{q(\tau)\cdot(\tau - x_0)}$.
+\end{itemize}
+Jednakost važi kada su eksponenti jednaki, tj.\ kada
+$p(\tau) - y_0 = q(\tau)\cdot(\tau - x_0)$.
+Po definiciji količnika $q(X) = \frac{p(X)-y_0}{X-x_0}$, ova jednakost važi za svako $X$
+samo ako $(X - x_0)$ zaista deli $p(X) - y_0$ bez ostatka - što je tačno jedino kada
+$p(x_0) = y_0$. Verifikator je tako potvrdio traženu vrednost polinoma bez poznavanja
+ostatka polinoma.
+
+\paragraph{Bezbednost i primene.}
+Obavezivanje počiva na $d$-jakoj Diffie--Hellmanovoj pretpostavci. Glavna prednost KZG
+šeme nije hiding svojstvo, već \emph{konstantna veličina dokaza} - i posveta i svedok su
+uvek jedan element grupe, bez obzira na stepen polinoma. KZG posvete koriste se u Ethereum protokolu od 2024.\
+godine kao deo standarda EIP-4844, koji uvodi blob transakcije za efikasno skladištenje
+podataka slojeva za skaliranje~\cite{eip4844}. Ista šema stoji u osnovi modernih
+ZK-SNARK sistema koji su tema narednih poglavlja.
+
+\section{Primene u blockchain ekosistemu}
+\label{sec:commitments-blockchain}
+
+Šeme posvete nisu samo teorijska apstrakcija - u ovom poglavlju razmatramo dva konkretna oblika njihove primene u blockchain infrastrukturi. U prvom, posveta se koristi da bi se jedna vrednost sakrila dok se ne ispune određeni uslovi. U drugom, koristi se da bi se efikasno i proverljivo predstavio čitav skup podataka.
+\subsection{Šablon posveti-pa-otkrij}
+\label{subsec:commit-reveal}
+
+Šablon posveti-pa-otkrij (engl.\ \textit{commit-reveal}) direktna je primena heš-zasnovane
+šeme posvete na javnim mrežama gde sve poruke vide svi učesnici čim budu poslate.
+
+Konkretna primena je registracija decentralizovanih domenskih imena u sistemu ENS
+(engl.\ \textit{Ethereum Name Service}). Kada korisnik želi da registruje \texttt{.eth}
+domen, zahtev kratko vreme provodi u javnom redu čekanja transakcija (engl.\ \textit{mempool})
+vidljivom svim učesnicima mreže. Napadač koji uoči zahtev može odmah da registruje isti
+domen pre korisnika - ovaj napad poznat je kao napad pretrcavanjem
+(engl.\ \textit{front-running}). ENS rešava ovo uvođenjem dve odvojene faze:
+
+\begin{enumerate}
+  \item \textbf{Faza posvećivanja}: korisnik bira slučajnost $r$, izračunava
+    $c = H(\text{ime} \,\|\, r)$ i objavljuje samo $c$ na lancu. Iz heša nije moguće
+    saznati koji domen korisnik registruje.
+  \item \textbf{Faza otkrivanja}: nakon obaveznog čekanja od najmanje 60 sekundi,
+    korisnik objavljuje pravo ime i vrednost $r$. Pametni ugovor
+    (engl.\ \textit{smart contract}) proverava podudarnost sa ranije poslatim hešom i
+    završava registraciju.
+\end{enumerate}
+
+Bezbednost protokola počiva direktno na dva svojstva šeme posvete: \emph{skrivanje}
+onemogućava napadaču da sazna ime iz heša, a \emph{obavezivanje} sprečava korisnika da
+naknadno promeni zahtev na popularniji domen koji je u međuvremenu primetio.
+
+Isti obrazac primenjuje se i izvan registracije domena. Sistemi za glasanje na blockchainu
+koriste commit-reveal da bi sprečili da glasači menjaju odluku na osnovu vidljivog rasporeda
+glasova.
+
+\subsection{Merkle stabla kao vektorske posvete}
+\label{subsec:merkle}
+
+Heš-zasnovana šema iz sekcije~\ref{subsec:hash-commitment} obavezuje na \emph{jednu} poruku.
+U praksi često treba da se obavežemo na \emph{skup} vrednosti - na primer, na sve
+transakcije u bloku - i da naknadno efikasno dokazujemo da određena vrednost pripada
+tom skupu. Merkle stablo (engl.\ \textit{Merkle tree}) je struktura koja to omogućava.
+
+\begin{definition}[Merkle stablo]
+\label{def:merkle-tree}
+Neka je $\{d_1, d_2, \ldots, d_n\}$ skup podataka i $H$ kriptografska heš funkcija.
+Merkle stablo nad ovim skupom je binarno stablo u kome:
+\begin{itemize}
+  \item svaki list sadrži heš jednog podatka: $\ell_i = H(d_i)$,
+  \item svaki unutrašnji čvor sadrži heš svojih potomaka: $v = H(\text{levo} \,\|\, \text{desno})$,
+  \item koren stabla (engl.\ \textit{Merkle root}) $R$ je jednoznačno određen celim skupom.
+\end{itemize}
+\end{definition}
+
+Koren $R$ je posveta na čitav skup - promena bilo kojeg podatka $d_i$ propagira se kroz
+stablo i menja $R$, što je direktna posledica otpornosti heš funkcije na nalaženje sudara.
+
+Ključna prednost Merkle stabla je efikasan dokaz uključenosti
+(engl.\ \textit{Merkle proof}): da bi dokazao da $d_i$ pripada skupu posvedočenom korenom
+$R$, dovoljno je priložiti \emph{put} od lista $\ell_i$ do korena - niz od
+$\lceil \log_2 n \rceil$ heš vrednosti. Primalac može da proveri dokaz reizračunavanjem
+puta i poređenjem sa $R$, bez poznavanja ijednog drugog podatka iz skupa. U praksi se
+koriste i varijante veće arnosti - Ethereum koristi strukturu sa arnosti 16~\cite{ethereumMPT} - ali princip
+posvete i dokaza uključenosti ostaje isti.
+
+U Ethereum protokolu svako zaglavlje bloka sadrži tri Merkle korena: koren stabla
+transakcija, koren stabla stanja (engl.\ \textit{state root}) i koren stabla priznanica
+(engl.\ \textit{receipts root})~\cite{wood2014ethereum}. Na taj način, stanje celog
+protokola - svi nalozi, stanja ugovora, salda - kompaktno je posvedočeno jednim hešem
+od 32 bajta, što je direktna primena Merkle korena kao posvete na skup.
+
+\section{Šeme posvete kao osnova sistema za dokazivanje}
+\label{sec:commitments-zk-bridge}
+
+Šeme posvete nisu samo samostalni kriptografski alati - one su gradivni elementi
+savremenih sistema za dokazivanje nultog znanja koji su tema narednih poglavlja.
+
+U zk-STARK sistemima dokazivač se tokom protokola mora obavezati na veliki skup vrednosti,
+a verifikator nasumično bira pozicije i proverava ih. Za taj korak STARK koristi upravo
+Merkle stablo: listovi sadrže heševe evaluacija polinoma, a koren se objavljuje kao posveta.
+Svaki zahtev verifikatora dobija Merkle dokaz - niz heš vrednosti duž putanje do korena,
+čija veličina raste logaritamski sa brojem posvedočenih vrednosti.
+
+U zk-SNARK sistemima zasnovanim na bilinearnim preslikavanjima koriste se KZG polinomijalne
+posvete. Posveta na polinom je jedan element grupe eliptičke krive, a dokaz da taj polinom
+u nekoj konkretnoj tački uzima određenu vrednost je ponovo jedan element grupe, iste
+veličine, bez obzira na stepen polinoma. Upravo ta konstantna veličina dokaza otvaranja
+presudno utiče na kompaktnost celog SNARK dokaza.
+
+Ovaj kontrast leži u osnovi ključne razlike između dve porodice ZK sistema: zk-SNARK
+dokazi su obično svega nekoliko stotina bajtova, dok su zk-STARK dokazi znatno veći,
+jer Merkle putanje rastu logaritamski.
+
+Veličina dokaza nije samo teorijsko pitanje. Ethereum planira prelaz na besstanu validaciju
+(engl.\ \textit{stateless validation}), u kojoj verifikator proverava ispravnost bloka bez
+čuvanja celokupnog stanja lokalno. Uz svaki blok mora se preneti svedok
+(engl.\ \textit{witness}) - skup vrednosti i kriptografskih dokaza koji pokrivaju sve
+pristupe stanju u tom bloku. Trenutno Ethereum čuva stanje u stablu sa arnosti 16~\cite{ethereumMPT}: da bi
+se dokazao jedan pristup stanju, na svakom nivou stabla potrebno je priložiti svih 15
+pratećih čvorova. Za stotine pristupa stanju po bloku, svedok naraste na nekoliko megabajta
+i ne može se pouzdano preneti unutar 12-sekundnog slota.
+
+Rešenje koje Ethereum razrađuje jeste zamena heš-zasnovane posvete unutar čvorova stabla
+\emph{vektorskom posvetom sa dokazima konstantne veličine}. Pošto dokaz otvaranja ne
+zavisi od broja elemenata u čvoru, stablo može imati znatno veću arnost bez kazne na
+veličinu svedoka. Prema merenjima na istorijskim blokovima, svedok za tipičan blok sa
+Verkle stablom iznosi oko 380\,KB u medijani~\cite{statelessfyi}, što je značajno manje
+od nekoliko megabajta kod trenutnog rešenja. Ova evolucija ilustruje kako teorijska
+svojstva šema posvete - a posebno veličina dokaza otvaranja - imaju direktne praktične
+posledice za skalabilnost i decentralizaciju blockchain sistema.
