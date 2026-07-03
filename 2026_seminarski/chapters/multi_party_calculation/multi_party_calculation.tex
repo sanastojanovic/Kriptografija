@@ -27,7 +27,7 @@ Neki kriptografski protokoli koji se mogu posmatrati kao primer MPC-a su~\cite{s
 
 Prilikom projektovanja protokola za sigurno izračunavanje sa više učesnika, pored privatnosti ulaza potrebno je razmotriti i ponašanje učesnika. Najčešće se razmatraju dva modela protivnika. \emph{Pošteni ali radoznali} (eng. \textit{honest-but-curious}) protivnici korektno izvršavaju protokol, ali pokušavaju da iz dostupnih informacija saznaju što više o privatnim podacima drugih učesnika. Zlonamerni (eng. \textit{malicious}) protivnici mogu proizvoljno odstupati od protokola i slati netačne podatke, pa protokol mora garantovati i privatnost i ispravnost izračunavanja ~\cite{smart2016cryptography}.
 
-Ovi modeli bezbednosti su veoma različiti, i protokoli koji su sigurni u jednom modelu nisu nužno sigurni u drugom modelu. Na primer, protokol koji je siguran protiv \emph{poštenih ali radoznalih} protivnika skoro sigurno je neupotrebljiv protiv zlonamernih protivnika.
+Ovi modeli bezbednosti značajno se razlikuju, a protokoli koji su sigurni u jednom modelu nisu nužno sigurni u drugom modelu. Na primer, protokol koji je siguran protiv \emph{poštenih ali radoznalih} protivnika najčešće nije primenljiv u prisustvu zlonamernih protivnika.
 
 Još jedna pretpostavka je da je komunikacija između učesnika asinhrona, tj. da poruke koje se šalju između učesnika mogu biti odložene ili čak izgubljene. Ovakva komunikacija je najpraktičnija i najčešća u realnim scenarijima. U takvom modelu, jedan od učesnika mora biti poslednji. U takvoj situaciji, neki učesnici mogu znati rezultat izračunavanja, dok drugi još uvek nisu dobili sve poruke. Zlonamerni učesnici mogu lažirati situaciju i ne poslati poslednju poruku, čime će onemogućiti druge učesnike da dobiju rezultat. Ipak, pretpostavljamo da zlonamerni učesnici neće izvesti takav napad. Protokol koji je siguran protiv zlonamernih učesnika koji mogu da izbrišu poslednju poruku se naziva fer protokol~\cite{smart2016cryptography}.
 
@@ -62,7 +62,7 @@ Ispostavlja se da je prvi pristup bolji za komunikaciju između dva učesnika, d
 
 \section{Slučaj dva učesnika}
 
-U slučaju bezbednog izračunavanja sa dva učesnika, pretpostavljamo da postoje dve strane $A$ i $B$, koje imaju ulaze $x$ i $y$ respektivno, i da $A$ želi da izračuna funkciju $f_A(x, y)$, a $B$ želi da izračuna funkciju $f_B(x, y)$. Cilj je da se to postigne bez otkrivanja bilo kakvih informacija o ulazima ili funkcijama osim onoga što se može zaključiti iz izlaza funkcija i sopstvenih ulaza~\cite{smart2016cryptography}. 
+U slučaju bezbednog izračunavanja sa dva učesnika, pretpostavljamo da postoje dve strane $A$ i $B$, koje imaju ulaze $x$ i $y$, redom, i da $A$ želi da izračuna funkciju $f_A(x, y)$, a $B$ želi da izračuna funkciju $f_B(x, y)$. Cilj je da se to postigne bez otkrivanja bilo kakvih informacija o ulazima ili funkcijama osim onoga što se može zaključiti iz izlaza funkcija i sopstvenih ulaza~\cite{smart2016cryptography}. 
 
 Bez gubitka opštosti, problem se redukuje na jednu funkciju $f$ čiji je izlaz namenjen $B$-u. U tom slučaju $A$ poseduje dodatni tajni ulaz $k$ ne duži od najdužeg izlaza funkcije $f_A(x, y)$. Potrebno je kreirati protokol u kojem $B$ razmenom poruka sa $A$ dobija vrednost funkcije $f(x, y, k) = (k \oplus f_A(x, y), f_B(x, y))$ tokom kog ne saznaje ništa više o $x$ i $k$ osim onoga što je implicirano izlazom. Nakon što $B$ dobije ovu vrednost, on može da pošalje vrednost $k \oplus f_A(x, y)$ nazad $A$-u, koji zatim može da dešifruje ovu vrednost koristeći svoj tajni ulaz $k$, i tako sazna vrednost $f_A(x, y)$~\cite{smart2016cryptography}. Ova apstrakcija funkcije omogućava da se MPC primeni i na scenarije koji nisu striktno numerički. U primeru \ref{oblivious_negotiation} ćemo ilustrovati ovaj protokol na primeru pregovaranja između dve strane.
 
@@ -75,9 +75,9 @@ Bez gubitka opštosti, problem se redukuje na jednu funkciju $f$ čiji je izlaz 
 
 \subsection{Maskirana kola}
 
-Jedno od rešenja ovog problema je korišćenje Jaovog protokola zasnovanog na maskiranim kolima (eng. \textit{garbled circuit}). Pretpostavimo da funkcija $f(x, y)$ može biti izračunata u polinomijalnom vremenu. To znači da postoji binarno kolo koje takođe može izračunati izlaz funkcije~\cite{smart2016cryptography}. 
+Jedan od pristupa rešavanju ovog problema zasniva se na Jaovom protokolu sa maskiranim kolima (eng. \textit{garbled circuit}). Pretpostavimo da funkcija $f(x, y)$ može biti izračunata u polinomijalnom vremenu. To znači da postoji binarno kolo koje takođe može izračunati izlaz funkcije~\cite{smart2016cryptography}. 
 
-Logičko kolo može biti predstavljeno skupom žica $W = \{w_1,\ldots,w_n\}$ i skupom logičkih kapija $G = \{g_1,\ldots,g_m\}$. Svaka kapija je funkcija koja uzima kao ulaz vrednosti dve žice i proizvodi vrednost izlazne žice. Na primer, pretpostavimo da je $g_1$ \verb|OR| kapija koja uzima kao ulaz žice $w_1$ i $w_2$ i proizvodi izlaznu žicu $w_3$. Izlazna vrednost se tada izračunava kao logička konjunkcija ulaznih vrednosti.
+Logičko kolo može biti predstavljeno skupom žica $W = \{w_1,\ldots,w_n\}$ i skupom logičkih kapija $G = \{g_1,\ldots,g_m\}$. Svaka kapija je funkcija koja uzima kao ulaz vrednosti dve žice i proizvodi vrednost izlazne žice. Na primer, pretpostavimo da je $g_1$ \verb|OR| kapija koja uzima kao ulaz žice $w_1$ i $w_2$ i proizvodi izlaznu žicu $w_3$. Izlazna vrednost se tada izračunava kao logička disjunkcija ulaznih vrednosti.
  \textit{Maskirano kolo} je kolo u kojem su vrednosti žica maskirane, a kapije su predstavljene kao tabele koje sadrže maskirane vrednosti izlazne žice za svaku kombinaciju ulaznih žica. Ove tabele se nazivaju maskiranim tabelama (eng. \textit{garbled tables}), a proces kreiranja ovih tabela i maskiranja žica se naziva konstrukcija maskiranog kola (eng. \textit{garbled circuit construction})~\cite{smart2016cryptography}.
 
 \subsection{Konstrukcija maskiranog kola}
@@ -161,11 +161,11 @@ Na slici \ref{fig:garbled_circuit_evaluation} prikazan je proces evaluacije mask
     \label{fig:garbled_circuit_evaluation}
 \end{figure}
 
-$B$ prvo evaluira \verb|AND| kapiju $g_1$. Pošto zna da su spoljašnje vrednosti ulaznih žica $w_1$ i $w_3$ redom $1$ i $1$. U maskiranoj tabeli za \verb|AND| kapiju pronalazi vrednost $c_{1,1}^1$ i dešifruje je koristeći ključeve $k_1^1$ i $k_3^1$ koje poseduje. Dešifrovanjem dobija vrednost $k_5^0\|0$. On nema način da sazna da li ova vrednost predstavlja logičku nulu ili jedinicu jer ne zna vrednost $\rho_5$~\cite{smart2016cryptography}.
+$B$ prvo evaluira \verb|AND| kapiju $g_1$. Pošto zna da su spoljašnje vrednosti ulaznih žica $w_1$ i $w_3$ redom $1$ i $1$, u maskiranoj tabeli za \verb|AND| kapiju pronalazi vrednost $c_{1,1}^1$ i dešifruje je koristeći ključeve $k_1^1$ i $k_3^1$ koje poseduje. Dešifrovanjem dobija vrednost $k_5^0\|0$, pa nema način da sazna da li ova vrednost predstavlja logičku nulu ili jedinicu jer ne zna vrednost $\rho_5$~\cite{smart2016cryptography}.
 
 $B$ sada primenjuje isti postupak evaluacije na \verb|XOR| kapiju $g_2$. Pošto zna da su spoljašnje vrednosti ulaznih žica $w_2$ i $w_4$ redom $1$ i $0$, pronalazi vrednost $c_{1,0}^2$ u maskiranoj tabeli za \verb|XNOR| kapiju i dešifruje je koristeći ključeve $k_2^0$ i $k_4^0$. Dešifrovanjem dobija vrednost $k_6^0\|1$. Opet, on nema način da sazna da li ova vrednost predstavlja logičku nulu ili jedinicu jer ne zna vrednost $\rho_6$~\cite{smart2016cryptography}.
 
-Postupak se nastavlja evaluacijom \verb|OR| kapije $g_3$. Pošto zna da su spoljašnje vrednosti ulaznih žica $w_5$ i $w_6$ redom $0$ i $1$, pronalazi vrednost $c_{0,1}^3$ u maskiranoj tabeli za \verb|OR| kapiju i dešifruje je koristeći ključeve $k_5^0$ i $k_6^0$. Dešifrovanjem dobija vrednost $k_7^1\|1$. Pošto je $B$ dobio vrednost $\rho_7=1$ on izračunava unutrašnju vrednost izlazne žice $w_7$ kao $1\oplus \rho_7=0$~\cite{smart2016cryptography}. 
+Postupak se nastavlja evaluacijom \verb|OR| kapije $g_3$. Pošto zna da su spoljašnje vrednosti ulaznih žica $w_5$ i $w_6$ redom $0$ i $1$, pronalazi vrednost $c_{0,1}^3$ u maskiranoj tabeli za \verb|OR| kapiju i dešifruje je koristeći ključeve $k_5^0$ i $k_6^0$. Dešifrovanjem dobija vrednost $k_7^1\|1$. Pošto je $B$ dobio vrednost $\rho_7=1$, on izračunava unutrašnju vrednost izlazne žice $w_7$ kao $1\oplus \rho_7=0$~\cite{smart2016cryptography}. 
 
 
 \subsection{Jaov protokol}
@@ -336,7 +336,7 @@ Finalno, učesnici objavljuju svoje delove i rekonstruišu polinom stepena $t=2$
 
 Pretpostavimo da je broj korumpiranih učesnika veći od $t$. U tom slučaju, korumpirani učesnici mogu se udružiti i rekonstruisati bilo koju od tajni u šemi, jer su deljenja zasnovana na polinomima stepena najviše $t$. Međutim, može se pokazati, koristeći savršenu tajnost Šamirove šeme deljenja tajni, da sve dok je broj korumpiranih učesnika manji ili jednak $t$, gore opisani protokol je savršeno siguran~\cite{smart2016cryptography}.
 
-U slučaju da su svi učesnici \emph{pošteni ali radoznali}, gore opisani protokol je dovoljan za sigurno izračunavanje. Ukoliko učesnici ne slede protokol, mogu namestiti nevalidne rezultate poštenim učesnicima. Da bi ovo pokazali, dovoljno je primetiti da bi zlonamerni učesnik mogao jednostavno da proizvede nevalidno deljenje svog proizvoda u drugom delu multiplikacionog protokola opisanog ranije\cite{smart2016cryptography}. 
+U slučaju da su svi učesnici \emph{pošteni ali radoznali}, gore opisani protokol je dovoljan za sigurno izračunavanje. Ukoliko učesnici ne slede protokol, mogu namestiti nevalidne rezultate poštenim učesnicima. Da bismo to pokazali, dovoljno je primetiti da bi zlonamerni učesnik mogao jednostavno da proizvede nevalidno deljenje svog proizvoda u drugom delu multiplikacionog protokola opisanog ranije\cite{smart2016cryptography}. 
 
 % section Model više učesnika: pošteni-ali-radoznali učesnici (end)
 
@@ -366,7 +366,7 @@ To se postiže pomoću sledećih koraka~\cite{smart2016cryptography}:
     broj zlonamernih učesnika ograničen sa $t < n/3$, svaka greška u deljenju stepena $2t$ biće
     otkrivena. U ovoj fazi protokol se prekida ako se otkrije bilo kakva greška.
 
-    \item Nakon toga igrači lokalno izračunaju delove \(c^{(i)}\) po formuli
+    \item Nakon toga učesnici lokalno izračunavaju delove \(c^{(i)}\) po formuli
     \[ c^{(i)} = s + r^{(i)}. \]
 \end{itemize}
 
@@ -406,7 +406,7 @@ d e + d b + e a + c = (x-a)(y-b) + (x-a)b + (y-b)a + c
 = ((x-a)+a)((y-b)+b) = x y = z.
 \]
 
-Na ovaj način množenje se svodi na rekonstrukciju dve javne vrednosti $d$ i $e$, dok se ostatak izračunavanja obavlja nad deljenim vrednostima. Zahvaljujući mogućnosti detekcije i ispravljanja grešaka, protokol ostaje ispravan čak i u prisustvu do $t<n/3$ zlonamernih učesnika.
+Na ovaj način, operacija množenja svodi se na rekonstrukciju dve javne vrednosti $d$ i $e$, dok se ostatak izračunavanja obavlja nad deljenim vrednostima. Zahvaljujući mogućnosti detekcije i ispravljanja grešaka, protokol ostaje ispravan čak i u prisustvu do $t<n/3$ zlonamernih učesnika.
 
 
 \section{Zaključak} 
