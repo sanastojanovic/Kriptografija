@@ -37,7 +37,7 @@
 2. (Commitments) -> Bezbednosna svojstva + Heš-zasnovana šema posvete
 3. (Commitments) -> Bezbednosna svojstva + Pedersenova šema posvete 
 
-> preporučeni dodatni materijal: [Commitments prezentacija](./2026_prezentacije/commitments/prezentacija_commitments.pdf)
+> preporučeni materijal: [Commitments prezentacija](./2026_prezentacije/commitments/prezentacija_commitments.pdf), [kriptografija_napredne_teme.pdf](./kriptografija_napredne_teme.pdf)(Glava 4)
 >
 > dodatna referenca: [Ivan Drecun: Kriptografsko obavezivanje](https://poincare.matf.bg.ac.rs/~ivan.drecun/kripto/book/lec03-hashes.html#kriptografsko-obavezivanje)
 ---
