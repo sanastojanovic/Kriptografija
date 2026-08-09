@@ -90,9 +90,12 @@
 ## 10. Potpuno homomorfno šifrovanje
 *Fully Homomorphic Encryption — FHE (`fully_homomorphic_encryption`)*
 
-- (Potpuno homomorfno šifrovanje) ->
-- (Potpuno homomorfno šifrovanje) ->
-- (Potpuno homomorfno šifrovanje) ->
+- (Potpuno homomorfno šifrovanje) -> Šta je homomorfna enkripcija?
+- (Potpuno homomorfno šifrovanje) -> Šta je bootstrapping u homomorfnoj enkripciji?
+- (Potpuno homomorfno šifrovanje) -> Navesti neku primenu homomorfne enkripcije.
+
+> preporučeni materijal: [FHE prezentacija](./2026_prezentacije/fhe/fhe.pdf), [kriptografija_napredne_teme.pdf](./kriptografija_napredne_teme.pdf)(Glava 10)
+
 
 ---
 
