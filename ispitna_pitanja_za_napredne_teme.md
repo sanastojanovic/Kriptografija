@@ -15,9 +15,9 @@
 ## 2. Bezbedno izračunavanje sa više učesnika
 *Multi-Party Calculation (`multi_party_calculation`)*
 
-- (Multi-Party Calculation) –>
-- (Multi-Party Calculation) –>
-- (Multi-Party Calculation) –>
+- Šta je osnovni cilj protokola za bezbedno izračunavanje sa više učesnika (MPC)?
+- Šta je i kako se konstruiše šifrovano binarno kolo?
+- Šta je i kako se konstruiše šifrovano aritmetičko kolo?
 
 ---
 
