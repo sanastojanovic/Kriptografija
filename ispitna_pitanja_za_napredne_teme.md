@@ -81,9 +81,13 @@
 ## 9. Učenje sa greškama
 *Learning With Errors — LWE (`lwe`)*
 
-- (Učenje sa greškama) –>
-- (Učenje sa greškama) –>
-- (Učenje sa greškama) –>
+- (Učenje sa greškama) –> Kako izgleda protokol javnog ključa zasnovan na problemu učenja sa greškama?
+- (Učenje sa greškama) –> Objasniti geometrijsku intuiciju veze između problema dekodiranja na ograničenoj udaljenosti (BDD) i problema učenja sa greškama (LWE).
+- (Učenje sa greškama) –> Koje nedostatke osnovne šeme zasnovane na učenju sa greškama (LWE) ublažava njena varijanta učenja
+  sa greškama u prstenu (Ring-LWE)?
+
+> preporučeni materijal: [LWE prezentacija](./2026_prezentacije/lwe/lwe-prez.pdf), [kriptografija_napredne_teme.pdf](./kriptografija_napredne_teme.pdf)(Glava 9)
+
 
 ---
 
