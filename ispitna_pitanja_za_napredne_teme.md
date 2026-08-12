@@ -76,9 +76,9 @@
 ## 8. Kriptografija zasnovana na rešetkama
 *Lattice-Based Cryptography (`lattices`)*
 
-- (rešetke) –>
-- (rešetke) –>
-- (rešetke) –>
+- (rešetke) –> Na čemu se zasniva bezbednost kriptografskih sistema koji se danas koriste i da li je ona ugrožena? Ako jeste ugrožena, navesti zašto.
+- (rešetke) –> Kako se definišu rešetke i koji je njihov značaj u kriptografiji ?
+- (rešetke) –>  Koji problemi se smatraju teški na rešetkama i koji je njihov značaj u kriptografiji?
 
 ---
 
