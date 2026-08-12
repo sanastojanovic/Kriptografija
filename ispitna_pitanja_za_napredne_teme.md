@@ -54,9 +54,12 @@
 ## 6. ZK-SNARK
 *Zero-Knowledge SNARK (`zk_snark`)*
 
-- (ZK SNARK) –>
-- (ZK SNARK) –>
-- (ZK SNARK) –>
+1. (zk_snark) -> Objasniti osnovnu ideju zk-SNARK sistema i ulogu javne tvrdnje, svedoka i jednačine \(R(x,w)\) = 1.
+
+2. (zk_snark) -> Obajsniti na koji način se pomoću zk-SNARK dokaza proverava validnost zaštićene Zcash transakcije.
+
+3. (zk_snark) ->  Navesti i objasniti glavne prednosti i nedostatke zk-SNARK sistema.
+
 
 ---
 
