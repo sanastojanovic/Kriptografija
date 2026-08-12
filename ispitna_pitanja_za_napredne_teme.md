@@ -45,9 +45,14 @@
 ## 5. Uvod u dokaze nultog znanja
 *Zero-Knowledge — uvod (`zk_uvod`)*
 
-- (ZK) –>
-- (ZK) –>
-- (ZK) –>
+- (ZK)-> Objasniti protokol za izomorfizam grafova kao primer dokaza nultog znanja. Navesti ulogu posvete (commitment), izazova (challenge) i odgovora (response), kao i zašto se protokol smatra dokazom nultog znanja.
+
+    \item Koja su tri osnovna svojstva dokaza nultog znanja? Objasniti pojmove potpunosti (completeness), tačnosti (soundness) i nultog znanja (zero-knowledge).
+  
+- (ZK) –> Koja su tri osnovna svojstva dokaza nultog znanja? Objasniti pojmove potpunosti (completeness), tačnosti (soundness) i nultog znanja (zero-knowledge).
+- (ZK) –> Koja je razlika između interaktivnih i neinteraktivnih dokaza nultog znanja?
+\end{enumerate}
+\end{frame}
 
 ---
 
