@@ -49,8 +49,6 @@
   
 - (ZK) –> Koja su tri osnovna svojstva dokaza nultog znanja? Objasniti pojmove potpunosti (completeness), tačnosti (soundness) i nultog znanja (zero-knowledge).
 - (ZK) –> Koja je razlika između interaktivnih i neinteraktivnih dokaza nultog znanja?
-\end{enumerate}
-\end{frame}
 
 ---
 
