@@ -67,10 +67,11 @@
 ## 7. ZK-STARK
 *Zero-Knowledge STARK (`zk_stark`)*
 
-- (ZK STARK) –>
-- (ZK STARK) –>
-- (ZK STARK) –>
+- (ZK STARK) –> Objasniti zašto se zk-STARK sistemi smatraju transparentnim, skalabilnim i verovatno postkvantno sigurnim?
 
+- (ZK STARK) –> Objasniti osnovni tok zk-STARK sistema i ulogu njegovih ključnih komponenti.
+
+- (ZK STARK) –> Kako zk-STARK sistem proverava ispravnost izvršavanja programa bez ponovnog izvršavanja celog programa?
 ---
 
 ## 8. Kriptografija zasnovana na rešetkama
