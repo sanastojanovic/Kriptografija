@@ -115,7 +115,5 @@
 - (Secret Sharing) -> Kako se tajna rekonstruiše u Šamirovoj šemi i koji matematički postupak se koristi?
 - (Secret Sharing) -> Objasniti vezu između stepena polinoma i minimalnog broja učesnika potrebnih za rekonstrukciju tajne u Šamirovoj šemi.
 
-> preporučeni materijal: [Secret sharing prezentacija](./2026_prezentacije/secret_sharing/secret_sharing.pdf), [kriptografija_napredne_teme.pdf](./kriptografija_napredne_teme.pdf)(Glava 11)
->
-> dodatna referenca: [Ivan Drecun: Deljenje tajni](https://poincare.matf.bg.ac.rs/~ivan.drecun/kripto/book/lec09-threshold.html)
+> preporučeni materijal: [Secret sharing prezentacija](./2026_prezentacije/secret_sharing/secret_sharing.pdf), [Ivan Drecun: Deljenje tajni](https://poincare.matf.bg.ac.rs/~ivan.drecun/kripto/book/lec09-threshold.html)
 ---
